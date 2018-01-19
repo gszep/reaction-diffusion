@@ -179,7 +179,7 @@ Simulation.prototype.sliders = function() {
 	$('#diffusionRatioSlider').slider('value', diffusionRatio)
 
 	$('#timeStepSlider').slider({
-		value: timeStep, min: 0, max:0.21, step:0.001,
+		value: timeStep, min: 0.001, max:0.21, step:0.001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)
