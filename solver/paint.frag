@@ -43,5 +43,5 @@ void main() {
 		// if(value > color5.a)
 		// 		col = color5.rgb;
 
-	gl_FragColor = vec4(X,0,Y,1.0);
+	gl_FragColor = vec4(X,X,Y,1.0);
 }
