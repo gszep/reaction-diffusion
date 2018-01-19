@@ -18,7 +18,7 @@ function Simulation(canvas,nStates,coordinate,integrator,painter) {
 
 	this.nStates = nStates
 	this.spaceStep = 1.5
-	this.timeStep = 0.01
+	this.timeStep = 0.1
 
 	// initialise interactions
 	this.sliders()

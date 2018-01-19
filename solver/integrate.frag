@@ -46,8 +46,8 @@ Coordinate laplacian(sampler2D texture) {
 void main() {
 
 	// parameter space
-	float forward = 1.0*centre.y;
-	float backward = 1.0*centre.x;
+	float forward = 1.0;//*centre.y;
+	float backward = 1.0;//*centre.x;
 
 	// compute laplacians
 	Coordinate x = laplacian(component[0]);
@@ -68,15 +68,15 @@ void main() {
 		float dist = dot(diff, diff);
 
 		if(dist < 7000.0)
-				Y = vec4(0.9,0.9,0.9,0.9);
+				X = vec4(0.9,0.9,0.9,0.9);
 		if(dist < 5000.0)
 				B = vec4(0.9,0.9,0.9,0.9);
 		if(dist < 1000.0)
-				X = vec4(0.9,0.9,0.9,0.9);
+				Y = vec4(0.9,0.9,0.9,0.9);
 	}
 
 	// output components to buffer
-	gl_FragData[0] = X + timeStep*( dX*diffusionRatio + forward*B*X - backward*X*Y );
+	gl_FragData[0] = X + timeStep*( dX + forward*B*X - backward*X*Y );
 	gl_FragData[1] = Y + timeStep*( dY*diffusionRatio + forward*B*Y - backward*X*Y );
 	gl_FragData[2] = B + timeStep*( dB - forward*B*X - forward*B*Y + 2.0*backward*X*Y );
 }
