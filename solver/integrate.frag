@@ -14,7 +14,7 @@ uniform sampler2D component[3];
 
 // parameters
 uniform float diffusionRatio;
-uniform vec2 brush;
+uniform vec4 brush;
 
 // variables
 struct Coordinate {
@@ -64,15 +64,13 @@ void main() {
 
 	// user perturbations
 	if(brush.x > 0.0) {
-		vec2 diff = (centre - brush)/spaceStep;
-		float dist = dot(diff, diff);
 
-		if(dist < 7000.0)
-				X = vec4(0.9,0.9,0.9,0.9);
-		if(dist < 5000.0)
-				B = vec4(0.9,0.9,0.9,0.9);
-		if(dist < 1000.0)
-				Y = vec4(0.9,0.9,0.9,0.9);
+		float location = distance(centre,brush.xy);
+		float radius = brush.z;
+		float componentIndex = brush.w;
+
+		if( location < radius )
+			X = vec4(0.9,0.9,0.9,0.9);
 	}
 
 	// output components to buffer

@@ -17,7 +17,7 @@ function Simulation(canvas,nStates,coordinate,integrator,painter) {
 	this.height = $(canvas).height()
 
 	this.nStates = nStates
-	this.spaceStep = 1.5
+	this.spaceStep = 1.2
 	this.timeStep = 0.1
 
 	// initialise interactions
@@ -63,7 +63,8 @@ Simulation.prototype.render = function(clock) {
 		this.updateUniforms(this.buffer[index])
 		this.renderer.render(this.scene, this.camera, this.buffer[this.index], true)
 
-		this.uniforms.brush.value = new THREE.Vector2(-1, -1)
+		// reset brush
+		this.uniforms.brush.value = new THREE.Vector4(-1,-1,0,0)
 
 		// toggle buffer
 		this.index = index
@@ -99,7 +100,7 @@ Simulation.prototype.materials = function(coordinate,integrator,painter) {
 		component: {type: 'tv', value: [] },
 
 		diffusionRatio: {type: 'f', value: diffusionRatio },
-		brush: {type: 'v2', value: new THREE.Vector2(-10, -10)},
+		brush: {type: 'v4', value: new THREE.Vector4(-1,-1,0,0)},
 		color: {type: 'v4v', value: [] }
 	}
 
@@ -180,6 +181,7 @@ Simulation.prototype.sliders = function() {
 // mouse events and colour gradients
 Simulation.prototype.mouseEvents = function() {
 	var that = this
+	this.brush = { radius: 0.1 }
 
 	this.canvas.onmouseup = function() {
 		that.isMouseDown = false
@@ -188,9 +190,10 @@ Simulation.prototype.mouseEvents = function() {
 	this.canvas.onmousedown = function() {
 		that.isMouseDown = true
 
-		that.uniforms.brush.value = new THREE.Vector2(
+		that.uniforms.brush.value = new THREE.Vector4(
 			this.mouseX/$('#'+that.canvas.id).width(),
-			1-this.mouseY/$('#'+that.canvas.id).height()
+			1-this.mouseY/$('#'+that.canvas.id).height(),
+			that.brush.radius,0
 		)
 	}
 
@@ -201,11 +204,23 @@ Simulation.prototype.mouseEvents = function() {
 		this.mouseY = mouseEvent.pageY - $('#'+that.canvas.id).offset().top
 
 		if(that.isMouseDown){
-			that.uniforms.brush.value = new THREE.Vector2(
+			that.uniforms.brush.value = new THREE.Vector4(
 				this.mouseX/$('#'+that.canvas.id).width(),
-				1-this.mouseY/$('#'+that.canvas.id).height()
+				1-this.mouseY/$('#'+that.canvas.id).height(),
+				that.brush.radius,0
 			)
 		}
+	}
+
+	this.canvas.onmousewheel = function(event) {
+		var delta = event.wheelDelta ? event.wheelDelta : -event.detail
+		var radius = that.brush.radius + delta/1000
+
+		that.brush.radius = radius > 0 ? radius : 0.01
+	}
+
+	window.onkeydown = function(event) {
+		console.log('keycode: '+String.fromCharCode(event.keyCode))
 	}
 
 	$('#gradient').gradient('setUpdateCallback',function() {
