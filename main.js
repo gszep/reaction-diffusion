@@ -255,7 +255,7 @@ Simulation.prototype.mouseEvents = function() {
 	// use mousewheel to change brush radius
 	this.canvas.onmousewheel = function(event) {
 		var delta = event.wheelDelta ? event.wheelDelta : -event.detail
-		var radius = that.brush.radius + delta/1000
+		var radius = that.brush.radius + delta/10000
 
 		that.brush.radius = radius > 0 ? radius : 0.01
 	}
