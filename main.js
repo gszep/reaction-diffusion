@@ -287,17 +287,17 @@ loadSolver = function() {
 
 		new Promise( resolve => {
 			jQuery.get('solver/coordinate.vert',
-				function ( code ) { resolve(code) })
+				function ( code ) { resolve(code) },'text')
 		}),
 
 		new Promise( resolve => {
 			jQuery.get('solver/integrate.frag',
-				function ( code ) { resolve(code) })
+				function ( code ) { resolve(code) },'text')
 		}),
 
 		new Promise( resolve => {
 			jQuery.get('solver/paint.frag',
-				function ( code ) { resolve(code) })
+				function ( code ) { resolve(code) },'text')
 		})
 	])
 }
