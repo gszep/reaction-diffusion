@@ -5,12 +5,11 @@ varying vec2 right;
 varying vec2 top;
 varying vec2 bottom;
 
-// spatiotemporal discretisation
+// temporal discretisation
 uniform float timeStep;
-uniform vec2 spaceStep;
 
 // components as textures
-uniform sampler2D component[3];
+uniform sampler2D component[3]; // !! do not change name, only change number
 
 // parameters
 uniform float diffusionRatio;
