@@ -1,11 +1,11 @@
 // vertex coordinates
 varying vec2 centre;
 
-// components and colours
+// components and colors
 uniform sampler2D component[3]; // !! do not change name, only change number
 uniform vec4 color[5];
 
-// this function maps components to colourspace
+// this function maps components to colorspace
 void main() {
 
 		vec4 grayscale = vec4(0.3,0.59,0.11,0.0);
@@ -42,6 +42,6 @@ void main() {
 		if(value > color[4].a)
 				col = color[4].rgb;
 
-	//gl_FragColor = vec4(X,X,Y,1.0);
-	gl_FragColor = vec4(col.r,col.g,col.b,1.0);
+	gl_FragColor = vec4(X,X,Y,1.0);
+	//gl_FragColor = vec4(col.r,col.g,col.b,1.0);
 }

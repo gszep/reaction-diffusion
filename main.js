@@ -8,7 +8,7 @@ Adapted from code by Pablo Márquez Neila
 /* exported loadSolver */
 
 // Configuration.
-var diffusionRatio = 0.5
+var diffusionRatio = 1.0
 var timeStep = 0.1
 
 // main simulation canvas
@@ -31,7 +31,13 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.mouseEvents()
 
 	// begin simulation
+	this.initialCondition()
 	this.renderLoop()
+}
+
+// setting initial condition
+Simulation.prototype.initialCondition = function() {
+	
 }
 
 // main animation loop
@@ -47,68 +53,59 @@ Simulation.prototype.render = function() {
 	this.uniforms.diffusionRatio.value = diffusionRatio
 	this.uniforms.timeStep.value = timeStep
 
-	// set display mesh to use integrator
-	this.mesh.material = this.computeMaterial
-
-	for ( var i = 0; i < this.renderStep; ++i ) {
-
-		// set current buffer index
-		var index = this.index === 0?1:0
-
-		// TODO(@gszep) factor paramter properties/updater
-		this.updateComponents(this.buffer[this.index])
-		this.renderer.render(this.scene, this.camera, this.buffer[index], true)
-
-		this.updateComponents(this.buffer[index])
-		this.renderer.render(this.scene, this.camera, this.buffer[this.index], true)
-
-		// toggle buffer
-		this.index = index
-	}
+	// propagate materials for a given number of steps
+	this.propagate()
 
 	// render display material
-	this.mesh.material = this.displayMaterial
-	this.renderer.render(this.scene, this.camera)
+	this.display()
 }
+
+
+// propagate materials for given number of timesteps
+Simulation.prototype.propagate = function() {
+
+	// set mesh to use integrator
+	this.mesh.material = this.integrator
+
+	// alternate two targets in buffer per step
+	this.renderStep = this.renderStep % 2 == 0 ? this.renderStep : this.renderStep+1
+	for ( var i = 0; i < this.renderStep; ++i ) {
+
+		// swap in current components from buffer
+		this.updateComponents(this.buffer[i%2])
+
+		// compute step, render to next components in buffer
+		this.renderer.render(this.scene, this.camera, this.buffer[(i+1)%2], true)
+
+		// update user perturbation properties
+		this.updateBrush()
+	}
+}
+
 
 // transfer components from buffer to uniforms for next update
 Simulation.prototype.updateComponents = function(buffer) {
 
-	// iterate through buffers and copy to uniforms
 	for ( let i = 0; i < this.nComponents; i++ ) {
 		this.uniforms.component.value[i] = buffer.attachments[i]
 	}
+}
 
-	// remove brush after each timestep
+
+// update perturbation brush
+Simulation.prototype.updateBrush = function() {
 	this.uniforms.brush.value = new THREE.Vector4(-1,-1,0,0)
 }
+
 
 // initialise uniforms, shaders and materials
 Simulation.prototype.materials = function(coordinate,integrator,painter) {
 
 	// unifroms holds the set of variables and parameters
-	this.uniforms = {
-
-		// spacetime parameters
-		timeStep: {type: 'f', value: timeStep },
-		spaceStep: {type: 'v2', value:
-
-			new THREE.Vector2(
-				this.spaceStep/this.width,
-				this.spaceStep/this.height)
-		},
-
-		// components and colour variables
-		component: {type: 'tv', value: [] },
-		color: {type: 'v4v', value: [] },
-
-		// TODO(@gszep) factor paramter properties
-		diffusionRatio: {type: 'f', value: diffusionRatio },
-		brush: {type: 'v4', value: new THREE.Vector4(-1,-1,0,0)}
-	}
+	this.uniforms = this.uniforms()
 
 	// compute material plays the role of integrator on gpu
-	this.computeMaterial = new THREE.ShaderMaterial({
+	this.integrator = new THREE.ShaderMaterial({
 
 		// pass in variables and parameters
 		uniforms: this.uniforms,
@@ -122,7 +119,7 @@ Simulation.prototype.materials = function(coordinate,integrator,painter) {
 	})
 
 	// display material renders the components in rgb format
-	this.displayMaterial = new THREE.ShaderMaterial({
+	this.painter = new THREE.ShaderMaterial({
 
 		// pass components and colors for mapping
 		uniforms: {
@@ -135,6 +132,31 @@ Simulation.prototype.materials = function(coordinate,integrator,painter) {
 		fragmentShader: painter,
 	})
 }
+
+
+// initialises unifrom for materials
+Simulation.prototype.uniforms = function() {
+	return {
+
+		// spacetime parameters
+		timeStep: {type: 'f', value: timeStep },
+		spaceStep: {type: 'v2', value:
+
+			new THREE.Vector2(
+				this.spaceStep/this.width,
+				this.spaceStep/this.height)
+		},
+
+		// components and color variables
+		component: {type: 'tv', value: [] },
+		color: {type: 'v4v', value: [] },
+
+		// TODO(@gszep) factor paramter properties
+		diffusionRatio: {type: 'f', value: diffusionRatio },
+		brush: {type: 'v4', value: new THREE.Vector4(-1,-1,0,0)}
+	}
+}
+
 
 // view and rendering engine
 Simulation.prototype.view = function() {
@@ -160,9 +182,7 @@ Simulation.prototype.view = function() {
 
 // initialise frame buffers
 Simulation.prototype.buffer = function() {
-
 	this.buffer = []
-	this.index = 0
 
 	// alternate two targets for frame buffer
 	for ( let i = 0; i < 2; i++ ) {
@@ -170,6 +190,10 @@ Simulation.prototype.buffer = function() {
 		let target = new THREE.WebGLMultiRenderTarget(
 			this.width/this.spaceStep, this.height/this.spaceStep, {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
+
+		// periodic boundary conditions
+		target.texture.wrapS = THREE.RepeatWrapping
+		target.texture.wrapT = THREE.RepeatWrapping
 
 		// two render targets per component in system
 		for ( let i = 0; i < this.nComponents-1; i++ ) {
@@ -218,7 +242,7 @@ Simulation.prototype.sliders = function() {
 }
 
 
-// mouse events and colour gradients
+// mouse events and color gradients
 Simulation.prototype.mouseEvents = function() {
 	var that = this
 
@@ -286,18 +310,12 @@ Simulation.prototype.mouseEvents = function() {
 	// TODO(@gszep) use number keys for selecting components
 	window.onkeydown = function() { return false }
 
-	// bind gradient widget to colours in painter material
+	// bind gradient widget to colors in painter
 	$('#gradient').gradient('setUpdateCallback',function () { that.updateColors() })
 	this.updateColors()
 
 	// prevent context menue from opening on right-click
 	this.canvas.oncontextmenu = function (event) { event.preventDefault() }
-}
-
-
-// TODO update perturbation brush
-Simulation.prototype.updateBrush = function() {
-
 }
 
 
@@ -309,6 +327,15 @@ Simulation.prototype.updateColors = function() {
 		var [r,g,b,a] = colors[i]
 		this.uniforms.color.value[i] = new THREE.Vector4(r,g,b,a)
 	}
+}
+
+
+// display materials with component to color map
+Simulation.prototype.display = function() {
+
+	// swap to display material and render
+	this.mesh.material = this.painter
+	this.renderer.render(this.scene, this.camera)
 }
 
 
@@ -327,7 +354,7 @@ Simulation.prototype.getComponents = function(integrator,painter) {
 
 		// check if painter and integrator match
 		if (integratorComponents != painterComponents)
-			throw 'components found in integrate.frag and paint.frag not equal \n'
+			throw 'components found in integrator.frag and painter.frag not equal \n'
 			+integratorComponents+' != '+painterComponents
 		else
 			return integratorComponents
@@ -348,12 +375,12 @@ loadSolver = function() {
 		}),
 
 		new Promise( resolve => {
-			jQuery.get('solver/integrate.frag',
+			jQuery.get('solver/integrator.frag',
 				function ( code ) { resolve(code) },'text')
 		}),
 
 		new Promise( resolve => {
-			jQuery.get('solver/paint.frag',
+			jQuery.get('solver/painter.frag',
 				function ( code ) { resolve(code) },'text')
 		})
 	])
