@@ -61,13 +61,13 @@
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0, '#FFFFFF'],[0.1,'#FFFF00'],[0.2,'#9E0E0E'],[0.7,'#5F1900'],[1.0, '#210B0B']]})
+				$("#gradient").gradient({values: [[0.0, '#FFFFFF'],[0.5,'#FF0000'],[1.0,'#000000']]})
 
 				// load reaction-diffusion solver
 				loadSolver().then( ([coordinate,integrator,painter]) => {
 
 					// instantiate simulation canvas
-					simulation = new Simulation("#simulation-canvas",coordinate,integrator,painter)
+					S = new Simulation("#simulation-canvas",coordinate,integrator,painter)
 				})
 
 			</script>

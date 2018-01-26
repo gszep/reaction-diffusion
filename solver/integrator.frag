@@ -44,53 +44,33 @@ Coordinate laplacian(sampler2D texture) {
 // this propagates the reaction-diffusion system
 void main() {
 
-	// parameter space
-	float forward = 1.0;//*centre.y;
-	float backward = 1.0;//*centre.x;
-
-	// TODO(@gszep) factor components code
-	Coordinate x = laplacian(component[0]);
-	vec4 X = x.point;
-	vec4 dX = x.gradient;
-
-	Coordinate y = laplacian(component[1]);
-	vec4 Y = y.point;
-	vec4 dY = y.gradient;
-
-	Coordinate b = laplacian(component[2]);
-	vec4 B = b.point;
-	vec4 dB = b.gradient;
+	// calculate laplacians
+	Coordinate coordinate[NCOMPONENTS];
+	for( int i=0; i < NCOMPONENTS; i++ ) {
+		coordinate[i] = laplacian(component[i]);
+	}
 
 	// user perturbations
 	if(brush.x > 0.0) {
 
 		float location = distance(centre,brush.xy);
 		float radius = brush.z;
-		float componentIndex = brush.w;
+		int componentIndex = int(brush.w);
 
+		//  within radius set all comonents to zero except chosen one
 		if( location < radius ) {
+			for (int i=0; i<NCOMPONENTS; i++) {
 
-			// TODO(@gszep) factor components code
-			if (componentIndex == 0.0) {
-				X = vec4(0.9,0.9,0.9,0.9);
-				Y = vec4(0.0,0.0,0.0,0.0);
-				B = vec4(0.0,0.0,0.0,0.0);
-			}
-			else if (componentIndex == 1.0) {
-				X = vec4(0.0,0.0,0.0,0.0);
-				Y = vec4(0.9,0.9,0.9,0.9);
-				B = vec4(0.0,0.0,0.0,0.0);
-			}
-			else if (componentIndex == 2.0) {
-				X = vec4(0.0,0.0,0.0,0.0);
-				Y = vec4(0.0,0.0,0.0,0.0);
-				B = vec4(0.9,0.9,0.9,0.9);
+				if (i == componentIndex)
+					coordinate[i].point = vec4(0.9,0.9,0.9,0.9);
+				else
+					coordinate[i].point = vec4(0.0,0.0,0.0,0.0);
 			}
 		}
 	}
 
 	// output components to buffer
-	gl_FragData[0] = X + timeStep*( dX + forward*B*X - backward*X*Y );
-	gl_FragData[1] = Y + timeStep*( dY*diffusionRatio + forward*B*Y - backward*X*Y );
-	gl_FragData[2] = B + timeStep*( dB - forward*B*X - forward*B*Y + 2.0*backward*X*Y );
+	gl_FragData[0] = coordinate[0].point + timeStep*( coordinate[0].gradient + coordinate[1].point*coordinate[0].point - coordinate[0].point*coordinate[2].point );
+	gl_FragData[1] = coordinate[1].point + timeStep*( coordinate[1].gradient - coordinate[1].point*coordinate[0].point - coordinate[1].point*coordinate[2].point + 2.0*coordinate[0].point*coordinate[2].point );
+	gl_FragData[2] = coordinate[2].point + timeStep*( coordinate[2].gradient*diffusionRatio + coordinate[1].point*coordinate[2].point - coordinate[0].point*coordinate[2].point );
 }
