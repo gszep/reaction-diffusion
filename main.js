@@ -21,6 +21,7 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.width = $(canvas).width()
 	this.height = $(canvas).height()
 
+	// TODO(gszep) these need to somehow be externally accessible
 	this.spaceStep = 1
 	this.renderStep = 20
 
@@ -41,13 +42,25 @@ function Simulation(canvas,coordinate,integrator,painter) {
 
 // initial value of component n at lattice point (x,y)
 Simulation.prototype.initial = function(x,y,n) {
-	if (n==0)
-		return Math.abs(Math.sin(2*Math.PI*x/(this.width)))*
-		Math.abs(Math.sin(2*Math.PI*y/(2*this.height)))
+	if (n==0) {
+		if ( x%(this.width/10) < 20 && y%(this.height/10) < 20 ){
+			return 1.0
+		}
+		else {
+			return 0.0
+		}
+	}
 	if (n==1)
-		return 0.0
-	if (n==2)
-		return 0.0
+		return 1.0
+	if (n==2) {
+		if ( (x+25)%(this.width/10) < 20 && (y+25)%(this.height/10) < 20 ){
+			return 1.0
+		}
+		else {
+			return 0.0
+		}
+	}
+
 }
 
 
@@ -246,8 +259,8 @@ Simulation.prototype.buffer = function() {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
 
 		// periodic boundary conditions
-		target.texture.wrapS = THREE.RepeatWrapping
-		target.texture.wrapT = THREE.RepeatWrapping
+		// target.texture.wrapS = THREE.RepeatWrapping
+		// target.texture.wrapT = THREE.RepeatWrapping
 
 		// prevent interpolation
 		target.texture.magFilter = THREE.NearestFilter
