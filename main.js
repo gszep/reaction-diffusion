@@ -35,64 +35,84 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.mouseEvents()
 
 	// begin simulation
-	this.initialCondition()
-	this.renderLoop()
+	this.initialCondition().then( begin => {
+		if(begin)
+			this.renderLoop()
+	})
 }
 
 
 // initial value of component n at lattice point (x,y)
 Simulation.prototype.initial = function(x,y,n) {
-	if (n==0) {
-		if ( x%(this.width/10) < 20 && y%(this.height/10) < 20 ){
-			return 1.0
-		}
-		else {
-			return 0.0
-		}
-	}
-	if (n==1)
-		return 1.0
-	if (n==2) {
-		if ( (x+25)%(this.width/10) < 20 && (y+25)%(this.height/10) < 20 ){
-			return 1.0
-		}
-		else {
-			return 0.0
-		}
-	}
+	var nTiles = 5
 
+	// unit tile coordinates
+	x %= this.width/nTiles
+	y %= this.height/nTiles
+
+	var xCenter = this.width/nTiles/4
+	var yCenter = this.height/nTiles/4
+	var size = 20
+	var r = 1.0
+	var mu = 1.0
+
+	if (
+		Math.abs(x-xCenter)<size*r && Math.abs(y-yCenter)<size*r ||
+		Math.abs(x-3*xCenter)<size*r && Math.abs(y-3*yCenter)<size*r ){
+		if(n==0)
+			return 1.0*mu
+		else
+			return 0.0
+	}
+	else if (
+		Math.abs(x-xCenter)<size && Math.abs(y-3*yCenter)<size || Math.abs(x-3*xCenter)<size && Math.abs(y-yCenter)<size ){
+		if(n==2)
+			return 1.0
+		else
+			return 0.0
+	}
+	else {
+		if(n==1)
+			return 1.0
+		else
+			return 0.0
+	}
 }
 
 
 // setting initial condition
 Simulation.prototype.initialCondition = function() {
+	return new Promise( resolve => {
 
-	var width = Math.ceil(this.width/this.spaceStep)
-	var height = Math.ceil(this.height/this.spaceStep)
+		var width = Math.ceil(this.width/this.spaceStep)
+		var height = Math.ceil(this.height/this.spaceStep)
 
-	// iterate through components
-	for ( let n = 0; n < this.nComponents; n++ ) {
-		var pixels = new Float32Array(4*width*height)
+		// iterate through components
+		for ( let n = 0; n < this.nComponents; n++ ) {
+			var pixels = new Float32Array(4*width*height)
 
-		// iterate through lattice
-		for ( let i = 0; i < width; i++ ) {
-			for ( let j = 0; j < height; j++ ) {
+			// iterate through lattice
+			for ( let i = 0; i < width; i++ ) {
+				for ( let j = 0; j < height; j++ ) {
 
-				var k = j*width+i
-				var x = i*this.spaceStep
-				var y = j*this.spaceStep
+					var k = j*width+i
+					var x = i*this.spaceStep
+					var y = j*this.spaceStep
 
-				// setting initial value of component n at lattice point (x,y)
-				pixels[4*k] = pixels[4*k+1] = pixels[4*k+2] = pixels[4*k+3] = this.initial(x,y,n)
+					// setting initial value of component n at lattice point (x,y)
+					pixels[4*k] = pixels[4*k+1] = pixels[4*k+2] = pixels[4*k+3] = this.initial(x,y,n)
+				}
 			}
+
+			// write initial arrays to textures
+			this.buffer[0].attachments[n] = new THREE.DataTexture(
+				pixels, width, height, THREE.RGBAFormat, THREE.FloatType )
+			this.buffer[0].attachments[n].needsUpdate = true
+
+			// signal to begin render loop
+			resolve(true)
 		}
-
-		// write initial arrays to textures
-		this.buffer[0].attachments[n] = new THREE.DataTexture(
-			pixels, width, height, THREE.RGBAFormat, THREE.FloatType )
-		this.buffer[0].attachments[n].needsUpdate = true
-
-	}
+	})
 }
 
 
@@ -259,8 +279,8 @@ Simulation.prototype.buffer = function() {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
 
 		// periodic boundary conditions
-		// target.texture.wrapS = THREE.RepeatWrapping
-		// target.texture.wrapT = THREE.RepeatWrapping
+		target.texture.wrapS = THREE.RepeatWrapping
+		target.texture.wrapT = THREE.RepeatWrapping
 
 		// prevent interpolation
 		target.texture.magFilter = THREE.NearestFilter
