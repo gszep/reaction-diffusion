@@ -5,6 +5,11 @@ varying vec2 right;
 varying vec2 top;
 varying vec2 bottom;
 
+varying vec2 topleft;
+varying vec2 topright;
+varying vec2 bottomleft;
+varying vec2 bottomright;
+
 // temporal discretisation
 uniform float timeStep;
 
@@ -26,16 +31,23 @@ struct Coordinate {
 Coordinate laplacian(sampler2D texture) {
 
 	// values of point
-	vec4 point = texture2D(texture,centre);
+	vec4 point = texture2D(texture,fract(centre));
 
 	// construct point and gradient
 	Coordinate coordinate;
 	coordinate.point = point;
-	coordinate.gradient = 	texture2D(texture,left)+
-							texture2D(texture,right)+
-							texture2D(texture,bottom)+
-							texture2D(texture,top)-
-							4.0 * point;
+	coordinate.gradient = (
+		4.0*texture2D(texture,fract(left))+
+		4.0*texture2D(texture,fract(right))+
+		4.0*texture2D(texture,fract(bottom))+
+		4.0*texture2D(texture,fract(top))+
+		1.0*texture2D(texture,fract(topleft))+
+		1.0*texture2D(texture,fract(topright))+
+		1.0*texture2D(texture,fract(bottomleft))+
+		1.0*texture2D(texture,fract(bottomright))-
+		20.0*point
+
+	) / 6.0;
 
 	return coordinate;
 }

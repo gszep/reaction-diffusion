@@ -278,10 +278,6 @@ Simulation.prototype.buffer = function() {
 			Math.ceil(this.height/this.spaceStep), {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
 
-		// periodic boundary conditions
-		target.texture.wrapS = THREE.RepeatWrapping
-		target.texture.wrapT = THREE.RepeatWrapping
-
 		// prevent interpolation
 		target.texture.magFilter = THREE.NearestFilter
 
