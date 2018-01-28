@@ -11,6 +11,7 @@ Adapted from code by Pablo Márquez Neila
 var diffusionRatio = 1.0
 var timeStep = 0.001
 
+
 // main simulation canvas
 function Simulation(canvas,coordinate,integrator,painter) {
 
@@ -20,7 +21,7 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.width = $(canvas).width()
 	this.height = $(canvas).height()
 
-	this.spaceStep = 1.0
+	this.spaceStep = 1
 	this.renderStep = 20
 
 	// initialise view and materials from glsl code
@@ -37,16 +38,57 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.renderLoop()
 }
 
+
+// initial value of component n at lattice point (x,y)
+Simulation.prototype.initial = function(x,y,n) {
+	if (n==0)
+		return Math.abs(Math.sin(2*Math.PI*x/(this.width)))*
+		Math.abs(Math.sin(2*Math.PI*y/(2*this.height)))
+	if (n==1)
+		return 0.0
+	if (n==2)
+		return 0.0
+}
+
+
 // setting initial condition
 Simulation.prototype.initialCondition = function() {
 
+	var width = Math.ceil(this.width/this.spaceStep)
+	var height = Math.ceil(this.height/this.spaceStep)
+
+	// iterate through components
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		var pixels = new Float32Array(4*width*height)
+
+		// iterate through lattice
+		for ( let i = 0; i < width; i++ ) {
+			for ( let j = 0; j < height; j++ ) {
+
+				var k = j*width+i
+				var x = i*this.spaceStep
+				var y = j*this.spaceStep
+
+				// setting initial value of component n at lattice point (x,y)
+				pixels[4*k] = pixels[4*k+1] = pixels[4*k+2] = pixels[4*k+3] = this.initial(x,y,n)
+			}
+		}
+
+		// write initial arrays to textures
+		this.buffer[0].attachments[n] = new THREE.DataTexture(
+			pixels, width, height, THREE.RGBAFormat, THREE.FloatType )
+		this.buffer[0].attachments[n].needsUpdate = true
+
+	}
 }
+
 
 // main animation loop
 Simulation.prototype.renderLoop = function() {
 	this.render()
 	requestAnimationFrame(this.renderLoop.bind(this))
 }
+
 
 // single animation iteration
 Simulation.prototype.render = function() {
@@ -82,39 +124,6 @@ Simulation.prototype.propagate = function() {
 		// update user perturbation properties
 		this.updateBrush()
 	}
-}
-
-Simulation.prototype.readData = function() {
-
-	var width = this.width/this.spaceStep
-	var height = this.height/this.spaceStep
-	var components = []
-
-	// create temporary buffer to parse out data
-	let dataBuffer = gl.createFramebuffer()
-	gl.bindFramebuffer(gl.FRAMEBUFFER,dataBuffer)
-	var pixels = new Float32Array(4*width*height)
-
-	// iterate through components
-	for ( let i = 0; i < this.nComponents; i++ ) {
-		let component = this.uniforms.component.value[i]
-		var texture = this.renderer.properties.get(component)
-
-		// bind texture to buffer
-		gl.framebufferTexture2D(
-			gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture.__webglTexture,0)
-
-		// write first channel of texture pixels to array
-		gl.readPixels(0,0,width,height,gl.RGBA,gl.FLOAT,pixels)
-		components.push(
-			pixels.filter( function(value, index) {
-				return index % 4 == 0
-			})
-		)
-	}
-
-	console.log(components)
-	gl.deleteFramebuffer(dataBuffer)
 }
 
 
@@ -185,8 +194,8 @@ Simulation.prototype.uniforms = function() {
 		spaceStep: {type: 'v2', value:
 
 			new THREE.Vector2(
-				this.spaceStep/this.width,
-				this.spaceStep/this.height)
+				1/Math.ceil(this.width/this.spaceStep),
+				1/Math.ceil(this.height/this.spaceStep))
 		},
 
 		// components and color variables
@@ -232,12 +241,16 @@ Simulation.prototype.buffer = function() {
 	for ( let i = 0; i < 2; i++ ) {
 
 		let target = new THREE.WebGLMultiRenderTarget(
-			this.width/this.spaceStep, this.height/this.spaceStep, {
+			Math.ceil(this.width/this.spaceStep),
+			Math.ceil(this.height/this.spaceStep), {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
 
 		// periodic boundary conditions
 		target.texture.wrapS = THREE.RepeatWrapping
 		target.texture.wrapT = THREE.RepeatWrapping
+
+		// prevent interpolation
+		target.texture.magFilter = THREE.NearestFilter
 
 		// two render targets per component in system
 		for ( let i = 0; i < this.nComponents-1; i++ ) {
@@ -246,6 +259,42 @@ Simulation.prototype.buffer = function() {
 
 		this.buffer.push(target)
 	}
+}
+
+
+// print present components to console
+Simulation.prototype.readData = function() {
+
+	var width = Math.ceil(this.width/this.spaceStep)
+	var height = Math.ceil(this.height/this.spaceStep)
+	var components = []
+
+	// create temporary buffer to parse out data
+	let dataBuffer = gl.createFramebuffer()
+	gl.bindFramebuffer(gl.FRAMEBUFFER,dataBuffer)
+	var pixels = new Float32Array(4*width*height)
+
+	// iterate through components
+	for ( let i = 0; i < this.nComponents; i++ ) {
+		let component = this.uniforms.component.value[i]
+		var texture = this.renderer.properties.get(component)
+
+		// bind texture to buffer
+		gl.framebufferTexture2D(
+			gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture.__webglTexture,0)
+
+		// write first channel of texture pixels to array
+		gl.readPixels(0,0,width,height,gl.RGBA,gl.FLOAT,pixels)
+
+		components.push(
+			pixels.filter( function(value, index) {
+				return index % 4 == 0
+			})
+		)
+	}
+
+	console.log(components)
+	gl.deleteFramebuffer(dataBuffer)
 }
 
 
@@ -312,8 +361,8 @@ Simulation.prototype.mouseEvents = function() {
 			component = 2
 
 		that.uniforms.brush.value = new THREE.Vector4(
-			this.mouseX/$('#'+that.canvas.id).width(),
-			1-this.mouseY/$('#'+that.canvas.id).height(),
+			this.mouseX/that.width,
+			1-this.mouseY/that.height,
 			that.brush.radius,component
 		)
 	}
@@ -336,8 +385,8 @@ Simulation.prototype.mouseEvents = function() {
 
 		if(that.isMouseDown){
 			that.uniforms.brush.value = new THREE.Vector4(
-				this.mouseX/$('#'+that.canvas.id).width(),
-				1-this.mouseY/$('#'+that.canvas.id).height(),
+				this.mouseX/that.width,
+				1-this.mouseY/that.height,
 				that.brush.radius,component
 			)
 		}
