@@ -52,7 +52,7 @@ Simulation.prototype.initial = function(x,y,n) {
 
 	var xCenter = this.width/nTiles/4
 	var yCenter = this.height/nTiles/4
-	var size = 20
+	var size = 5
 	var r = 1.0
 	var mu = 1.0
 
