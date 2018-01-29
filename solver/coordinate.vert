@@ -5,6 +5,11 @@ varying vec2 right;
 varying vec2 top;
 varying vec2 bottom;
 
+varying vec2 topleft;
+varying vec2 topright;
+varying vec2 bottomleft;
+varying vec2 bottomright;
+
 // spatial discretisation
 uniform vec2 spaceStep;
 
@@ -18,6 +23,12 @@ void main() {
 		right = centre+vec2(spaceStep.x,0);
 		bottom = centre-vec2(0,spaceStep.y);
 		top = centre+vec2(0,spaceStep.y);
+
+		// diagonal terms
+		bottomleft = centre-vec2(spaceStep.x,spaceStep.y);
+		bottomright = centre-vec2(-spaceStep.x,spaceStep.y);
+		topleft = centre+vec2(-spaceStep.x,spaceStep.y);
+		topright = centre+vec2(spaceStep.x,spaceStep.y);
 
 		// transformation from object to vertex coordinate
 		gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
