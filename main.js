@@ -7,10 +7,13 @@ Adapted from code by Pablo Márquez Neila
 /* global THREE loadSolver:true $ jQuery gl:true */
 /* exported loadSolver*/
 
+// spatiotemporal globals
+var timeStep = 0.001
+var renderStep = 20
+var spaceStep = 1
+
 // Configuration.
 var diffusionRatio = 1.0
-var timeStep = 0.001
-
 
 // main simulation canvas
 function Simulation(canvas,coordinate,integrator,painter) {
@@ -20,10 +23,6 @@ function Simulation(canvas,coordinate,integrator,painter) {
 
 	this.width = $(canvas).width()
 	this.height = $(canvas).height()
-
-	// TODO(gszep) these need to somehow be externally accessible
-	this.spaceStep = 1
-	this.renderStep = 20
 
 	// initialise view and materials from glsl code
 	this.nComponents = this.getComponents(integrator)
@@ -35,83 +34,28 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.mouseEvents()
 
 	// begin simulation
-	this.initialCondition().then( begin => {
-		if(begin)
-			this.renderLoop()
+	this.initialCondition().then( () => {
+		this.renderLoop()
 	})
-}
-
-
-// initial value of component n at lattice point (x,y)
-Simulation.prototype.initial = function(x,y,n) {
-	var nTiles = 5
-
-	// unit tile coordinates
-	x %= this.width/nTiles
-	y %= this.height/nTiles
-
-	var xCenter = this.width/nTiles/4
-	var yCenter = this.height/nTiles/4
-	var size = 5
-	var r = 1.0
-	var mu = 1.0
-
-	if (
-		Math.abs(x-xCenter)<size*r && Math.abs(y-yCenter)<size*r ||
-		Math.abs(x-3*xCenter)<size*r && Math.abs(y-3*yCenter)<size*r ){
-		if(n==0)
-			return 1.0*mu
-		else
-			return 0.0
-	}
-	else if (
-		Math.abs(x-xCenter)<size && Math.abs(y-3*yCenter)<size || Math.abs(x-3*xCenter)<size && Math.abs(y-yCenter)<size ){
-		if(n==2)
-			return 1.0
-		else
-			return 0.0
-	}
-	else {
-		if(n==1)
-			return 1.0
-		else
-			return 0.0
-	}
 }
 
 
 // setting initial condition
 Simulation.prototype.initialCondition = function() {
 	return new Promise( resolve => {
+		this.data = []
 
-		var width = Math.ceil(this.width/this.spaceStep)
-		var height = Math.ceil(this.height/this.spaceStep)
-
-		// iterate through components
+		// generate initial conditions
 		for ( let n = 0; n < this.nComponents; n++ ) {
-			var pixels = new Float32Array(4*width*height)
 
-			// iterate through lattice
-			for ( let i = 0; i < width; i++ ) {
-				for ( let j = 0; j < height; j++ ) {
-
-					var k = j*width+i
-					var x = i*this.spaceStep
-					var y = j*this.spaceStep
-
-					// setting initial value of component n at lattice point (x,y)
-					pixels[4*k] = pixels[4*k+1] = pixels[4*k+2] = pixels[4*k+3] = this.initial(x,y,n)
-				}
-			}
-
-			// write initial arrays to textures
-			this.buffer[0].attachments[n] = new THREE.DataTexture(
-				pixels, width, height, THREE.RGBAFormat, THREE.FloatType )
-			this.buffer[0].attachments[n].needsUpdate = true
-
-			// signal to begin render loop
-			resolve(true)
+			var initialFunction = this.initial(n)
+			var pixels = this.pixelsAt(initialFunction)
+			this.appendData(pixels)
 		}
+
+		// write condition to textures and signal to begin render loop
+		this.writeData()
+		resolve()
 	})
 }
 
@@ -129,6 +73,9 @@ Simulation.prototype.render = function() {
 	// update parameters
 	this.uniforms.diffusionRatio.value = diffusionRatio
 	this.uniforms.timeStep.value = timeStep
+	this.uniforms.spaceStep.value = new THREE.Vector2(
+		1/Math.ceil(this.width/spaceStep),
+		1/Math.ceil(this.height/spaceStep))
 
 	// propagate materials for a given number of steps
 	this.propagate()
@@ -145,8 +92,8 @@ Simulation.prototype.propagate = function() {
 	this.mesh.material = this.integrator
 
 	// alternate two targets in buffer per step
-	this.renderStep = this.renderStep % 2 == 0 ? this.renderStep : this.renderStep+1
-	for ( var i = 0; i < this.renderStep; ++i ) {
+	renderStep = renderStep % 2 == 0 ? renderStep : renderStep+1
+	for ( var i = 0; i < renderStep; ++i ) {
 
 		// swap in current components from buffer
 		this.updateComponents(this.buffer[i%2])
@@ -227,8 +174,8 @@ Simulation.prototype.uniforms = function() {
 		spaceStep: {type: 'v2', value:
 
 			new THREE.Vector2(
-				1/Math.ceil(this.width/this.spaceStep),
-				1/Math.ceil(this.height/this.spaceStep))
+				1/Math.ceil(this.width/spaceStep),
+				1/Math.ceil(this.height/spaceStep))
 		},
 
 		// components and color variables
@@ -253,7 +200,7 @@ Simulation.prototype.view = function() {
 	this.renderer.setSize(this.width, this.height)
 
 	// initialise render buffers
-	this.buffer()
+	this.setBuffer()
 
 	// initialise camera angle to be rendered
 	this.scene = new THREE.Scene()
@@ -267,15 +214,15 @@ Simulation.prototype.view = function() {
 
 
 // initialise frame buffers
-Simulation.prototype.buffer = function() {
+Simulation.prototype.setBuffer = function() {
 	this.buffer = []
 
 	// alternate two targets for frame buffer
 	for ( let i = 0; i < 2; i++ ) {
 
 		let target = new THREE.WebGLMultiRenderTarget(
-			Math.ceil(this.width/this.spaceStep),
-			Math.ceil(this.height/this.spaceStep), {
+			Math.ceil(this.width/spaceStep),
+			Math.ceil(this.height/spaceStep), {
 				format: THREE.RGBAFormat, type: THREE.FloatType })
 
 		// prevent interpolation
@@ -291,17 +238,17 @@ Simulation.prototype.buffer = function() {
 }
 
 
-// print present components to console
+// read data from components; store as image contexts
 Simulation.prototype.readData = function() {
 
-	var width = Math.ceil(this.width/this.spaceStep)
-	var height = Math.ceil(this.height/this.spaceStep)
-	var components = []
+	var width = Math.ceil(this.width/spaceStep)
+	var height = Math.ceil(this.height/spaceStep)
+	this.data = []
 
 	// create temporary buffer to parse out data
 	let dataBuffer = gl.createFramebuffer()
 	gl.bindFramebuffer(gl.FRAMEBUFFER,dataBuffer)
-	var pixels = new Float32Array(4*width*height)
+	var pixels = new Uint8Array(4*width*height)
 
 	// iterate through components
 	for ( let i = 0; i < this.nComponents; i++ ) {
@@ -312,18 +259,162 @@ Simulation.prototype.readData = function() {
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture.__webglTexture,0)
 
-		// write first channel of texture pixels to array
-		gl.readPixels(0,0,width,height,gl.RGBA,gl.FLOAT,pixels)
-
-		components.push(
-			pixels.filter( function(value, index) {
-				return index % 4 == 0
-			})
-		)
+		// write texture pixels to image contexts
+		gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels)
+		this.appendData(pixels)
 	}
 
-	console.log(components)
 	gl.deleteFramebuffer(dataBuffer)
+}
+
+
+// appends pixel array as image context
+Simulation.prototype.appendData = function(pixels) {
+
+	var width = Math.ceil(this.width/spaceStep)
+	var height = Math.ceil(this.height/spaceStep)
+
+	// create off-screen canvas element
+	var canvas = document.createElement('canvas'),
+		ctx = canvas.getContext('2d')
+	canvas.width = width
+	canvas.height = height
+
+	// create imageData object
+	var image = ctx.createImageData(width, height)
+	image.data.set(pixels)
+
+	// update canvas with new data
+	ctx.putImageData(image,0,0)
+	this.data.push(canvas)
+}
+
+
+// write data to components
+Simulation.prototype.writeData = function() {
+
+	var width = Math.ceil(this.width/spaceStep)
+	var height = Math.ceil(this.height/spaceStep)
+
+	// reset buffer
+	this.setBuffer()
+
+	// iterate through stored data
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		var canvas = this.data[n]
+		var srcCtx = canvas.getContext('2d')
+		var image = srcCtx.getImageData(0,0,canvas.width,canvas.height)
+
+		// create off-screen canvas element
+		var newCanvas = document.createElement('canvas')
+		newCanvas.width = image.width
+		newCanvas.height = image.height
+
+		var destCtx = document.createElement('canvas').getContext('2d')
+
+		newCanvas.getContext('2d').putImageData(image,0,0)
+		destCtx.scale(width/canvas.width,height/canvas.height)
+		//destCtx.drawImage(newCanvas, 0, 0)
+
+		var pixels = newCanvas.getContext('2d').getImageData(0,0,width,height).data
+
+		// write data arrays to textures
+		this.buffer[0].attachments[n] = new THREE.DataTexture(
+			Float32Array.from(pixels, x => x/256 ),
+			width, height, THREE.RGBAFormat, THREE.FloatType )
+		this.buffer[0].attachments[n].needsUpdate = true
+
+	}
+}
+
+
+// retrieve pixels for function over lattice
+Simulation.prototype.pixelsAt = function(callback) {
+
+	var width = Math.ceil(this.width/spaceStep)
+	var height = Math.ceil(this.height/spaceStep)
+
+	// iterate through lattice
+	var pixels = new Uint8Array(4*width*height)
+	for ( let i = 0; i < width; i++ ) {
+		for ( let j = 0; j < height; j++ ) {
+
+			var k = j*width+i
+			var x = i*spaceStep
+			var y = j*spaceStep
+
+			// evaluating callback function at lattice point (x,y)
+			pixels[4*k] = pixels[4*k+1] = pixels[4*k+2] = pixels[4*k+3] = 255*callback(x,y)
+		}
+	}
+
+	// return callback function evaluated over whole lattice
+	return pixels
+}
+
+
+// initial value function of component n
+Simulation.prototype.initial = function(n) {
+	var that = this
+
+	if (n==0)
+		return function(x,y){
+
+			// unit tile coordinates
+			var nTiles = 5
+			x %= that.width/nTiles
+			y %= that.height/nTiles
+
+			var xCenter = that.width/nTiles/4
+			var yCenter = that.height/nTiles/4
+			var size = 5
+			var r = 1.0
+			var mu = 1.0
+
+			if (Math.abs(x-xCenter)<size*r && Math.abs(y-yCenter)<size*r ||
+					Math.abs(x-3*xCenter)<size*r && Math.abs(y-3*yCenter)<size*r )
+				return 1.0*mu
+			else
+				return 0.0
+		}
+
+	if (n==1)
+		return function(x,y){
+
+			// unit tile coordinates
+			var nTiles = 5
+			x %= that.width/nTiles
+			y %= that.height/nTiles
+
+			var xCenter = that.width/nTiles/4
+			var yCenter = that.height/nTiles/4
+			var size = 5
+
+			if (!(Math.abs(x-xCenter)<size && Math.abs(y-3*yCenter)<size) &&
+					!(Math.abs(x-3*xCenter)<size && Math.abs(y-yCenter)<size) )
+				return 1.0
+			else
+				return 0.0
+		}
+
+	if (n==2)
+		return function(x,y){
+
+			// unit tile coordinates
+			var nTiles = 5
+			x %= that.width/nTiles
+			y %= that.height/nTiles
+
+			var xCenter = that.width/nTiles/4
+			var yCenter = that.height/nTiles/4
+			var size = 5
+
+			if (Math.abs(x-xCenter)<size && Math.abs(y-3*yCenter)<size ||
+					Math.abs(x-3*xCenter)<size && Math.abs(y-yCenter)<size )
+				return 1.0
+			else
+				return 0.0
+		}
 }
 
 
@@ -343,7 +434,6 @@ Simulation.prototype.sliders = function() {
 			diffusionRatio = ui.value
 		}
 	})
-
 	$('#diffusionRatioSlider').slider('value', diffusionRatio)
 
 	$('#timeStepSlider').slider({
@@ -359,8 +449,22 @@ Simulation.prototype.sliders = function() {
 			timeStep = ui.value
 		}
 	})
-
 	$('#timeStepSlider').slider('value', timeStep)
+
+	$('#spaceStepSlider').slider({
+		value: spaceStep, min:0.1 , max:10, step:0.1,
+
+		change: function(event, ui) {
+			$('#spaceStep').html(ui.value)
+			spaceStep = ui.value
+		},
+
+		slide: function(event, ui) {
+			$('#spaceStep').html(ui.value)
+			spaceStep = ui.value
+		}
+	})
+	$('#spaceStepSlider').slider('value', spaceStep)
 }
 
 
@@ -430,9 +534,13 @@ Simulation.prototype.mouseEvents = function() {
 	}
 
 	// TODO(@gszep) use number keys for selecting components
-	window.onkeydown = function() {
+	window.onkeydown = function(event) {
+		event.preventDefault()
+
 		if ( event.code == 'Enter' )
 			that.readData()
+		if ( event.code == 'Space' )
+			that.writeData()
 	}
 
 	// bind gradient widget to colors in painter
