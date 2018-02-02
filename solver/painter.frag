@@ -1,17 +1,19 @@
-// vertex coordinates
-varying vec2 centre;
+#version 300 es
 
-// components and colors
-uniform sampler2D component[NCOMPONENTS];
-uniform vec4 color[NCOMPONENTS];
+#define GL2
+#ifdef GL_ES
+	precision highp float;
+#endif
 
-// this function maps components to colorspace
-void main() {
+uniform sampler2D uTexSamp;
+uniform int text;
 
-	vec4 displayPixel = vec4(0.0,0.0,0.0,0.0);
-	for( int i=0; i < NCOMPONENTS; i++ ) {
-		displayPixel = mix( displayPixel, color[i], texture2D(component[i], centre).w);
-	};
+in vec2 vTexCoord;
+out vec4 fragmentColor;
 
-	gl_FragColor = displayPixel;
+void main(void) {
+	// int x = text ^ 12;
+
+	vec2 x = texture(uTexSamp, vTexCoord).rg;
+	fragmentColor = vec4(x, 0., 1.);
 }

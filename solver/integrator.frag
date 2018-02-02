@@ -1,88 +1,46 @@
-// vertex coordinates
-varying vec2 centre;
-varying vec2 left;
-varying vec2 right;
-varying vec2 top;
-varying vec2 bottom;
+#version 300 es
 
-varying vec2 topleft;
-varying vec2 topright;
-varying vec2 bottomleft;
-varying vec2 bottomright;
+#define GL2
+#ifdef GL_ES
+	precision highp float;
+#endif
 
-// temporal discretisation
-uniform float timeStep;
+uniform sampler2D uTexSamp;
+uniform float dt;
+uniform float dte;
+uniform float dth2;
+uniform float a;
+uniform float ba;
+const float d = 1./512.;
 
-// components as textures
-uniform sampler2D component[3]; // !! do not change name, only change number
+in vec2 vTexCoord;
+out vec4 fragmentColor;
 
-// parameters
-uniform float diffusionRatio;
-uniform vec4 brush;
+void main(void) {
+   vec4 t = texture(uTexSamp, vTexCoord);
+   float u = t.r,  v = t.g,  u2 = t.b,  v2 = t.a;
+   u += u2/256.;   v += v2/256.;
+   float vnew = v + (u - v)*dt,  uth = v/a + ba,  unew;
+   float tmp = dte*(u - uth);
+   if ( u <= uth)  unew = u/(1. - tmp*(1. - u));
+   else{
+      tmp *= u;
+      unew = (tmp + u)/(tmp + 1.);
+   }
+   unew += (texture(uTexSamp, vec2(vTexCoord.x, vTexCoord.y + d) ).r +
+      texture(uTexSamp, vec2(vTexCoord.x, vTexCoord.y - d) ).r +
+      texture(uTexSamp, vec2(vTexCoord.x + d, vTexCoord.y) ).r +
+      texture(uTexSamp, vec2(vTexCoord.x - d, vTexCoord.y) ).r +
 
-// variables
-struct Coordinate {
-	vec4 point;
-	vec4 gradient;
-};
+     (texture(uTexSamp, vec2(vTexCoord.x, vTexCoord.y + d) ).b +
+      texture(uTexSamp, vec2(vTexCoord.x, vTexCoord.y - d) ).b +
+      texture(uTexSamp, vec2(vTexCoord.x + d, vTexCoord.y) ).b +
+      texture(uTexSamp, vec2(vTexCoord.x - d, vTexCoord.y) ).b)/256.
 
-
-// calculate discrete laplacian
-Coordinate laplacian(sampler2D texture) {
-
-	// values of point
-	vec4 point = texture2D(texture,fract(centre));
-
-	// construct point and gradient
-	Coordinate coordinate;
-	coordinate.point = point;
-	coordinate.gradient = (
-		4.0*texture2D(texture,fract(left))+
-		4.0*texture2D(texture,fract(right))+
-		4.0*texture2D(texture,fract(bottom))+
-		4.0*texture2D(texture,fract(top))+
-		1.0*texture2D(texture,fract(topleft))+
-		1.0*texture2D(texture,fract(topright))+
-		1.0*texture2D(texture,fract(bottomleft))+
-		1.0*texture2D(texture,fract(bottomright))-
-		20.0*point
-
-	) / 6.0;
-
-	return coordinate;
-}
-
-
-// this propagates the reaction-diffusion system
-void main() {
-
-	// calculate laplacians
-	Coordinate coordinate[NCOMPONENTS];
-	for( int i=0; i < NCOMPONENTS; i++ ) {
-		coordinate[i] = laplacian(component[i]);
-	}
-
-	// user perturbations
-	if(brush.x > 0.0) {
-
-		float location = distance(centre,brush.xy);
-		float radius = brush.z;
-		int componentIndex = int(brush.w);
-
-		//  within radius set all comonents to zero except chosen one
-		if( location < radius ) {
-			for (int i=0; i<NCOMPONENTS; i++) {
-
-				if (i == componentIndex)
-					coordinate[i].point = vec4(0.9,0.9,0.9,0.9);
-				else
-					coordinate[i].point = vec4(0.0,0.0,0.0,0.0);
-			}
-		}
-	}
-
-	// output components to buffer
-	gl_FragData[0] = coordinate[0].point + timeStep*( coordinate[0].gradient + coordinate[1].point*coordinate[0].point - coordinate[0].point*coordinate[2].point );
-	gl_FragData[1] = coordinate[1].point + timeStep*( coordinate[1].gradient - coordinate[1].point*coordinate[0].point - coordinate[1].point*coordinate[2].point + 2.0*coordinate[0].point*coordinate[2].point );
-	gl_FragData[2] = coordinate[2].point + timeStep*( coordinate[2].gradient*diffusionRatio + coordinate[1].point*coordinate[2].point - coordinate[0].point*coordinate[2].point );
+      - 4.*u)*dth2;
+   u2 = fract(unew*256.);
+   if (u2 > .5) unew -= d;
+   v2 = fract(vnew*256.);
+   if (v2 > .5) vnew -= d;
+   fragmentColor = vec4(unew, vnew, u2, v2 );
 }
