@@ -1,19 +1,24 @@
 #version 300 es
+#define NCOMPONENTS 3
 
-#define GL2
-#ifdef GL_ES
-	precision highp float;
-#endif
+// use 16-bit preicision floats
+precision highp float;
 
-uniform sampler2D uTexSamp;
-uniform int text;
+// components and colors
+uniform sampler2D component[NCOMPONENTS];
+uniform vec4 colors[NCOMPONENTS];
 
-in vec2 vTexCoord;
-out vec4 fragmentColor;
+// texture coordinate and output color
+in vec2 centre;
+out vec4 outputColor;
 
+// this function maps components to colorspace
 void main(void) {
-	// int x = text ^ 12;
 
-	vec2 x = texture(uTexSamp, vTexCoord).rg;
-	fragmentColor = vec4(x, 0., 1.);
+	vec4 displayPixel = vec4(0.0,0.0,0.0,0.0);
+	for( int i=0; i < NCOMPONENTS; i++ ) {
+		displayPixel = mix( displayPixel, colors[i], texture(component[i], centre).x);
+	};
+
+	outputColor = displayPixel;
 }
