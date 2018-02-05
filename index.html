@@ -1,23 +1,79 @@
 <html>
 	<head>
 		<title>Rection-Diffusion Sytems</title>
+		<link rel="icon" type="image/png" href="public/img/favicon.png"/>
+		<meta charset="UTF-8">
 
+		<!-- standard libraries -->
+		<link rel="stylesheet" type="text/css" href="public/css/style.css"/>
 		<script type="text/javascript" src="public/js/jquery.min.js"></script>
+
+		<!-- parameter sliders -->
+		<link type="text/css" href="public/css/jquery-ui.css" rel="stylesheet" />
+		<script type="text/javascript" src="public/js/jquery-ui.min.js"></script>
+
+		<!-- color gradient widget -->
+		<link rel="stylesheet" type="text/css" href="view/gradientui/gradientui.css"/>
+		<script type="text/javascript" src="view/gradientui/colorPicker.js"></script>
+		<script type="text/javascript" src="view/gradientui/gradientui.js"></script>
+
+		<!-- main libraries -->
 		<script type="text/javascript" src="solver/solver.js"></script>
 		<script type="text/javascript" src="main.js"></script>
+
+		<!-- random number generator-->
+		<script src="public/js/random.min.js"></script>
+		<script>random = new Random()</script>
 
 	</head>
 
 	<body>
-		<canvas id="simulation-canvas" width="512" height="512"></canvas>
-		<script>
+		<header><h1>Reaction-Diffusion System</h1></header>
+		<div id="simulation">
 
-			// load reaction-diffusion solver
-			loadSolver().then( ([coordinate,integrator,painter]) => {
+			<aside class="panel">
 
-				// instantiate simulation canvas
-				S = new Simulation('simulation-canvas',coordinate,integrator,painter)
-			})
-		</script>
+				<section id="instructions">
+					<header><h4>Model</h4></header>
+						Approximate Majority
+						<br></br>
+				</section>
+
+				<section id="controls">
+					<header><h4>Parameters</h4></header>
+
+					Diffusion Ratio:
+					<span class="remark" id="diffusionRatio"></span><br/>
+					<div id="diffusionRatioSlider" class="slider"></div>
+
+					Time Step:
+					<span class="remark" id="timeStep"></span><br/>
+					<div id="timeStepSlider" class="slider"></div>
+
+					Space Step:
+					<span class="remark" id="spaceStep"></span><br/>
+					<div id="spaceStepSlider" class="slider"></div>
+
+					Colors:
+					<div id="gradient"></div>
+				</section>
+
+			</aside>
+
+			<canvas id="simulation-canvas" width="512" height="512"></canvas>
+			<script>
+
+				// initialise color scheme
+				$("#gradient").gradient({values: [[0.0, '#FFD40B'],[0.5,'#FFFFFF'],[1.0,'#1700F1']]})
+
+				// load reaction-diffusion solver
+				loadSolver().then( ([coordinate,integrator,painter]) => {
+
+					// instantiate simulation canvas
+					S = new Simulation('simulation-canvas',coordinate,integrator,painter)
+				})
+			</script>
+
+		</div>
 	</body>
 </html>
