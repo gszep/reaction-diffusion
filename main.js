@@ -34,22 +34,17 @@ function Simulation(canvas,coordinate,integrator,painter) {
 
 // setting initial condition
 Simulation.prototype.initialCondition = function() {
-	var allpixels = []
+	var components = []
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
 
 		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++){
-				if (Math.random() < .001) pixels.push( 0 )
-				else pixels.push( 0 )
-				if (Math.random() < .5) pixels.push( 0 )
-				else pixels.push( 0 )
-				pixels.push( 0 )
-				pixels.push( 0 )
-			}
-		allpixels.push(pixels)
+			for(var j = 0; j<this.height; j++)
+				pixels.push(0,0,0,0)
+
+		components.push(pixels)
 	}
-	return allpixels
+	return components
 }
 
 
@@ -99,8 +94,6 @@ Simulation.prototype.setParameters = function() {
 		'spaceStep': 1.0, 'timeStep': 0.001,
 		'brush': [-1,-1,0,0], 'colors': [],
 		'diffusionRatio': 1.0,
-
-		'a': .8,  'ba': .01/.8
 	}
 }
 
@@ -138,21 +131,6 @@ Simulation.prototype.sliders = function() {
 		}
 	})
 	$('#timeStepSlider').slider('value', that.parameters.timeStep)
-
-	$('#spaceStepSlider').slider({
-		value: that.parameters.spaceStep, min:0.1 , max:10, step:0.1,
-
-		change: function(event, ui) {
-			$('#spaceStep').html(ui.value)
-			that.parameters.spaceStep = ui.value
-		},
-
-		slide: function(event, ui) {
-			$('#spaceStep').html(ui.value)
-			that.parameters.spaceStep = ui.value
-		}
-	})
-	$('#spaceStepSlider').slider('value', that.parameters.spaceStep)
 }
 
 
@@ -182,8 +160,8 @@ Simulation.prototype.mouseEvents = function() {
 			component = 2
 
 		that.parameters.brush = [
-			this.mouseX/that.width,
-			1-this.mouseY/that.height,
+			this.mouseX/parseInt(that.canvas.style.width),
+			1-this.mouseY/parseInt(that.canvas.style.height),
 			that.brush.radius,component]
 	}
 
@@ -205,8 +183,8 @@ Simulation.prototype.mouseEvents = function() {
 
 		if(that.isMouseDown){
 			that.parameters.brush = [
-				this.mouseX/that.width,
-				1-this.mouseY/that.height,
+				this.mouseX/parseInt(that.canvas.style.width),
+				1-this.mouseY/parseInt(that.canvas.style.height),
 				that.brush.radius,component]
 		}
 	}
@@ -225,8 +203,11 @@ Simulation.prototype.mouseEvents = function() {
 
 		if ( event.code == 'Enter' )
 			that.pixels = that.getPixels()
-		if ( event.code == 'Space' )
+		if ( event.code == 'Space' ){
+
+
 			that.setBuffer(that.pixels)
+		}
 	}
 
 	// bind gradient widget to colors in painter
@@ -338,8 +319,8 @@ Simulation.prototype.setTextures = function(pixels) {
 			gl.bindTexture(gl.TEXTURE_2D, texture)
 
 			// texture properties
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 			// initialise texture pixels with data
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
@@ -444,8 +425,8 @@ Simulation.prototype.getWebGL = function(canvas) {
 	gl.getExtension('EXT_color_buffer_float')
 
 	// store dimensions
-	this.width = gl.drawingBufferHeight
-	this.height = gl.drawingBufferWidth
+	this.width = gl.drawingBufferWidth
+	this.height = gl.drawingBufferHeight
 
 	return gl
 }
