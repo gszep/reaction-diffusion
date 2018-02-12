@@ -7,7 +7,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $*/
 
 // rendering global
-var renderStep = 20
+var renderStep = 10
 
 // main simulation canvas
 function Simulation(canvas,coordinate,integrator,painter) {
@@ -204,8 +204,6 @@ Simulation.prototype.mouseEvents = function() {
 		if ( event.code == 'Enter' )
 			that.pixels = that.getPixels()
 		if ( event.code == 'Space' ){
-
-
 			that.setBuffer(that.pixels)
 		}
 	}

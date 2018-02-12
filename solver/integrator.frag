@@ -14,6 +14,9 @@ uniform float timeStep;
 // user perturbation
 uniform vec4 brush;
 
+// input variables
+in vec4 value[NCOMPONENTS];
+
 // input coordinate neighbourhood
 in vec2 centre;
 in vec2 left;
@@ -29,23 +32,10 @@ in vec2 bottomright;
 // parameters
 uniform float diffusionRatio;
 
-// variables
-struct Coordinate {
-	vec4 point;
-	vec4 gradient;
-};
-
 
 // calculate discrete laplacian
-Coordinate laplacian(sampler2D sampler) {
-
-	// values of point
-	vec4 point = texture(sampler,fract(centre));
-
-	// construct point and gradient
-	Coordinate coordinate;
-	coordinate.point = point;
-	coordinate.gradient = (
+vec4 getLaplacian(sampler2D sampler) {
+	return (
 		4.0*texture(sampler,fract(left))+
 		4.0*texture(sampler,fract(right))+
 		4.0*texture(sampler,fract(bottom))+
@@ -54,11 +44,9 @@ Coordinate laplacian(sampler2D sampler) {
 		1.0*texture(sampler,fract(topright))+
 		1.0*texture(sampler,fract(bottomleft))+
 		1.0*texture(sampler,fract(bottomright))-
-		20.0*point
+		20.0*texture(sampler,fract(centre))
 
 	) / 6.0;
-
-	return coordinate;
 }
 
 
@@ -66,32 +54,36 @@ Coordinate laplacian(sampler2D sampler) {
 void main() {
 
 	// calculate laplacians
-	Coordinate coordinate[NCOMPONENTS];
+	vec4 laplacian[NCOMPONENTS];
+	vec4 x[NCOMPONENTS];
+
 	for( int i=0; i < NCOMPONENTS; i++ ) {
-		coordinate[i] = laplacian(component[i]);
+		//value[i] = texture(component[i],centre);
+		laplacian[i] = getLaplacian(component[i]);
+		x[i] = vec4(0.0,0.0,0.0,0.0);
 	}
 
 	// user perturbations
 	if(brush.x > 0.0) {
 
-		float location = distance(centre,brush.xy);
+		float dist = distance(centre,brush.xy);
 		float radius = brush.z;
 		int componentIndex = int(brush.w);
 
 		//  within radius set all comonents to zero except chosen one
-		if( location < radius ) {
+		if( dist < radius ) {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					coordinate[i].point.r = 1.0;
+					x[i].r = 1.0;
 				else
-					coordinate[i].point.r = 0.0;
+					x[i].r = 0.0;
 			}
 		}
 	}
 
 	// output components to buffer
-	outputComponent[0] = coordinate[0].point + timeStep*( coordinate[0].gradient + coordinate[1].point*coordinate[0].point - coordinate[0].point*coordinate[2].point );
-	outputComponent[1] = coordinate[1].point + timeStep*( coordinate[1].gradient - coordinate[1].point*coordinate[0].point - coordinate[1].point*coordinate[2].point + 2.0*coordinate[0].point*coordinate[2].point );
-	outputComponent[2] = coordinate[2].point + timeStep*( coordinate[2].gradient*diffusionRatio + coordinate[1].point*coordinate[2].point - coordinate[0].point*coordinate[2].point );
+	outputComponent[0] = x[0]+value[0] + timeStep*( laplacian[0] + value[1]*value[0] - value[0]*value[2] );
+	outputComponent[1] = x[1]+value[1] + timeStep*( laplacian[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
+	outputComponent[2] = x[2]+value[2] + timeStep*( laplacian[2]*diffusionRatio + value[1]*value[2] - value[0]*value[2] );
 }

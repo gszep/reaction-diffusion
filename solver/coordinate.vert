@@ -24,10 +24,19 @@ out vec2 topright;
 out vec2 bottomleft;
 out vec2 bottomright;
 
+// input variables
+out vec4 value[NCOMPONENTS];
+
 void main(void) {
 
 	// pass texture coordinate to fragment shader
 	centre = textureCoordinate;
+
+
+	for( int i=0; i < NCOMPONENTS; i++ ) {
+		value[i] = texture(component[i],centre);
+		//laplacian[i] = getLaplacian(component[i]);
+	}
 
 	// get descretisation steps
 	ivec2 size = textureSize(component[0],0);
