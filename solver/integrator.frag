@@ -1,40 +1,43 @@
 #version 300 es
 #define NCOMPONENTS 3
 
-// use 16-bit preicision floats
+// use 16-bit preicision
 precision highp float;
+precision highp int;
 
-// components and temporal discretisation
-uniform sampler2D component[NCOMPONENTS];
+// chemical components
+uniform highp sampler2D component[NCOMPONENTS];
+in vec2 location;
 out vec4 outputComponent[NCOMPONENTS];
 
+// parameters
 uniform float spaceStep;
 uniform float timeStep;
-
-// user perturbation
 uniform vec4 brush;
-
-// input variables
-in vec4 value[NCOMPONENTS];
-
-// input coordinate neighbourhood
-in vec2 centre;
-in vec2 left;
-in vec2 right;
-in vec2 top;
-in vec2 bottom;
-
-in vec2 topleft;
-in vec2 topright;
-in vec2 bottomleft;
-in vec2 bottomright;
-
-// parameters
 uniform float diffusionRatio;
 
 
 // calculate discrete laplacian
 vec4 getLaplacian(sampler2D sampler) {
+
+	// get descretisation steps
+	ivec2 size = textureSize(component[0],0);
+	float dx = spaceStep / float(size.x);
+	float dy = spaceStep / float(size.y);
+
+	// precompute neighbourhood positions
+	vec2 centre = location;
+	vec2 left = centre-vec2(dx,0);
+	vec2 right = centre+vec2(dx,0);
+	vec2 bottom = centre-vec2(0,dy);
+	vec2 top = centre+vec2(0,dy);
+
+	// diagonal terms
+	vec2 bottomleft = centre-vec2(dx,dy);
+	vec2 bottomright = centre-vec2(-dx,dy);
+	vec2 topleft = centre+vec2(-dx,dy);
+	vec2 topright = centre+vec2(dx,dy);
+
 	return (
 		4.0*texture(sampler,fract(left))+
 		4.0*texture(sampler,fract(right))+
@@ -54,11 +57,12 @@ vec4 getLaplacian(sampler2D sampler) {
 void main() {
 
 	// calculate laplacians
+	vec4 value[NCOMPONENTS];
 	vec4 laplacian[NCOMPONENTS];
 	vec4 x[NCOMPONENTS];
 
 	for( int i=0; i < NCOMPONENTS; i++ ) {
-		//value[i] = texture(component[i],centre);
+		value[i] = texture(component[i],location);
 		laplacian[i] = getLaplacian(component[i]);
 		x[i] = vec4(0.0,0.0,0.0,0.0);
 	}
@@ -66,7 +70,7 @@ void main() {
 	// user perturbations
 	if(brush.x > 0.0) {
 
-		float dist = distance(centre,brush.xy);
+		float dist = distance(location,brush.xy);
 		float radius = brush.z;
 		int componentIndex = int(brush.w);
 
@@ -75,15 +79,15 @@ void main() {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					x[i].r = 1.0;
+					value[i].r = 1.0;
 				else
-					x[i].r = 0.0;
+					value[i].r = 0.0;
 			}
 		}
 	}
 
 	// output components to buffer
-	outputComponent[0] = x[0]+value[0] + timeStep*( laplacian[0] + value[1]*value[0] - value[0]*value[2] );
-	outputComponent[1] = x[1]+value[1] + timeStep*( laplacian[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
-	outputComponent[2] = x[2]+value[2] + timeStep*( laplacian[2]*diffusionRatio + value[1]*value[2] - value[0]*value[2] );
+	outputComponent[0] = value[0] + timeStep*( laplacian[0] + value[1]*value[0] - value[0]*value[2] );
+	outputComponent[1] = value[1] + timeStep*( laplacian[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
+	outputComponent[2] = value[2] + timeStep*( laplacian[2]*diffusionRatio + value[1]*value[2] - value[0]*value[2] );
 }

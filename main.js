@@ -71,6 +71,7 @@ Simulation.prototype.render = function() {
 
 // propagate textures for given number of timesteps
 Simulation.prototype.propagate = function() {
+	gl.viewport(0,0,this.width,this.height)
 	gl.useProgram(this.integrator)
 
 	// alternate two targets in buffer per step
@@ -91,7 +92,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = {
-		'spaceStep': 1.0, 'timeStep': 0.001,
+		'spaceStep': 10.0, 'timeStep': 0.001,
 		'brush': [-1,-1,0,0], 'colors': [],
 		'diffusionRatio': 1.0,
 	}
@@ -131,6 +132,22 @@ Simulation.prototype.sliders = function() {
 		}
 	})
 	$('#timeStepSlider').slider('value', that.parameters.timeStep)
+
+
+	$('#spaceStepSlider').slider({
+		value: that.parameters.spaceStep, min:0.1 , max:10, step:0.1,
+
+		change: function(event, ui) {
+			$('#spaceStep').html(ui.value)
+			that.parameters.spaceStep = ui.value
+		},
+
+		slide: function(event, ui) {
+			$('#spaceStep').html(ui.value)
+			that.parameters.spaceStep = ui.value
+		}
+	})
+	$('#spaceStepSlider').slider('value', that.parameters.spaceStep)
 }
 
 
@@ -315,14 +332,15 @@ Simulation.prototype.setTextures = function(pixels) {
 
 			let texture = gl.createTexture()
 			gl.bindTexture(gl.TEXTURE_2D, texture)
-
-			// texture properties
-			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+			gl.pixelStorei(gl.UNPACK_ALIGNMENT,1)
 
 			// initialise texture pixels with data
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
 				gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
+
+				// texture properties
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 			textures.push(texture)
 		}
@@ -377,35 +395,28 @@ Simulation.prototype.getPixels = function() {
 
 // initialise mesh geomerty to render onto
 Simulation.prototype.setGeometry = function() {
-
-	let buffer = gl.createBuffer()
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-
-	// vertex position and texture surface limits
-	var xy = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
-	var uv = new Float32Array([0,0, 1,0, 0,1, 1,1])
-
-	// populate coordinate buffer
-	gl.bufferData(gl.ARRAY_BUFFER,xy.byteLength+uv.byteLength,gl.STATIC_DRAW)
-	gl.bufferSubData(gl.ARRAY_BUFFER,0,xy)
-	gl.bufferSubData(gl.ARRAY_BUFFER,xy.byteLength,uv)
-
-	// get location index of coordinates in shaders
 	let vertexIndex = gl.getAttribLocation(this.integrator, 'vertexCoordinate')
-	let textureIndex = gl.getAttribLocation(this.integrator, 'textureCoordinate')
 
-	// attach buffers to shaders
-	gl.vertexAttribPointer(vertexIndex,2,gl.FLOAT,gl.FALSE,0,0)
-	gl.vertexAttribPointer(textureIndex,2,gl.FLOAT,gl.FALSE,0,xy.byteLength)
-
+	// populate coordinate buffer with four vertexes
 	gl.enableVertexAttribArray(vertexIndex)
-	gl.enableVertexAttribArray(textureIndex)
+	var xy = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
+	gl.bufferData(gl.ARRAY_BUFFER,xy,gl.STATIC_DRAW)
+
+	// attach coordinate buffer to shaders
+	gl.vertexAttribPointer(vertexIndex,2,gl.FLOAT,gl.FALSE,0,0)
 }
 
 
 // show with component to color map
 Simulation.prototype.display = function() {
+	gl.viewport(0,0,
+		parseInt(this.canvas.style.width),
+		parseInt(this.canvas.style.height))
+
 	gl.useProgram(this.painter)
+
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 }
