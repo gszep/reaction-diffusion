@@ -23,28 +23,11 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.sliders()
 	this.mouseEvents()
 
-	// initial condition
-	this.pixels = this.initialCondition()
-	this.setBuffer(this.pixels)
+	// zero initial condition
+	this.setBuffer(this.zeros())
 
 	// begin simulation
 	this.renderLoop()
-}
-
-
-// setting initial condition
-Simulation.prototype.initialCondition = function() {
-	var components = []
-	for ( let n = 0; n < this.nComponents; n++ ) {
-		let pixels = []
-
-		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++)
-				pixels.push(0,0,0,0)
-
-		components.push(pixels)
-	}
-	return components
 }
 
 
@@ -92,8 +75,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = {
-		'spaceStep': 10.0, 'timeStep': 0.001,
-		'brush': [-1,-1,0,0], 'colors': [],
+		'timeStep': 0.001, 'brush': [-1,-1,0,0], 'colors': [],
 		'diffusionRatio': 1.0,
 	}
 }
@@ -135,19 +117,29 @@ Simulation.prototype.sliders = function() {
 
 
 	$('#spaceStepSlider').slider({
-		value: that.parameters.spaceStep, min:0.1 , max:10, step:0.1,
+		value: 512, min:10 , max:512, step:1,
 
 		change: function(event, ui) {
 			$('#spaceStep').html(ui.value)
-			that.parameters.spaceStep = ui.value
+			that.width = ui.value; that.height = ui.value;
+
+			if (that.textures)
+				that.setBuffer(that.getPixels())
+			else
+				that.setBuffer(that.zeros())
 		},
 
 		slide: function(event, ui) {
 			$('#spaceStep').html(ui.value)
-			that.parameters.spaceStep = ui.value
+			that.width = ui.value; that.height = ui.value;
+
+			if (that.textures)
+				that.setBuffer(that.getPixels())
+			else
+				that.setBuffer(that.zeros())
 		}
 	})
-	$('#spaceStepSlider').slider('value', that.parameters.spaceStep)
+	$('#spaceStepSlider').slider('value', that.height)
 }
 
 
@@ -221,7 +213,8 @@ Simulation.prototype.mouseEvents = function() {
 		if ( event.code == 'Enter' )
 			that.pixels = that.getPixels()
 		if ( event.code == 'Space' ){
-			that.setBuffer(that.pixels)
+			if (that.pixels)
+				that.setBuffer(that.pixels)
 		}
 	}
 
@@ -288,28 +281,31 @@ Simulation.prototype.resetBrush = function() {
 
 // initialise frame buffers with given component pixels[n]
 Simulation.prototype.setBuffer = function(pixels) {
-	this.buffer = []
 
 	// create two texture targets per component
 	this.setTextures(pixels)
 
 	// create two buffers for alternating frame method
-	for ( let i = 0; i < 2; i++ ) {
+	if (!this.buffer) {
+		this.buffer = []
 
-		let buffer = gl.createFramebuffer()
-		gl.bindFramebuffer(gl.FRAMEBUFFER,buffer)
+		for ( let i = 0; i < 2; i++ ) {
 
-		// bind component textures to frame buffers
-		for ( let n = 0; n < this.nComponents; n++ ) {
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+n,
-				gl.TEXTURE_2D, this.textures[i][n], 0)
-		}
-		this.buffer.push(buffer)
+			let buffer = gl.createFramebuffer()
+			gl.bindFramebuffer(gl.FRAMEBUFFER,buffer)
+
+			// bind component textures to frame buffers
+			for ( let n = 0; n < this.nComponents; n++ ) {
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+n,
+					gl.TEXTURE_2D, this.textures[i][n], 0)
+				}
+				this.buffer.push(buffer)
+			}
+
+			// bind component textures to painter program
+			gl.useProgram(this.painter)
+			this.bindComponents(this.painter,1)
 	}
-
-	// bind component textures to painter program
-	gl.useProgram(this.painter)
-	this.bindComponents(this.painter,1)
 
 	// check for errors
 	let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
@@ -320,7 +316,14 @@ Simulation.prototype.setBuffer = function(pixels) {
 
 // initialise textures with given pixels
 Simulation.prototype.setTextures = function(pixels) {
-	this.textures = []
+
+	// create textures if none exist
+	var createTextures = false
+	if (!this.textures) {
+
+		this.textures = []
+		createTextures = true
+	}
 
 	// two targets for frame buffer
 	for ( let i = 0; i < 2; i++ ) {
@@ -330,7 +333,12 @@ Simulation.prototype.setTextures = function(pixels) {
 		for ( let n = 0; n < this.nComponents; n++ ) {
 			gl.activeTexture(gl.TEXTURE0+n+i*this.nComponents)
 
-			let texture = gl.createTexture()
+			var texture
+			if (createTextures)
+				texture = gl.createTexture()
+			else
+				texture = this.textures[i][n]
+
 			gl.bindTexture(gl.TEXTURE_2D, texture)
 			gl.pixelStorei(gl.UNPACK_ALIGNMENT,1)
 
@@ -338,9 +346,9 @@ Simulation.prototype.setTextures = function(pixels) {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
 				gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
 
-				// texture properties
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+			// texture properties
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 			textures.push(texture)
 		}
@@ -364,11 +372,24 @@ Simulation.prototype.bindComponents = function(program,bufferIndex) {
 }
 
 
+// setting zero initial condition
+Simulation.prototype.zeros = function() {
+	var components = []
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		let pixels = []
+
+		for(var i = 0; i<this.width; i++)
+			for(var j = 0; j<this.height; j++)
+				pixels.push(0,0,0,0)
+
+		components.push(pixels)
+	}
+	return components
+}
+
+
 // get pixel data from components
 Simulation.prototype.getPixels = function() {
-
-	var width = Math.ceil(this.width)
-	var height = Math.ceil(this.height)
 	let data = []
 
 	// create temporary buffer to parse out data
@@ -377,14 +398,14 @@ Simulation.prototype.getPixels = function() {
 
 	// iterate through components
 	for ( let n = 0; n < this.nComponents; n++ ) {
-		let pixels = new Float32Array(4*width*height)
+		let pixels = new Float32Array(4*this.width*this.height)
 
 		// bind texture to buffer
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,this.textures[1][n],0)
 
 		// write texture pixels to image contexts
-		gl.readPixels(0,0,width,height,gl.RGBA,gl.FLOAT,pixels)
+		gl.readPixels(0,0,this.width,this.height,gl.RGBA,gl.FLOAT,pixels)
 		data.push(pixels)
 	}
 

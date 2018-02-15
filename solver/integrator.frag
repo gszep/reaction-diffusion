@@ -7,36 +7,33 @@ precision highp int;
 
 // chemical components
 uniform highp sampler2D component[NCOMPONENTS];
-in vec2 location;
 out vec4 outputComponent[NCOMPONENTS];
+in vec2 location;
 
 // parameters
-uniform float spaceStep;
 uniform float timeStep;
 uniform vec4 brush;
 uniform float diffusionRatio;
 
-
 // calculate discrete laplacian
 vec4 getLaplacian(sampler2D sampler) {
 
-	// get descretisation steps
+	// get dicrete neighbourhood
 	ivec2 size = textureSize(component[0],0);
-	float dx = spaceStep / float(size.x);
-	float dy = spaceStep / float(size.y);
+	float dx = 1.0 / float(size.x);
+	float dy = 1.0 / float(size.y);
 
-	// precompute neighbourhood positions
-	vec2 centre = location;
-	vec2 left = centre-vec2(dx,0);
-	vec2 right = centre+vec2(dx,0);
-	vec2 bottom = centre-vec2(0,dy);
-	vec2 top = centre+vec2(0,dy);
+	// orthogonal terms
+	vec2 left = location-vec2(dx,0);
+	vec2 right = location+vec2(dx,0);
+	vec2 bottom = location-vec2(0,dy);
+	vec2 top = location+vec2(0,dy);
 
 	// diagonal terms
-	vec2 bottomleft = centre-vec2(dx,dy);
-	vec2 bottomright = centre-vec2(-dx,dy);
-	vec2 topleft = centre+vec2(-dx,dy);
-	vec2 topright = centre+vec2(dx,dy);
+	vec2 bottomleft = location-vec2(dx,dy);
+	vec2 bottomright = location-vec2(-dx,dy);
+	vec2 topleft = location+vec2(-dx,dy);
+	vec2 topright = location+vec2(dx,dy);
 
 	return (
 		4.0*texture(sampler,fract(left))+
@@ -47,24 +44,20 @@ vec4 getLaplacian(sampler2D sampler) {
 		1.0*texture(sampler,fract(topright))+
 		1.0*texture(sampler,fract(bottomleft))+
 		1.0*texture(sampler,fract(bottomright))-
-		20.0*texture(sampler,fract(centre))
-
+		20.0*texture(sampler,location)
 	) / 6.0;
 }
 
 
 // this propagates the reaction-diffusion system
 void main() {
-
-	// calculate laplacians
 	vec4 value[NCOMPONENTS];
 	vec4 laplacian[NCOMPONENTS];
-	vec4 x[NCOMPONENTS];
 
+	// calculate laplacians
 	for( int i=0; i < NCOMPONENTS; i++ ) {
 		value[i] = texture(component[i],location);
 		laplacian[i] = getLaplacian(component[i]);
-		x[i] = vec4(0.0,0.0,0.0,0.0);
 	}
 
 	// user perturbations

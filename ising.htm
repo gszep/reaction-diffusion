@@ -72,7 +72,7 @@ function getShader ( gl, id ){
 var gl, prog, prog_show, FBO, FBO1, texture, texture1, ctx,
     cTemp, bHot = true, mouseDown = false,
     timer, delay = 0, frames = 0, time, animation, pix,
-    n = 512/1, sampLoc, wLoc, bwLoc, nLoc, hLoc, T = 1
+    n = 32, sampLoc, wLoc, bwLoc, nLoc, hLoc, T = 1
 function main() {
    var c = document.getElementById("c")
    var err = "Your browser does not support "
@@ -248,7 +248,7 @@ w=[]
   drawTemp()
 }
 function setMag(s) {
-   n = 512/s.valueOf();
+   n = 32;
    gl.useProgram(prog)
    gl.uniform1f(nLoc, n)
    gl.uniform1f(hLoc, 1/n)
