@@ -24,16 +24,18 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.mouseEvents()
 
 	// zero initial condition
-	this.setBuffer(this.zeros())
+	this.pixels = this.zeros()
+	this.setBuffer(this.pixels)
 
 	// begin simulation
+	this.pause = false
 	this.renderLoop()
 }
 
 
 // main animation loop
 Simulation.prototype.renderLoop = function() {
-	this.render()
+	if (!this.pause) this.render()
 	requestAnimationFrame(this.renderLoop.bind(this))
 }
 
@@ -118,25 +120,20 @@ Simulation.prototype.sliders = function() {
 
 	$('#spaceStepSlider').slider({
 		value: 512, min:10 , max:512, step:1,
-
 		change: function(event, ui) {
 			$('#spaceStep').html(ui.value)
-			that.width = ui.value; that.height = ui.value;
-
-			if (that.textures)
-				that.setBuffer(that.getPixels())
-			else
-				that.setBuffer(that.zeros())
 		},
 
 		slide: function(event, ui) {
 			$('#spaceStep').html(ui.value)
-			that.width = ui.value; that.height = ui.value;
 
 			if (that.textures)
-				that.setBuffer(that.getPixels())
+				that.pixels = that.getPixels()
 			else
-				that.setBuffer(that.zeros())
+				that.pixels = that.zeros()
+
+			that.width = ui.value; that.height = ui.value;
+			that.setBuffer(that.pixels)
 		}
 	})
 	$('#spaceStepSlider').slider('value', that.height)
@@ -213,8 +210,7 @@ Simulation.prototype.mouseEvents = function() {
 		if ( event.code == 'Enter' )
 			that.pixels = that.getPixels()
 		if ( event.code == 'Space' ){
-			if (that.pixels)
-				that.setBuffer(that.pixels)
+			that.setBuffer(that.pixels)
 		}
 	}
 
@@ -281,6 +277,8 @@ Simulation.prototype.resetBrush = function() {
 
 // initialise frame buffers with given component pixels[n]
 Simulation.prototype.setBuffer = function(pixels) {
+	this.pause = true
+	var pixels = this.resize(pixels)
 
 	// create two texture targets per component
 	this.setTextures(pixels)
@@ -311,6 +309,8 @@ Simulation.prototype.setBuffer = function(pixels) {
 	let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
 	if (status!=gl.FRAMEBUFFER_COMPLETE)
 		throw 'Incomplete Frame Buffer: '+status
+
+	this.pause = false
 }
 
 
@@ -389,7 +389,7 @@ Simulation.prototype.zeros = function() {
 
 
 // get pixel data from components
-Simulation.prototype.getPixels = function() {
+Simulation.prototype.getPixels = function(index) {
 	let data = []
 
 	// create temporary buffer to parse out data
@@ -410,7 +410,50 @@ Simulation.prototype.getPixels = function() {
 	}
 
 	gl.deleteFramebuffer(dataBuffer)
-	return data
+
+	if (index != undefined)
+		return data[index]
+	else
+		return data
+}
+
+
+function scaleImageData(pixels, width, height) {
+	var canvas = document.createElement('canvas')
+	var ctx = canvas.getContext('2d')
+
+	originalWidth = Math.sqrt(pixels.length/4)
+	originalHeight = Math.sqrt(pixels.length/4)
+
+	canvas.width = 512
+	canvas.height = 512
+	var imageData = ctx.createImageData(originalWidth, originalHeight)
+
+	// set our buffer as source
+	imageData.data.set(pixels.map( value => { return value*255 }))
+
+	var newCanvas = document.createElement('canvas')
+	newCanvas.width = 512
+	newCanvas.height = 512
+
+	newCanvas.getContext("2d").putImageData(imageData,0,0);
+
+	ctx.scale(width/originalWidth,height/originalHeight);
+	ctx.drawImage(newCanvas,0,0);
+
+  return ctx.getImageData(0,0,width,height);
+}
+
+
+// resize pixel array with constant interpolation
+Simulation.prototype.resize = function(pixels) {
+		var components = []
+
+		for ( let n = 0; n < this.nComponents; n++ ) {
+			let resized = scaleImageData(pixels[n],this.width,this.height)
+			components.push(resized.data.map( value => { return value/255 }))
+		}
+		return components
 }
 
 
