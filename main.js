@@ -7,7 +7,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $*/
 
 // rendering global
-var renderStep = 10
+var renderStep = 20
 
 // main simulation canvas
 function Simulation(canvas,coordinate,integrator,painter) {
@@ -18,14 +18,15 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.nComponents = this.getComponents(integrator)
 	this.setGeometry()
 
-	// initialise parameters and interactions
+	// zero initial condition
+	this.pixels = this.zeros()
+	this.width = 256; this.height = 256;
+	this.setBuffer(this.pixels)
+
+	// initialise parameters, interactions
 	this.setParameters()
 	this.sliders()
 	this.mouseEvents()
-
-	// zero initial condition
-	this.pixels = this.zeros()
-	this.setBuffer(this.pixels)
 
 	// begin simulation
 	this.pause = false
@@ -76,9 +77,9 @@ Simulation.prototype.propagate = function() {
 
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
-	this.parameters = {
-		'timeStep': 0.001, 'brush': [-1,-1,0,0], 'colors': [],
-		'diffusionRatio': 1.0,
+	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
+		'diffusion': [[0.00001],[0.00001],[0.00001]],
+		'timeStep': 0.0,
 	}
 }
 
@@ -88,22 +89,45 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: that.parameters.diffusionRatio, min: 0, max:2, step:0.001,
+		value: 1.0, min: 0, max:2, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusionRatio = ui.value
+			that.parameters.diffusion[2][0] = ui.value * that.parameters.diffusion[0][0]
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusionRatio = ui.value
+			that.parameters.diffusion[2][0] = ui.value * that.parameters.diffusion[0][0]
 		}
 	})
-	$('#diffusionRatioSlider').slider('value', that.parameters.diffusionRatio)
+	$('#diffusionRatioSlider').slider('value',1.0)
+
+	$('#gridSizeSlider').slider({
+		value: 256, min:100 , max:512, step:1,
+		change: function(event, ui) {
+			$('#gridSize').html(ui.value)
+		},
+
+		slide: function(event, ui) {
+			$('#gridSize').html(ui.value)
+
+			if (that.textures)
+				that.pixels = that.getPixels()
+			else
+				that.pixels = that.zeros()
+
+			that.width = ui.value; that.height = ui.value;
+			that.setBuffer(that.pixels)
+
+			that.parameters.timeStep = 0.0
+			$('#timeStepSlider').slider('value', that.parameters.timeStep)
+		}
+	})
+	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
-		value: that.parameters.timeStep, min: 0.001, max:0.21, step:0.001,
+		value: that.parameters.timeStep, min: 0.0, max:0.3, step:0.001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)
@@ -116,27 +140,6 @@ Simulation.prototype.sliders = function() {
 		}
 	})
 	$('#timeStepSlider').slider('value', that.parameters.timeStep)
-
-
-	$('#spaceStepSlider').slider({
-		value: 512, min:10 , max:512, step:1,
-		change: function(event, ui) {
-			$('#spaceStep').html(ui.value)
-		},
-
-		slide: function(event, ui) {
-			$('#spaceStep').html(ui.value)
-
-			if (that.textures)
-				that.pixels = that.getPixels()
-			else
-				that.pixels = that.zeros()
-
-			that.width = ui.value; that.height = ui.value;
-			that.setBuffer(that.pixels)
-		}
-	})
-	$('#spaceStepSlider').slider('value', that.height)
 }
 
 
@@ -154,44 +157,24 @@ Simulation.prototype.mouseEvents = function() {
 
 	this.canvas.onmousedown = function(event) {
 		that.isMouseDown = true
-		var component
-
-		if (event.which == 1)
-			component = 0
-
-		if (event.which == 2)
-			component = 1
-
-		if (event.which == 3)
-			component = 2
 
 		that.parameters.brush = [
 			this.mouseX/parseInt(that.canvas.style.width),
 			1-this.mouseY/parseInt(that.canvas.style.height),
-			that.brush.radius,component]
+			that.brush.radius,event.which-1]
 	}
 
 	this.canvas.onmousemove = function(event) {
 		var mouseEvent = event ? event : window.event
-		var component
 
 		this.mouseX = mouseEvent.pageX - $('#'+that.canvas.id).offset().left
 		this.mouseY = mouseEvent.pageY - $('#'+that.canvas.id).offset().top
-
-		if (event.which == 1)
-			component = 0
-
-		if (event.which == 2)
-			component = 1
-
-		if (event.which == 3)
-			component = 2
 
 		if(that.isMouseDown){
 			that.parameters.brush = [
 				this.mouseX/parseInt(that.canvas.style.width),
 				1-this.mouseY/parseInt(that.canvas.style.height),
-				that.brush.radius,component]
+				that.brush.radius,event.which-1]
 		}
 	}
 
@@ -418,42 +401,45 @@ Simulation.prototype.getPixels = function(index) {
 }
 
 
-function scaleImageData(pixels, width, height) {
-	var canvas = document.createElement('canvas')
-	var ctx = canvas.getContext('2d')
-
-	originalWidth = Math.sqrt(pixels.length/4)
-	originalHeight = Math.sqrt(pixels.length/4)
-
-	canvas.width = 512
-	canvas.height = 512
-	var imageData = ctx.createImageData(originalWidth, originalHeight)
-
-	// set our buffer as source
-	imageData.data.set(pixels.map( value => { return value*255 }))
-
-	var newCanvas = document.createElement('canvas')
-	newCanvas.width = 512
-	newCanvas.height = 512
-
-	newCanvas.getContext("2d").putImageData(imageData,0,0);
-
-	ctx.scale(width/originalWidth,height/originalHeight);
-	ctx.drawImage(newCanvas,0,0);
-
-  return ctx.getImageData(0,0,width,height);
-}
-
-
 // resize pixel array with constant interpolation
 Simulation.prototype.resize = function(pixels) {
 		var components = []
 
 		for ( let n = 0; n < this.nComponents; n++ ) {
-			let resized = scaleImageData(pixels[n],this.width,this.height)
+			let resized = this.rescalePixels(pixels[n],this.width,this.height)
 			components.push(resized.data.map( value => { return value/255 }))
 		}
 		return components
+}
+
+
+Simulation.prototype.rescalePixels = function(pixels, width, height) {
+	let canvas = document.createElement('canvas')
+
+	// view window dimensions
+	canvas.width = parseInt(this.canvas.style.width)
+	canvas.height = parseInt(this.canvas.style.height)
+
+	// original grid size
+	originalWidth = Math.sqrt(pixels.length/4)
+	originalHeight = Math.sqrt(pixels.length/4)
+
+	// pass pixel data to html canvas
+	var ctx = canvas.getContext('2d')
+	var imageData = ctx.createImageData(originalWidth, originalHeight)
+	imageData.data.set(pixels.map( value => { return value*255 }))
+
+	// create target canvas
+	var target = document.createElement('canvas')
+	target.width = canvas.width
+	target.height = canvas.height
+
+	// rescale pixels on canvas
+	target.getContext("2d").putImageData(imageData,0,0);
+	ctx.scale(width/originalWidth,height/originalHeight);
+	ctx.drawImage(target,0,0);
+
+  return ctx.getImageData(0,0,width,height);
 }
 
 

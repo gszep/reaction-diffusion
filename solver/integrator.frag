@@ -11,15 +11,14 @@ out vec4 outputComponent[NCOMPONENTS];
 in vec2 location;
 
 // parameters
-uniform float timeStep;
 uniform vec4 brush;
-uniform float diffusionRatio;
+uniform float diffusion[NCOMPONENTS];
+uniform float timeStep;
 
 // calculate discrete laplacian
-vec4 getLaplacian(sampler2D sampler) {
+vec4 getLaplacian(sampler2D sampler, ivec2 size) {
 
 	// get dicrete neighbourhood
-	ivec2 size = textureSize(component[0],0);
 	float dx = 1.0 / float(size.x);
 	float dy = 1.0 / float(size.y);
 
@@ -36,28 +35,31 @@ vec4 getLaplacian(sampler2D sampler) {
 	vec2 topright = location+vec2(dx,dy);
 
 	return (
-		4.0*texture(sampler,fract(left))+
-		4.0*texture(sampler,fract(right))+
-		4.0*texture(sampler,fract(bottom))+
-		4.0*texture(sampler,fract(top))+
-		1.0*texture(sampler,fract(topleft))+
-		1.0*texture(sampler,fract(topright))+
-		1.0*texture(sampler,fract(bottomleft))+
-		1.0*texture(sampler,fract(bottomright))-
-		20.0*texture(sampler,location)
+		4.0*texture(sampler,fract(left))/(dx*dx)+
+		4.0*texture(sampler,fract(right))/(dx*dx)+
+		4.0*texture(sampler,fract(bottom))/(dy*dy)+
+		4.0*texture(sampler,fract(top))/(dy*dy)+
+		1.0*texture(sampler,fract(topleft))/(dx*dy)+
+		1.0*texture(sampler,fract(topright))/(dx*dy)+
+		1.0*texture(sampler,fract(bottomleft))/(dx*dy)+
+		1.0*texture(sampler,fract(bottomright))/(dx*dy)-
+		20.0*texture(sampler,location)/(dx*dy)
 	) / 6.0;
 }
 
 
 // this propagates the reaction-diffusion system
 void main() {
+
 	vec4 value[NCOMPONENTS];
 	vec4 laplacian[NCOMPONENTS];
 
 	// calculate laplacians
+	ivec2 size = textureSize(component[0],0);
 	for( int i=0; i < NCOMPONENTS; i++ ) {
+
 		value[i] = texture(component[i],location);
-		laplacian[i] = getLaplacian(component[i]);
+		laplacian[i] = getLaplacian(component[i],size);
 	}
 
 	// user perturbations
@@ -79,8 +81,17 @@ void main() {
 		}
 	}
 
+	// choose stable timeStep as default
+	float dt;
+	if (timeStep==0.0) {
+		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[1] + 0.018 ));
+	}
+	else {
+		dt = timeStep;
+	}
+
 	// output components to buffer
-	outputComponent[0] = value[0] + timeStep*( laplacian[0] + value[1]*value[0] - value[0]*value[2] );
-	outputComponent[1] = value[1] + timeStep*( laplacian[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
-	outputComponent[2] = value[2] + timeStep*( laplacian[2]*diffusionRatio + value[1]*value[2] - value[0]*value[2] );
+	outputComponent[0] = value[0] + dt*( laplacian[0]*diffusion[0] + value[1]*value[0] - value[0]*value[2] );
+	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] + value[1]*value[2] - value[0]*value[2] );
 }
