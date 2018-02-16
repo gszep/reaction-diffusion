@@ -37,14 +37,41 @@ vec4 getLaplacian(sampler2D sampler, ivec2 size) {
 	return (
 		4.0*texture(sampler,fract(left))/(dx*dx)+
 		4.0*texture(sampler,fract(right))/(dx*dx)+
+
 		4.0*texture(sampler,fract(bottom))/(dy*dy)+
 		4.0*texture(sampler,fract(top))/(dy*dy)+
+
 		1.0*texture(sampler,fract(topleft))/(dx*dy)+
 		1.0*texture(sampler,fract(topright))/(dx*dy)+
+
 		1.0*texture(sampler,fract(bottomleft))/(dx*dy)+
 		1.0*texture(sampler,fract(bottomright))/(dx*dy)-
+
 		20.0*texture(sampler,location)/(dx*dy)
 	) / 6.0;
+}
+
+
+uint TausStep(uint z, int S1, int S2, int S3, uint M)
+{
+    uint b = (((z << S1) ^ z) >> S2);
+    return (((z & M) << S3) ^ b);
+}
+
+uint LCGStep(uint z, uint A, uint C)
+{
+    return (A * z + C);
+}
+
+float random() {
+		uvec4 state = uvec4(texture(component[0],location));
+    state.x = TausStep(state.x, 13, 19, 12, uint(4294967294));
+    state.y = TausStep(state.y, 2, 25, 4, uint(4294967288));
+    state.z = TausStep(state.z, 3, 11, 17, uint(4294967280));
+    state.w = LCGStep(state.w, uint(1664525), uint(1013904223));
+
+    //outputComponent[0] = vec4(state);
+    return 2.3283064365387e-10 * float(state.x ^ state.y ^ state.z ^ state.w);
 }
 
 
@@ -89,6 +116,8 @@ void main() {
 	else {
 		dt = timeStep;
 	}
+
+	float noise = random();
 
 	// output components to buffer
 	outputComponent[0] = value[0];

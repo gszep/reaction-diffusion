@@ -19,8 +19,8 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.setGeometry()
 
 	// zero initial condition
-	this.pixels = this.zeros()
 	this.width = 256; this.height = 256;
+	this.pixels = this.zeros()
 	this.setBuffer(this.pixels)
 
 	// initialise parameters, interactions
@@ -261,7 +261,9 @@ Simulation.prototype.resetBrush = function() {
 // initialise frame buffers with given component pixels[n]
 Simulation.prototype.setBuffer = function(pixels) {
 	this.pause = true
-	var pixels = this.resize(pixels)
+
+	if (pixels[0].length/4 != this.width*this.height)
+		pixels = this.resize(pixels)
 
 	// create two texture targets per component
 	this.setTextures(pixels)
@@ -364,8 +366,13 @@ Simulation.prototype.zeros = function() {
 		for(var i = 0; i<this.width; i++){
 			for(var j = 0; j<this.height; j++) {
 
-				let u = n==0 ? random.real(-1,1) : 0
-				pixels.push(u,u,u,u)
+				if( n==0 ) // generate seeds for noise
+					pixels.push(random.real(0,1),
+											random.real(0,1),
+											random.real(0,1),
+											random.real(0,1))
+				else
+					pixels.push(0,0,0,0)
 			}
 		}
 
