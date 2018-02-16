@@ -78,7 +78,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
-		'diffusion': [[0.00001],[0.00001],[0.00001]],
+		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
 		'timeStep': 0.0,
 	}
 }
@@ -93,12 +93,12 @@ Simulation.prototype.sliders = function() {
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[2][0] = ui.value * that.parameters.diffusion[0][0]
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[2][0] = ui.value * that.parameters.diffusion[0][0]
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 		}
 	})
 	$('#diffusionRatioSlider').slider('value',1.0)
@@ -161,7 +161,7 @@ Simulation.prototype.mouseEvents = function() {
 		that.parameters.brush = [
 			this.mouseX/parseInt(that.canvas.style.width),
 			1-this.mouseY/parseInt(that.canvas.style.height),
-			that.brush.radius,event.which-1]
+			that.brush.radius,event.which]
 	}
 
 	this.canvas.onmousemove = function(event) {
@@ -174,7 +174,7 @@ Simulation.prototype.mouseEvents = function() {
 			that.parameters.brush = [
 				this.mouseX/parseInt(that.canvas.style.width),
 				1-this.mouseY/parseInt(that.canvas.style.height),
-				that.brush.radius,event.which-1]
+				that.brush.radius,event.which]
 		}
 	}
 
@@ -361,9 +361,13 @@ Simulation.prototype.zeros = function() {
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
 
-		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++)
-				pixels.push(0,0,0,0)
+		for(var i = 0; i<this.width; i++){
+			for(var j = 0; j<this.height; j++) {
+
+				let u = n==0 ? random.real(-1,1) : 0
+				pixels.push(u,u,u,u)
+			}
+		}
 
 		components.push(pixels)
 	}

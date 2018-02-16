@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 3
+#define NCOMPONENTS 4
 
 // use 16-bit preicision
 precision highp float;
@@ -84,14 +84,15 @@ void main() {
 	// choose stable timeStep as default
 	float dt;
 	if (timeStep==0.0) {
-		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[1] + 0.018 ));
+		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[2] + 0.018 ));
 	}
 	else {
 		dt = timeStep;
 	}
 
 	// output components to buffer
-	outputComponent[0] = value[0] + dt*( laplacian[0]*diffusion[0] + value[1]*value[0] - value[0]*value[2] );
-	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] - value[1]*value[0] - value[1]*value[2] + 2.0*value[0]*value[2] );
-	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] + value[1]*value[2] - value[0]*value[2] );
+	outputComponent[0] = value[0];
+	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + value[2]*value[1] - value[1]*value[3] );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - value[2]*value[1] - value[2]*value[3] + 2.0*value[1]*value[3] );
+	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] + value[2]*value[3] - value[1]*value[3] );
 }

@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 3
+#define NCOMPONENTS 4
 
 // use 16-bit preicision
 precision highp float;
