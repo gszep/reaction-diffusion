@@ -18,39 +18,25 @@ function Simulation(canvas,coordinate,integrator,painter) {
 	this.nComponents = this.getComponents(integrator)
 	this.setGeometry()
 
-	// initialise parameters and interactions
+	// zero initial condition
+	this.width = 256; this.height = 256;
+	this.pixels = this.zeros()
+	this.setBuffer(this.pixels)
+
+	// initialise parameters, interactions
 	this.setParameters()
 	this.sliders()
 	this.mouseEvents()
 
-	// initial condition
-	this.pixels = this.initialCondition()
-	this.setBuffer(this.pixels)
-
 	// begin simulation
+	this.pause = false
 	this.renderLoop()
-}
-
-
-// setting initial condition
-Simulation.prototype.initialCondition = function() {
-	var components = []
-	for ( let n = 0; n < this.nComponents; n++ ) {
-		let pixels = []
-
-		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++)
-				pixels.push(0,0,0,0)
-
-		components.push(pixels)
-	}
-	return components
 }
 
 
 // main animation loop
 Simulation.prototype.renderLoop = function() {
-	this.render()
+	if (!this.pause) this.render()
 	requestAnimationFrame(this.renderLoop.bind(this))
 }
 
@@ -71,6 +57,7 @@ Simulation.prototype.render = function() {
 
 // propagate textures for given number of timesteps
 Simulation.prototype.propagate = function() {
+	gl.viewport(0,0,this.width,this.height)
 	gl.useProgram(this.integrator)
 
 	// alternate two targets in buffer per step
@@ -90,10 +77,9 @@ Simulation.prototype.propagate = function() {
 
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
-	this.parameters = {
-		'spaceStep': 1.0, 'timeStep': 0.001,
-		'brush': [-1,-1,0,0], 'colors': [],
-		'diffusionRatio': 1.0,
+	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
+		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
+		'timeStep': 0.0,
 	}
 }
 
@@ -103,22 +89,45 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: that.parameters.diffusionRatio, min: 0, max:2, step:0.001,
+		value: 1.0, min: 0, max:2, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusionRatio = ui.value
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusionRatio = ui.value
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 		}
 	})
-	$('#diffusionRatioSlider').slider('value', that.parameters.diffusionRatio)
+	$('#diffusionRatioSlider').slider('value',1.0)
+
+	$('#gridSizeSlider').slider({
+		value: 256, min:100 , max:512, step:1,
+		change: function(event, ui) {
+			$('#gridSize').html(ui.value)
+		},
+
+		slide: function(event, ui) {
+			$('#gridSize').html(ui.value)
+
+			if (that.textures)
+				that.pixels = that.getPixels()
+			else
+				that.pixels = that.zeros()
+
+			that.width = ui.value; that.height = ui.value;
+			that.setBuffer(that.pixels)
+
+			that.parameters.timeStep = 0.0
+			$('#timeStepSlider').slider('value', that.parameters.timeStep)
+		}
+	})
+	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
-		value: that.parameters.timeStep, min: 0.001, max:0.21, step:0.001,
+		value: that.parameters.timeStep, min: 0.0, max:0.3, step:0.001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)
@@ -148,44 +157,24 @@ Simulation.prototype.mouseEvents = function() {
 
 	this.canvas.onmousedown = function(event) {
 		that.isMouseDown = true
-		var component
-
-		if (event.which == 1)
-			component = 0
-
-		if (event.which == 2)
-			component = 1
-
-		if (event.which == 3)
-			component = 2
 
 		that.parameters.brush = [
 			this.mouseX/parseInt(that.canvas.style.width),
 			1-this.mouseY/parseInt(that.canvas.style.height),
-			that.brush.radius,component]
+			that.brush.radius,event.which]
 	}
 
 	this.canvas.onmousemove = function(event) {
 		var mouseEvent = event ? event : window.event
-		var component
 
 		this.mouseX = mouseEvent.pageX - $('#'+that.canvas.id).offset().left
 		this.mouseY = mouseEvent.pageY - $('#'+that.canvas.id).offset().top
-
-		if (event.which == 1)
-			component = 0
-
-		if (event.which == 2)
-			component = 1
-
-		if (event.which == 3)
-			component = 2
 
 		if(that.isMouseDown){
 			that.parameters.brush = [
 				this.mouseX/parseInt(that.canvas.style.width),
 				1-this.mouseY/parseInt(that.canvas.style.height),
-				that.brush.radius,component]
+				that.brush.radius,event.which]
 		}
 	}
 
@@ -204,8 +193,6 @@ Simulation.prototype.mouseEvents = function() {
 		if ( event.code == 'Enter' )
 			that.pixels = that.getPixels()
 		if ( event.code == 'Space' ){
-
-
 			that.setBuffer(that.pixels)
 		}
 	}
@@ -273,39 +260,55 @@ Simulation.prototype.resetBrush = function() {
 
 // initialise frame buffers with given component pixels[n]
 Simulation.prototype.setBuffer = function(pixels) {
-	this.buffer = []
+	this.pause = true
+
+	if (pixels[0].length/4 != this.width*this.height)
+		pixels = this.resize(pixels)
 
 	// create two texture targets per component
 	this.setTextures(pixels)
 
 	// create two buffers for alternating frame method
-	for ( let i = 0; i < 2; i++ ) {
+	if (!this.buffer) {
+		this.buffer = []
 
-		let buffer = gl.createFramebuffer()
-		gl.bindFramebuffer(gl.FRAMEBUFFER,buffer)
+		for ( let i = 0; i < 2; i++ ) {
 
-		// bind component textures to frame buffers
-		for ( let n = 0; n < this.nComponents; n++ ) {
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+n,
-				gl.TEXTURE_2D, this.textures[i][n], 0)
-		}
-		this.buffer.push(buffer)
+			let buffer = gl.createFramebuffer()
+			gl.bindFramebuffer(gl.FRAMEBUFFER,buffer)
+
+			// bind component textures to frame buffers
+			for ( let n = 0; n < this.nComponents; n++ ) {
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+n,
+					gl.TEXTURE_2D, this.textures[i][n], 0)
+				}
+				this.buffer.push(buffer)
+			}
+
+			// bind component textures to painter program
+			gl.useProgram(this.painter)
+			this.bindComponents(this.painter,1)
 	}
-
-	// bind component textures to painter program
-	gl.useProgram(this.painter)
-	this.bindComponents(this.painter,1)
 
 	// check for errors
 	let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
 	if (status!=gl.FRAMEBUFFER_COMPLETE)
 		throw 'Incomplete Frame Buffer: '+status
+
+	this.pause = false
 }
 
 
 // initialise textures with given pixels
 Simulation.prototype.setTextures = function(pixels) {
-	this.textures = []
+
+	// create textures if none exist
+	var createTextures = false
+	if (!this.textures) {
+
+		this.textures = []
+		createTextures = true
+	}
 
 	// two targets for frame buffer
 	for ( let i = 0; i < 2; i++ ) {
@@ -315,16 +318,22 @@ Simulation.prototype.setTextures = function(pixels) {
 		for ( let n = 0; n < this.nComponents; n++ ) {
 			gl.activeTexture(gl.TEXTURE0+n+i*this.nComponents)
 
-			let texture = gl.createTexture()
-			gl.bindTexture(gl.TEXTURE_2D, texture)
+			var texture
+			if (createTextures)
+				texture = gl.createTexture()
+			else
+				texture = this.textures[i][n]
 
-			// texture properties
-			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-			gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+			gl.bindTexture(gl.TEXTURE_2D, texture)
+			gl.pixelStorei(gl.UNPACK_ALIGNMENT,1)
 
 			// initialise texture pixels with data
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
 				gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
+
+			// texture properties
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 			textures.push(texture)
 		}
@@ -348,11 +357,33 @@ Simulation.prototype.bindComponents = function(program,bufferIndex) {
 }
 
 
-// get pixel data from components
-Simulation.prototype.getPixels = function() {
+// setting zero initial condition
+Simulation.prototype.zeros = function() {
+	var components = []
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		let pixels = []
 
-	var width = Math.ceil(this.width)
-	var height = Math.ceil(this.height)
+		for(var i = 0; i<this.width; i++){
+			for(var j = 0; j<this.height; j++) {
+
+				if( n==0 ) // generate seeds for noise
+					pixels.push(random.real(0,1),
+											random.real(0,1),
+											random.real(0,1),
+											random.real(0,1))
+				else
+					pixels.push(0,0,0,0)
+			}
+		}
+
+		components.push(pixels)
+	}
+	return components
+}
+
+
+// get pixel data from components
+Simulation.prototype.getPixels = function(index) {
 	let data = []
 
 	// create temporary buffer to parse out data
@@ -361,53 +392,92 @@ Simulation.prototype.getPixels = function() {
 
 	// iterate through components
 	for ( let n = 0; n < this.nComponents; n++ ) {
-		let pixels = new Float32Array(4*width*height)
+		let pixels = new Float32Array(4*this.width*this.height)
 
 		// bind texture to buffer
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,this.textures[1][n],0)
 
 		// write texture pixels to image contexts
-		gl.readPixels(0,0,width,height,gl.RGBA,gl.FLOAT,pixels)
+		gl.readPixels(0,0,this.width,this.height,gl.RGBA,gl.FLOAT,pixels)
 		data.push(pixels)
 	}
 
 	gl.deleteFramebuffer(dataBuffer)
-	return data
+
+	if (index != undefined)
+		return data[index]
+	else
+		return data
+}
+
+
+// resize pixel array with constant interpolation
+Simulation.prototype.resize = function(pixels) {
+		var components = []
+
+		for ( let n = 0; n < this.nComponents; n++ ) {
+			let resized = this.rescalePixels(pixels[n],this.width,this.height)
+			components.push(resized.data.map( value => { return value/255 }))
+		}
+		return components
+}
+
+
+Simulation.prototype.rescalePixels = function(pixels, width, height) {
+	let canvas = document.createElement('canvas')
+
+	// view window dimensions
+	canvas.width = parseInt(this.canvas.style.width)
+	canvas.height = parseInt(this.canvas.style.height)
+
+	// original grid size
+	originalWidth = Math.sqrt(pixels.length/4)
+	originalHeight = Math.sqrt(pixels.length/4)
+
+	// pass pixel data to html canvas
+	var ctx = canvas.getContext('2d')
+	var imageData = ctx.createImageData(originalWidth, originalHeight)
+	imageData.data.set(pixels.map( value => { return value*255 }))
+
+	// create target canvas
+	var target = document.createElement('canvas')
+	target.width = canvas.width
+	target.height = canvas.height
+
+	// rescale pixels on canvas
+	target.getContext("2d").putImageData(imageData,0,0);
+	ctx.scale(width/originalWidth,height/originalHeight);
+	ctx.drawImage(target,0,0);
+
+  return ctx.getImageData(0,0,width,height);
 }
 
 
 // initialise mesh geomerty to render onto
 Simulation.prototype.setGeometry = function() {
-
-	let buffer = gl.createBuffer()
-	gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-
-	// vertex position and texture surface limits
-	var xy = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
-	var uv = new Float32Array([0,0, 1,0, 0,1, 1,1])
-
-	// populate coordinate buffer
-	gl.bufferData(gl.ARRAY_BUFFER,xy.byteLength+uv.byteLength,gl.STATIC_DRAW)
-	gl.bufferSubData(gl.ARRAY_BUFFER,0,xy)
-	gl.bufferSubData(gl.ARRAY_BUFFER,xy.byteLength,uv)
-
-	// get location index of coordinates in shaders
 	let vertexIndex = gl.getAttribLocation(this.integrator, 'vertexCoordinate')
-	let textureIndex = gl.getAttribLocation(this.integrator, 'textureCoordinate')
 
-	// attach buffers to shaders
-	gl.vertexAttribPointer(vertexIndex,2,gl.FLOAT,gl.FALSE,0,0)
-	gl.vertexAttribPointer(textureIndex,2,gl.FLOAT,gl.FALSE,0,xy.byteLength)
-
+	// populate coordinate buffer with four vertexes
 	gl.enableVertexAttribArray(vertexIndex)
-	gl.enableVertexAttribArray(textureIndex)
+	var xy = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
+	gl.bufferData(gl.ARRAY_BUFFER,xy,gl.STATIC_DRAW)
+
+	// attach coordinate buffer to shaders
+	gl.vertexAttribPointer(vertexIndex,2,gl.FLOAT,gl.FALSE,0,0)
 }
 
 
 // show with component to color map
 Simulation.prototype.display = function() {
+	gl.viewport(0,0,
+		parseInt(this.canvas.style.width),
+		parseInt(this.canvas.style.height))
+
 	gl.useProgram(this.painter)
+
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 }

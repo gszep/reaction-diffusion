@@ -1,97 +1,127 @@
 #version 300 es
-#define NCOMPONENTS 3
+#define NCOMPONENTS 4
 
-// use 16-bit preicision floats
+// use 16-bit preicision
 precision highp float;
+precision highp int;
 
-// components and temporal discretisation
-uniform sampler2D component[NCOMPONENTS];
+// chemical components
+uniform highp sampler2D component[NCOMPONENTS];
 out vec4 outputComponent[NCOMPONENTS];
-
-uniform float spaceStep;
-uniform float timeStep;
-
-// user perturbation
-uniform vec4 brush;
-
-// input coordinate neighbourhood
-in vec2 centre;
-in vec2 left;
-in vec2 right;
-in vec2 top;
-in vec2 bottom;
-
-in vec2 topleft;
-in vec2 topright;
-in vec2 bottomleft;
-in vec2 bottomright;
+in vec2 location;
 
 // parameters
-uniform float diffusionRatio;
-
-// variables
-struct Coordinate {
-	vec4 point;
-	vec4 gradient;
-};
-
+uniform vec4 brush;
+uniform float diffusion[NCOMPONENTS];
+uniform float timeStep;
 
 // calculate discrete laplacian
-Coordinate laplacian(sampler2D sampler) {
+vec4 getLaplacian(sampler2D sampler, ivec2 size) {
 
-	// values of point
-	vec4 point = texture(sampler,fract(centre));
+	// get dicrete neighbourhood
+	float dx = 1.0 / float(size.x);
+	float dy = 1.0 / float(size.y);
 
-	// construct point and gradient
-	Coordinate coordinate;
-	coordinate.point = point;
-	coordinate.gradient = (
-		4.0*texture(sampler,fract(left))+
-		4.0*texture(sampler,fract(right))+
-		4.0*texture(sampler,fract(bottom))+
-		4.0*texture(sampler,fract(top))+
-		1.0*texture(sampler,fract(topleft))+
-		1.0*texture(sampler,fract(topright))+
-		1.0*texture(sampler,fract(bottomleft))+
-		1.0*texture(sampler,fract(bottomright))-
-		20.0*point
+	// orthogonal terms
+	vec2 left = location-vec2(dx,0);
+	vec2 right = location+vec2(dx,0);
+	vec2 bottom = location-vec2(0,dy);
+	vec2 top = location+vec2(0,dy);
 
+	// diagonal terms
+	vec2 bottomleft = location-vec2(dx,dy);
+	vec2 bottomright = location-vec2(-dx,dy);
+	vec2 topleft = location+vec2(-dx,dy);
+	vec2 topright = location+vec2(dx,dy);
+
+	return (
+		4.0*texture(sampler,fract(left))/(dx*dx)+
+		4.0*texture(sampler,fract(right))/(dx*dx)+
+
+		4.0*texture(sampler,fract(bottom))/(dy*dy)+
+		4.0*texture(sampler,fract(top))/(dy*dy)+
+
+		1.0*texture(sampler,fract(topleft))/(dx*dy)+
+		1.0*texture(sampler,fract(topright))/(dx*dy)+
+
+		1.0*texture(sampler,fract(bottomleft))/(dx*dy)+
+		1.0*texture(sampler,fract(bottomright))/(dx*dy)-
+
+		20.0*texture(sampler,location)/(dx*dy)
 	) / 6.0;
+}
 
-	return coordinate;
+
+uint TausStep(uint z, int S1, int S2, int S3, uint M)
+{
+    uint b = (((z << S1) ^ z) >> S2);
+    return (((z & M) << S3) ^ b);
+}
+
+uint LCGStep(uint z, uint A, uint C)
+{
+    return (A * z + C);
+}
+
+float random() {
+		uvec4 state = uvec4(texture(component[0],location));
+    state.x = TausStep(state.x, 13, 19, 12, uint(4294967294));
+    state.y = TausStep(state.y, 2, 25, 4, uint(4294967288));
+    state.z = TausStep(state.z, 3, 11, 17, uint(4294967280));
+    state.w = LCGStep(state.w, uint(1664525), uint(1013904223));
+
+    //outputComponent[0] = vec4(state);
+    return 2.3283064365387e-10 * float(state.x ^ state.y ^ state.z ^ state.w);
 }
 
 
 // this propagates the reaction-diffusion system
 void main() {
 
+	vec4 value[NCOMPONENTS];
+	vec4 laplacian[NCOMPONENTS];
+
 	// calculate laplacians
-	Coordinate coordinate[NCOMPONENTS];
+	ivec2 size = textureSize(component[0],0);
 	for( int i=0; i < NCOMPONENTS; i++ ) {
-		coordinate[i] = laplacian(component[i]);
+
+		value[i] = texture(component[i],location);
+		laplacian[i] = getLaplacian(component[i],size);
 	}
 
 	// user perturbations
 	if(brush.x > 0.0) {
 
-		float location = distance(centre,brush.xy);
+		float dist = distance(location,brush.xy);
 		float radius = brush.z;
 		int componentIndex = int(brush.w);
 
 		//  within radius set all comonents to zero except chosen one
-		if( location < radius ) {
+		if( dist < radius ) {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					coordinate[i].point.r = 1.0;
+					value[i] = vec4(1.0);
 				else
-					coordinate[i].point.r = 0.0;
+					value[i] = vec4(0.0);
 			}
 		}
 	}
 
+	// choose stable timeStep as default
+	float dt;
+	if (timeStep==0.0) {
+		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[2] + 0.018 ));
+	}
+	else {
+		dt = timeStep;
+	}
+
+	float noise = random();
+
 	// output components to buffer
-	outputComponent[0] = coordinate[0].point + timeStep*( coordinate[0].gradient + coordinate[1].point*coordinate[0].point - coordinate[0].point*coordinate[2].point );
-	outputComponent[1] = coordinate[1].point + timeStep*( coordinate[1].gradient - coordinate[1].point*coordinate[0].point - coordinate[1].point*coordinate[2].point + 2.0*coordinate[0].point*coordinate[2].point );
-	outputComponent[2] = coordinate[2].point + timeStep*( coordinate[2].gradient*diffusionRatio + coordinate[1].point*coordinate[2].point - coordinate[0].point*coordinate[2].point );
+	outputComponent[0] = value[0];
+	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + value[2]*value[1] - value[1]*value[3] );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - value[2]*value[1] - value[2]*value[3] + 2.0*value[1]*value[3] );
+	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] + value[2]*value[3] - value[1]*value[3] );
 }

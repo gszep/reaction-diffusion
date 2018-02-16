@@ -21,7 +21,8 @@
 		<script type="text/javascript" src="solver/solver.js"></script>
 		<script type="text/javascript" src="main.js"></script>
 
-		<!-- random number generator-->
+		<!-- math libraries-->
+		<script src="public/js/math.js"></script>
 		<script src="public/js/random.min.js"></script>
 		<script>random = new Random()</script>
 
@@ -46,6 +47,10 @@
 					<span class="remark" id="diffusionRatio"></span><br/>
 					<div id="diffusionRatioSlider" class="slider"></div>
 
+					Grid Size:
+					<span class="remark" id="gridSize"></span><br/>
+					<div id="gridSizeSlider" class="slider"></div>
+
 					Time Step:
 					<span class="remark" id="timeStep"></span><br/>
 					<div id="timeStepSlider" class="slider"></div>
@@ -60,7 +65,7 @@
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0, '#FFD40B'],[0.5,'#FFFFFF'],[1.0,'#1700F1']]})
+				$("#gradient").gradient({values: [[0.0, '#000000'],[0.33, '#FFD40B'],[0.66,'#FFFFFF'],[1.0,'#1700F1']]})
 
 				// load reaction-diffusion solver
 				loadSolver().then( ([coordinate,integrator,painter]) => {
