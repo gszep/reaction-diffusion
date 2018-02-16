@@ -52,26 +52,27 @@ vec4 getLaplacian(sampler2D sampler, ivec2 size) {
 }
 
 
-uint TausStep(uint z, int S1, int S2, int S3, uint M)
+float TausStep(uint z, int S1, int S2, int S3, uint M)
 {
     uint b = (((z << S1) ^ z) >> S2);
-    return (((z & M) << S3) ^ b);
+    return float(((z & M) << S3) ^ b);
 }
 
-uint LCGStep(uint z, uint A, uint C)
+float LCGStep(uint z, uint A, uint C)
 {
-    return (A * z + C);
+    return float(A * z + C);
 }
 
 float random() {
-		uvec4 state = uvec4(texture(component[0],location));
-    state.x = TausStep(state.x, 13, 19, 12, uint(4294967294));
-    state.y = TausStep(state.y, 2, 25, 4, uint(4294967288));
-    state.z = TausStep(state.z, 3, 11, 17, uint(4294967280));
-    state.w = LCGStep(state.w, uint(1664525), uint(1013904223));
+	vec4 state = texture(component[0],location);
 
-    //outputComponent[0] = vec4(state);
-    return 2.3283064365387e-10 * float(state.x ^ state.y ^ state.z ^ state.w);
+	state.x = TausStep(uint(state.x), 13, 19, 12, uint(4294967294));
+	state.y = TausStep(uint(state.y), 2, 25, 4, uint(4294967288));
+	state.z = TausStep(uint(state.z), 3, 11, 17, uint(4294967280));
+	state.w = LCGStep(uint(state.w), uint(1664525), uint(1013904223));
+
+	outputComponent[0] = state;
+	return 2.3283064365387e-10 * float(uint(state.x)^uint(state.y)^uint(state.z)^uint(state.w));
 }
 
 
@@ -117,10 +118,7 @@ void main() {
 		dt = timeStep;
 	}
 
-	float noise = random();
-
 	// output components to buffer
-	outputComponent[0] = value[0];
 	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + value[2]*value[1] - value[1]*value[3] );
 	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - value[2]*value[1] - value[2]*value[3] + 2.0*value[1]*value[3] );
 	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] + value[2]*value[3] - value[1]*value[3] );

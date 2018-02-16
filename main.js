@@ -365,12 +365,13 @@ Simulation.prototype.zeros = function() {
 
 		for(var i = 0; i<this.width; i++){
 			for(var j = 0; j<this.height; j++) {
+				let max = 2**32
 
 				if( n==0 ) // generate seeds for noise
-					pixels.push(random.real(0,1),
-											random.real(0,1),
-											random.real(0,1),
-											random.real(0,1))
+					pixels.push(random.integer(128,max),
+											random.integer(128,max),
+											random.integer(128,max),
+											random.integer(128,max))
 				else
 					pixels.push(0,0,0,0)
 			}
