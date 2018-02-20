@@ -10,27 +10,27 @@ Adapted from code by Pablo Márquez Neila
 var renderStep = 20
 
 // main simulation canvas
-function Simulation(canvas,coordinate,integrator,painter) {
+function Simulation(canvas) {
 	gl = this.getWebGL(canvas)
+	this.compileShaders().then( () => {
 
-	// compile glsl shaders and initialise planar mesh
-	this.compileShaders(coordinate,integrator,painter)
-	this.nComponents = this.getComponents(integrator)
-	this.setGeometry()
+		// initialise planar mesh
+		this.setGeometry()
 
-	// zero initial condition
-	this.width = 256; this.height = 256;
-	this.pixels = this.zeros()
-	this.setBuffer(this.pixels)
+		// zero initial condition
+		this.width = 256; this.height = 256;
+		this.pixels = this.zeros()
+		this.setBuffer(this.pixels)
 
-	// initialise parameters, interactions
-	this.setParameters()
-	this.sliders()
-	this.mouseEvents()
+		// initialise parameters, interactions
+		this.setParameters()
+		this.sliders()
+		this.mouseEvents()
 
-	// begin simulation
-	this.pause = false
-	this.renderLoop()
+		// begin simulation
+		this.pause = false
+		this.renderLoop()
+	})
 }
 
 
@@ -46,6 +46,7 @@ Simulation.prototype.render = function() {
 
 	// update parameters
 	this.updateParameters()
+	this.setSeed()
 
 	// propagate for a given number of steps
 	this.propagate()
@@ -78,7 +79,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
-		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
+		'diffusion': [[0.0],[0.00001]],
 		'timeStep': 0.0,
 	}
 }
@@ -93,12 +94,12 @@ Simulation.prototype.sliders = function() {
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
+
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
+
 		}
 	})
 	$('#diffusionRatioSlider').slider('value',1.0)
@@ -190,8 +191,28 @@ Simulation.prototype.mouseEvents = function() {
 	window.onkeydown = function(event) {
 		event.preventDefault()
 
-		if ( event.code == 'Enter' )
+		if ( event.code == 'Enter' ) {
 			that.pixels = that.getPixels()
+			var data = that.pixels[1].filter( (_,index) => {return index%4==0})
+
+			var x = Array.range(data.min(),data.max(),(data.max()-data.min())/100)
+			var y = x.map( xi => { return Math.exp(-xi*xi/(2*data.var()))/Math.sqrt(2*Math.PI*data.var())})
+			var pdf = {
+				x: x,
+				y: y,
+				mode: 'lines',
+			}
+			var hist = {
+				x: Array.from(data),
+				type: 'histogram',
+				histnorm: 'probability'
+			}
+			var layout = {
+				yaxis: {range: [0, 0.1]}
+			}
+			var data = [hist,pdf];
+			Plotly.newPlot('graph', data, layout);
+		}
 		if ( event.code == 'Space' ){
 			that.setBuffer(that.pixels)
 		}
@@ -316,26 +337,26 @@ Simulation.prototype.setTextures = function(pixels) {
 
 		// create one texture for each component
 		for ( let n = 0; n < this.nComponents; n++ ) {
-			gl.activeTexture(gl.TEXTURE0+n+i*this.nComponents)
+			if( pixels[n] != undefined ){
+				gl.activeTexture(gl.TEXTURE0+n+i*this.nComponents)
 
-			var texture
-			if (createTextures)
-				texture = gl.createTexture()
-			else
-				texture = this.textures[i][n]
+				var texture
+				if (createTextures) texture = gl.createTexture()
+				else texture = this.textures[i][n]
 
-			gl.bindTexture(gl.TEXTURE_2D, texture)
-			gl.pixelStorei(gl.UNPACK_ALIGNMENT,1)
+				gl.bindTexture(gl.TEXTURE_2D, texture)
+				gl.pixelStorei(gl.UNPACK_ALIGNMENT,1)
 
-			// initialise texture pixels with data
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
-				gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
+				// initialise texture pixels with data
+				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.width, this.height, 0,
+					gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
 
-			// texture properties
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+				// texture properties
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-			textures.push(texture)
+				textures.push(texture)
+			}
 		}
 		this.textures.push(textures)
 	}
@@ -363,23 +384,32 @@ Simulation.prototype.zeros = function() {
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
 
-		for(var i = 0; i<this.width; i++){
-			for(var j = 0; j<this.height; j++) {
-				let max = 2**32
-
-				if( n==0 ) // generate seeds for noise
-					pixels.push(random.integer(128,max),
-											random.integer(128,max),
-											random.integer(128,max),
-											random.integer(128,max))
-				else
-					pixels.push(0,0,0,0)
-			}
-		}
+		for(var i = 0; i<this.width; i++)
+			for(var j = 0; j<this.height; j++)
+				pixels.push(0,0,0,0)
 
 		components.push(pixels)
 	}
 	return components
+}
+
+
+// setting seed for random numbers on gpu
+Simulation.prototype.setSeed = function() {
+	let pixels = []
+
+	for(var i = 0; i<this.width; i++){
+		for(var j = 0; j<this.height; j++) {
+			pixels.push(random.integer(2**7+1,2**32-1),
+									random.integer(2**7+1,2**32-1),
+									random.integer(2**7+1,2**32-1),
+									random.integer(2**7+1,2**32-1))
+		}
+	}
+
+	let components = []; components.length = this.nComponents
+	components[0] = pixels
+	this.setTextures(components)
 }
 
 
@@ -503,46 +533,97 @@ Simulation.prototype.getWebGL = function(canvas) {
 }
 
 
-// shader compiler method
-Simulation.prototype.getShader = function(sourceCode,type) {
+// shader compiler methods
+Simulation.prototype.getShader = function(type) {
 	var shader
 
-	if (type=='vertex')
+	if (type=='coordinate') {
 		shader = gl.createShader(gl.VERTEX_SHADER)
-	if (type=='fragment')
-		shader = gl.createShader(gl.FRAGMENT_SHADER)
+		return load(['solver/coordinate.vert']).then( ([sourceCode]) => {
 
-	// compile shader
-	gl.shaderSource(shader,sourceCode)
-	gl.compileShader(shader)
+			gl.shaderSource(shader,sourceCode)
+			gl.compileShader(shader)
 
-	// report any errors
-	if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
-		throw gl.getShaderInfoLog(shader)
+			// report any errors
+			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
+				throw gl.getShaderInfoLog(shader)
+			}
+
+			return shader
+		})
+
 	}
 
-	return shader
+	if (type=='integrator') {
+		shader = gl.createShader(gl.FRAGMENT_SHADER)
+
+		// compile shader
+		return load([
+			'solver/integrator.frag',
+			'solver/include/integrator/declare.glsl',
+			'solver/include/integrator/derivatives.glsl',
+			'solver/include/integrator/random.glsl'])
+			.then( ([sourceCode,declare,derivatives,random]) => {
+
+			this.nComponents = this.getComponents(declare)
+			gl.shaderSource(shader,declare+derivatives+random+sourceCode)
+			gl.compileShader(shader)
+
+			// report any errors
+			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
+				throw gl.getShaderInfoLog(shader)
+			}
+
+			return shader
+		})
+	}
+
+	if (type=='painter') {
+		shader = gl.createShader(gl.FRAGMENT_SHADER)
+
+		// compile shader
+		return load([
+			'solver/painter.frag',
+			'solver/include/painter/declare.glsl'])
+			.then( ([sourceCode,declare]) => {
+
+			gl.shaderSource(shader,declare+sourceCode)
+			gl.compileShader(shader)
+
+			// report any errors
+			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
+				throw gl.getShaderInfoLog(shader)
+			}
+
+			return shader
+		})
+	}
 }
 
 
 // compile integrator and painter shaders from glsl code
-Simulation.prototype.compileShaders = function(coordinate,integrator,painter) {
-
-	let locate = this.getShader(coordinate,'vertex')
-	let integrate = this.getShader(integrator,'fragment')
-	let paint = this.getShader(painter,'fragment')
+Simulation.prototype.compileShaders = function() {
 
 	this.integrator  = gl.createProgram()
 	this.painter  = gl.createProgram()
 
-	gl.attachShader(this.integrator, locate)
-	gl.attachShader(this.painter, locate)
+	return Promise.all([
 
-	gl.attachShader(this.integrator, integrate)
-	gl.attachShader(this.painter, paint)
+		this.getShader('coordinate').then( shader => {
+			gl.attachShader(this.integrator, shader)
+			gl.attachShader(this.painter, shader)
+		}),
 
-	gl.linkProgram(this.integrator)
-	gl.linkProgram(this.painter)
+		this.getShader('integrator').then( shader => {
+			gl.attachShader(this.integrator, shader)
+			gl.linkProgram(this.integrator)
+		}),
+
+		this.getShader('painter').then( shader => {
+			gl.attachShader(this.painter, shader)
+			gl.linkProgram(this.painter)
+		})
+	])
 }
 
 
