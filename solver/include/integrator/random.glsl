@@ -1,10 +1,9 @@
 // generate uniform random variable
+vec4 state;
 float Uniform(float min, float max) {
 	// Mohanty, S. et al. 2012.
 	// Efficient pseudo-random number generation for
 	// monte-carlo simulations using graphic processors
-
-	vec4 state = texture(component[0],location);
 
 	// tausworthe steps
 	uint x = ((uint(state.x)&4294967294u)<<12)^(((uint(state.x)<<13)^uint(state.x))>>19);
@@ -14,7 +13,7 @@ float Uniform(float min, float max) {
 	// linear congruence step
 	uint w = 1664525u * uint(state.w) + 1013904223u;
 
-	outputComponent[0] = vec4(x,y,z,w);
+	state = vec4(x,y,z,w);
 	return (max-min)*2.3283064365387e-10*float(x^y^z^w)+min;
 }
 

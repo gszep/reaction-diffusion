@@ -18,8 +18,8 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 256; this.height = 256;
-		this.pixels = this.zeros()
+		this.width = 32; this.height = 32;
+		this.pixels = this.wigner()
 		this.setBuffer(this.pixels)
 
 		// initialise parameters, interactions
@@ -47,6 +47,7 @@ Simulation.prototype.render = function() {
 	// update parameters
 	this.updateParameters()
 	this.setSeed()
+	this.applyConstraint()
 
 	// propagate for a given number of steps
 	this.propagate()
@@ -79,7 +80,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
-		'diffusion': [[0.0],[0.00001]],
+		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
 		'timeStep': 0.0,
 	}
 }
@@ -90,19 +91,21 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 1.0, min: 0, max:2, step:0.001,
+		value: 0.00001, min: 0, max:0.0001, step:0.00001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
+			that.parameters.diffusion[1][0] = ui.value
 
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
+			that.parameters.diffusion[1][0] = ui.value
 
 		}
 	})
-	$('#diffusionRatioSlider').slider('value',1.0)
+	$('#diffusionRatioSlider').slider('value',0.00001)
 
 	$('#gridSizeSlider').slider({
 		value: 256, min:100 , max:512, step:1,
@@ -116,7 +119,7 @@ Simulation.prototype.sliders = function() {
 			if (that.textures)
 				that.pixels = that.getPixels()
 			else
-				that.pixels = that.zeros()
+				that.pixels = that.wigner()
 
 			that.width = ui.value; that.height = ui.value;
 			that.setBuffer(that.pixels)
@@ -207,10 +210,16 @@ Simulation.prototype.mouseEvents = function() {
 				type: 'histogram',
 				histnorm: 'probability'
 			}
-			var layout = {
-				yaxis: {range: [0, 0.1]}
+			var lambda = {
+				x: that.lambda,
+				type: 'histogram',
+				histnorm: 'probability'
 			}
-			var data = [hist,pdf];
+			var layout = {
+				yaxis: {range: [0, 0.1]},
+				xaxis: {range: [-1.5, 1.5]}
+			}
+			var data = [hist,pdf,lambda];
 			Plotly.newPlot('graph', data, layout);
 		}
 		if ( event.code == 'Space' ){
@@ -394,6 +403,38 @@ Simulation.prototype.zeros = function() {
 }
 
 
+// setting wigner initial condition
+Simulation.prototype.wigner = function() {
+	var components = []
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		let pixels = []
+
+		for(var i = 0; i<this.width; i++) {
+			for(var j = 0; j<this.height; j++) {
+				let u = random.integer(-1,1)/(this.width*this.height)
+				pixels.push(u,u,u,u)
+			}
+		}
+		components.push(pixels)
+	}
+
+	// initialise random interaction matrix J[i][j]
+	// let N = this.width*this.height
+	// this.interaction = numeric.identity(N)
+  //
+	// for(var i = 0; i<N; i++)
+	// 	for(var j = 0; j<N; j++)
+	// 		this.interaction[i][j] = random.integer(-1,1)/Math.sqrt(N)
+  //
+	// // this.lambda = numeric.eig(this.interaction).lambda.x
+	lab.do("X = rand(200,300)")
+	lab.do("svd(X)", function ( result ) {
+		console.log(result)
+	})
+	return components
+}
+
+
 // setting seed for random numbers on gpu
 Simulation.prototype.setSeed = function() {
 	let pixels = []
@@ -409,6 +450,18 @@ Simulation.prototype.setSeed = function() {
 
 	let components = []; components.length = this.nComponents
 	components[0] = pixels
+	this.setTextures(components)
+}
+
+
+// apply global constraint
+Simulation.prototype.applyConstraint = function() {
+	let pixels = this.getPixels(1)
+	var Z = pixels.var(4)
+	pixels = pixels.map( value => { return value/(1+Z) })
+
+	let components = []; components.length = this.nComponents
+	components[1] = pixels
 	this.setTextures(components)
 }
 

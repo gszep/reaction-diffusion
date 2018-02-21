@@ -21,9 +21,14 @@
 		<!-- main libraries -->
 		<script type="text/javascript" src="main.js"></script>
 
-		<!-- math libraries-->
+		<!-- math and linear algebra -->
+		<script src="public/js/lalolib/lalolib.js"></script>
 		<script src="public/js/math.js"></script>
+
+		<!-- plotting -->
 		<script src="public/js/plotly.min.js"></script>
+
+		<!-- accurate psuedorandom numbers-->
 		<script src="public/js/random.min.js"></script>
 		<script>random = new Random()</script>
 
@@ -70,7 +75,7 @@
 				$("#gradient").gradient({values: [[0.0,'#000000'],[0.5,'#0080ff'],[1.0,'#FFFFFF']]})
 
 				// instantiate simulation canvas
-				S = new Simulation('simulation-canvas')
+				//S = new Simulation('simulation-canvas')
 
 			</script>
 
