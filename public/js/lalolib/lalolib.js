@@ -30,15 +30,15 @@ function laloprint( x , htmlId, append ) {
 		use print(x) to print to the standard LALOLabOutput
 
 		use print(x, id) to print to another html entity
-		
+
 		use str = print(x, true) to get the resulting string
 	*/
-	
+
 	if ( typeof(htmlId) == "undefined" )
-		var htmlId = "LALOLibOutput"; 
+		var htmlId = "LALOLibOutput";
 	if ( typeof(append) == "undefined" )
-		var append = true; 
-				
+		var append = true;
+
 	return printMat(x, size(x), htmlId, append ) ;
 }
 
@@ -62,7 +62,7 @@ function printMat(A, size, htmlId, append) {
 					str += printNumber(A.val[i*A.n+j]) + "]; ";
 				else
 					str += printNumber(A.val[i*A.n+j]) + "]";
-			}			
+			}
 			str += "]";
 			return str;
 		}
@@ -79,11 +79,11 @@ function printMat(A, size, htmlId, append) {
 	}
 	else {
 		// Produce HTML code and load it in htmlId
-		
+
 		var html = "";
 		var i;
 		var j;
-		
+
 		/*if (domathjax) {
 			html = tex ( A ) ;
 		}
@@ -118,8 +118,8 @@ function printMat(A, size, htmlId, append) {
 		else
 			document.getElementById(htmlId).innerHTML = html;
 		/*
-		if ( domathjax) 
-			MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);			
+		if ( domathjax)
+			MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
 			*/
 	}
 }
@@ -130,7 +130,7 @@ function printNumber ( x ) {
 			return "" + 0;// for sparse matrices
 			break;
 		case "string":
-			/*if ( domathjax ) 
+			/*if ( domathjax )
 				return "\\verb&" + x + "&";
 			else*/
 				return x;
@@ -138,7 +138,7 @@ function printNumber ( x ) {
 		case "boolean":
 			return x;
 			break;
-		default:	
+		default:
 			if ( x == Infinity )
 				return "Inf";
 			if ( x == -Infinity )
@@ -146,10 +146,10 @@ function printNumber ( x ) {
 			var x_int = Math.floor(x);
 			if ( Math.abs( x - x_int ) < 2.23e-16 ) {
 				return "" + x_int;
-			} 
+			}
 			else
 				return x.toFixed( printPrecision );
-				
+
 			break;
 	}
 }
@@ -157,27 +157,27 @@ function printNumber ( x ) {
 //// Error handling
 
 function error( msg ) {
-	throw new Error ( msg ) ;	
+	throw new Error ( msg ) ;
 //	postMessage( {"error": msg} );
 }
 
 
-/////////// 
+///////////
 // Plots
 //////////
 function plot(multiargs) {
 	// plot(x,y,"style", x2,y2,"style",y3,"style",... )
-	
+
 	// Part copied from lalolabworker.js
-	
+
 	var data = new Array();
-	var styles = new Array();	
-	var legends = new Array();		
+	var styles = new Array();
+	var legends = new Array();
 	var minX = Infinity;
 	var maxX = -Infinity;
 	var minY = Infinity;
 	var maxY = -Infinity;
-	
+
 	var p=0; // argument pointer
 	var x;
 	var y;
@@ -186,14 +186,14 @@ function plot(multiargs) {
 	var n;
 	var c = 0; // index of current curve
 	while ( p < arguments.length)  {
-	
+
 		if ( type( arguments[p] ) == "vector" ) {
 
 			if ( p + 1 < arguments.length && type ( arguments[p+1] ) == "vector" ) {
 				// classic (x,y) arguments
 				x = arguments[p];
 				y = arguments[p+1];
-			
+
 				p++;
 			}
 			else {
@@ -216,7 +216,7 @@ function plot(multiargs) {
 				// 2 columns => [x,y]
 				x = getCols(arguments[p], [0]);
 				y = getCols(arguments[p], [1]);
-			}			
+			}
 			else {
 				// more columns => trajectories as rows
 				x = range(arguments[p].n);
@@ -225,23 +225,23 @@ function plot(multiargs) {
 					data[c] = [new Array(x.length), new Array(x.length)];
 					for ( i=0; i < x.length; i++) {
 						data[c][0][i] = x[i];
-						data[c][1][i] = y[i]; 
+						data[c][1][i] = y[i];
 						if ( x[i] < minX )
 							minX = x[i];
-						if(x[i] > maxX ) 
+						if(x[i] > maxX )
 							maxX = x[i];
-						if ( y[i] > maxY ) 
+						if ( y[i] > maxY )
 							maxY = y[i];
-						if ( y[i] < minY ) 
+						if ( y[i] < minY )
 							minY = y[i];
 
 					}
-		
+
 					styles[c] = undefined;
 					legends[c] = "";
-		
+
 					// Next curve
-					c++; 
+					c++;
 				}
 				p++;
 				continue;
@@ -250,42 +250,42 @@ function plot(multiargs) {
 		else {
 			return "undefined";
 		}
-				
+
 		//Style
 		style = undefined;
 		if ( p + 1 < arguments.length && type ( arguments[p+1] ) == "string" ) {
 			style = arguments[p+1];
 			p++;
-		}			
-		legend = "";	
+		}
+		legend = "";
 		if ( p + 1 < arguments.length && type ( arguments[p+1] ) == "string" ) {
 			legend = arguments[p+1];
 			p++;
-		}	
+		}
 
-		// Add the curve (x,y, style) to plot		
-		data[c] = [new Array(x.length), new Array(x.length)];		
+		// Add the curve (x,y, style) to plot
+		data[c] = [new Array(x.length), new Array(x.length)];
 		for ( i=0; i < x.length; i++) {
 			data[c][0][i] = x[i];
-			data[c][1][i] = y[i]; 
+			data[c][1][i] = y[i];
 			if ( x[i] < minX )
 				minX = x[i];
-			if(x[i] > maxX ) 
+			if(x[i] > maxX )
 				maxX = x[i];
-			if ( y[i] > maxY ) 
+			if ( y[i] > maxY )
 				maxY = y[i];
-			if ( y[i] < minY ) 
+			if ( y[i] < minY )
 				minY = y[i];
 
 		}
 		styles[c] = style;
 		legends[c] = legend;
-		
+
 		// Next curve
-		c++; 
-		p++; // from next argument	
-	}	
-		
+		c++;
+		p++; // from next argument
+	}
+
 	var widthX = maxX-minX;
 	var widthY = Math.max( maxY-minY, 1);
 
@@ -293,42 +293,42 @@ function plot(multiargs) {
 	minX -= 0.1*widthX;
 	maxY += 0.1*widthY;
 	minY -= 0.1*widthY;
-	
-	if ( minY > 0 ) 
+
+	if ( minY > 0 )
 		minY = -0.1*maxY;
-	
-	if ( maxY < 0 ) 
+
+	if ( maxY < 0 )
 		maxY = -0.1*minY;
-	
+
 	var scaleY = 0.9 * (maxX-minX) / (2*maxY);
 
 	var plotinfo = {"data" : data, "minX" : minX, "maxX" : maxX, "minY" : minY, "maxY": maxY, "styles" : styles, "legend": legends };
 
 	//////// Part from laloplots.html //////////
-	
+
 	var plotid = "LALOLibPlot" + LALOLibPlotsIndex;
 	var legendwidth = 50;
-	
+
 	LALOLibOutput.innerHTML += "<br><div style='position:relative;left:0px;top:0px;text-align:left;'> <div><a onmousemove='mouseposition(event," + LALOLibPlotsIndex + ");' onmousedown='mousestartmove(event," + LALOLibPlotsIndex + ");' onmouseup='mousestopmove(event);' onmouseleave='mousestopmove(event);' ondblclick='zoomoriginal(" + LALOLibPlotsIndex + ");'><canvas id='" +plotid + "'  width='500' height='500' style='border: 1px solid black;'></canvas></a></div> <label id='lblposition" + LALOLibPlotsIndex + "'></label> <div style='position: absolute;left: 550px;top: -1em;'> <canvas id='legend" + LALOLibPlotsIndex + "' width='" + legendwidth + "' height='500'></canvas></div> <div id='legendtxt" + LALOLibPlotsIndex + "' style='position: absolute;left: 610px;top: 0;'></div> </div>";
 
 	// prepare legend
 	var ylegend = 20;
-	
+
 	// do plot
 
 	LALOLibPlots[LALOLibPlotsIndex] = new Plot(plotid) ;
-		
-	LALOLibPlots[LALOLibPlotsIndex].setScalePlot(plotinfo.minX, plotinfo.maxX, 200, plotinfo.scaleY); 
+
+	LALOLibPlots[LALOLibPlotsIndex].setScalePlot(plotinfo.minX, plotinfo.maxX, 200, plotinfo.scaleY);
 	if ( plotinfo.minY && plotinfo.maxY ) {
-		LALOLibPlots[LALOLibPlotsIndex].view(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY); 
+		LALOLibPlots[LALOLibPlotsIndex].view(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY);
 	}
-	
+
 	var colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0];
-	
+
 	var p;
 	var color;
 	for (p = 0; p<plotinfo.data.length; p++) {
-		
+
 		var linestyle = true;
 		var pointstyle = true;
 		if ( typeof(plotinfo.styles[p]) == "string" ) {
@@ -341,28 +341,28 @@ function plot(multiargs) {
 				plotinfo.styles[p] = plotinfo.styles[p].replace("_","");
 			}
 			color = parseColor(plotinfo.styles[p]);
-		
+
 			if ( color < 0 )
 				color = colors.splice(0,1)[0];		// pick next unused color
 			else
 				colors.splice(colors.indexOf(color),1); // remove this color
 		}
-		else 
+		else
 			color = color = colors.splice(0,1)[0];	// pick next unused color
-		
+
 		if ( typeof(color) == "undefined")	// pick black if no next unused color
 			color = 0;
-	
+
 		for ( i=0; i < plotinfo.data[p][0].length; i++) {
 			if ( pointstyle )
-				LALOLibPlots[LALOLibPlotsIndex].addPoint(plotinfo.data[p][0][i],plotinfo.data[p][1][i], color);	
-			if ( linestyle && i < plotinfo.data[p][0].length-1 ) 
-				LALOLibPlots[LALOLibPlotsIndex].plot_line(plotinfo.data[p][0][i],plotinfo.data[p][1][i], plotinfo.data[p][0][i+1],plotinfo.data[p][1][i+1], color);				
+				LALOLibPlots[LALOLibPlotsIndex].addPoint(plotinfo.data[p][0][i],plotinfo.data[p][1][i], color);
+			if ( linestyle && i < plotinfo.data[p][0].length-1 )
+				LALOLibPlots[LALOLibPlotsIndex].plot_line(plotinfo.data[p][0][i],plotinfo.data[p][1][i], plotinfo.data[p][0][i+1],plotinfo.data[p][1][i+1], color);
 		}
-		
-		
+
+
 		// Legend
-		if ( plotinfo.legend[p] != "" ) {		
+		if ( plotinfo.legend[p] != "" ) {
 			var ctx = document.getElementById("legend" +LALOLibPlotsIndex).getContext("2d");
 			setcolor(ctx, color);
 			ctx.lineWidth = "3";
@@ -379,20 +379,20 @@ function plot(multiargs) {
 				ctx.stroke();
 			}
 			ylegend += 20;
-			
-			document.getElementById("legendtxt" +LALOLibPlotsIndex).innerHTML += plotinfo.legend[p] + "<br>";						
+
+			document.getElementById("legendtxt" +LALOLibPlotsIndex).innerHTML += plotinfo.legend[p] + "<br>";
 		}
 	}
 	for ( var pi=0; pi <= LALOLibPlotsIndex; pi++)
 		LALOLibPlots[pi].replot();
-	
-	// ZOOM	
+
+	// ZOOM
 	if(window.addEventListener)
         document.getElementById(plotid).addEventListener('DOMMouseScroll', this.mousezoom, false);//firefox
- 
+
     //for IE/OPERA etc
     document.getElementById(plotid).onmousewheel = this.mousezoom;
-	
+
 	LALOLibPlotsIndex++;
 }
 
@@ -401,14 +401,14 @@ function colorplot(multiargs) {
 	// colorplot(x,y,z) or colorplot(X) or colorplot(..., "cmapname" )
 
 	// Part copied from lalolabworker.js
-	
+
 	var minX = Infinity;
 	var maxX = -Infinity;
 	var minY = Infinity;
 	var maxY = -Infinity;
 	var minZ = Infinity;
 	var maxZ = -Infinity;
-	
+
 	var x;
 	var y;
 	var z;
@@ -433,14 +433,14 @@ function colorplot(multiargs) {
 	else {
 		return "undefined";
 	}
-	
+
 	var minX = min(x);
 	var maxX = max(x);
 	var minY = min(y);
 	var maxY = max(y);
 	var minZ = min(z);
 	var maxZ = max(z);
-	
+
 	var widthX = maxX-minX;
 	var widthY = Math.max( maxY-minY, 1);
 
@@ -448,31 +448,31 @@ function colorplot(multiargs) {
 	minX -= 0.1*widthX;
 	maxY += 0.1*widthY;
 	minY -= 0.1*widthY;
-	
-	if ( minY > 0 ) 
+
+	if ( minY > 0 )
 		minY = -0.1*maxY;
-	
-	if ( maxY < 0 ) 
+
+	if ( maxY < 0 )
 		maxY = -0.1*minY;
 
 	var plotinfo = {"x" : x, "y": y, "z": z, "minX" : minX, "maxX" : maxX, "minY" : minY, "maxY": maxY,  "minZ" : minZ, "maxZ" : maxZ };
 
 	//////// Part from laloplots.html //////////
-		
+
 	var plotid = "LALOLibPlot" + LALOLibPlotsIndex;
 	var legendwidth = 50;
-	
+
 	LALOLibOutput.innerHTML += "<br><div style='position:relative;left:0px;top:0px;text-align:left;'> <div><a onmousemove='mouseposition(event," + LALOLibPlotsIndex + ");' onmousedown='mousestartmove(event," + LALOLibPlotsIndex + ");' onmouseup='mousestopmove(event);' onmouseleave='mousestopmove(event);' ondblclick='zoomoriginal(" + LALOLibPlotsIndex + ");'><canvas id='" +plotid + "'  width='500' height='500' style='border: 1px solid black;'></canvas></a></div> <label id='lblposition" + LALOLibPlotsIndex + "'></label> <div style='position: absolute;left: 550px;top: -1em;'> <canvas id='legend" + LALOLibPlotsIndex + "' width='" + legendwidth + "' height='500'></canvas></div> <div id='legendtxt" + LALOLibPlotsIndex + "' style='position: absolute;left: 610px;top: 0;'></div> </div>";
-	
+
 	LALOLibPlots[LALOLibPlotsIndex] = new ColorPlot(plotid) ;
-	LALOLibPlots[LALOLibPlotsIndex].setScale(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY,plotinfo.minZ, plotinfo.maxZ); 
-	LALOLibPlots[LALOLibPlotsIndex].view(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY); 	
-	
+	LALOLibPlots[LALOLibPlotsIndex].setScale(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY,plotinfo.minZ, plotinfo.maxZ);
+	LALOLibPlots[LALOLibPlotsIndex].view(plotinfo.minX, plotinfo.maxX, plotinfo.minY, plotinfo.maxY);
+
 	for (var i=0; i < plotinfo.x.length; i++)
 		LALOLibPlots[LALOLibPlotsIndex].addPoint(plotinfo.x[i],plotinfo.y[i],plotinfo.z[i]);
-	
+
 	LALOLibPlots[LALOLibPlotsIndex].replot();
-	
+
 	var legendwidth = 50;
 //	plotlegend.innerHTML += plotinfo.maxZ.toFixed(3) + "<br><canvas id='legend'  width='" + legendwidth + "' height='500'></canvas><br>" + plotinfo.minZ.toFixed(3);
 	var ctx = document.getElementById("legend" +LALOLibPlotsIndex).getContext("2d");
@@ -482,26 +482,26 @@ function colorplot(multiargs) {
 		y = Math.floor(i * legend.height / plot1.cmap.length);
 		ctx.fillStyle = "rgb(" + LALOLibPlots[LALOLibPlotsIndex].cmap[i][0] + "," + LALOLibPlots[LALOLibPlotsIndex].cmap[i][1] + "," + LALOLibPlots[LALOLibPlotsIndex].cmap[i][2] + ")";
 		ctx.fillRect( 0, legend.height-y, legendwidth , (legend.height / LALOLibPlots[LALOLibPlotsIndex].cmap.length) + 1) ;
-	}	
-	
-		
+	}
+
+
 	if(window.addEventListener)
         plotcanvas.addEventListener('DOMMouseScroll', this.mousezoom, false);//firefox
- 
+
     //for IE/OPERA etc
     plotcanvas.onmousewheel = this.mousezoom;
-	
+
 	LALOLibPlotsIndex++;
 }
 
 // 3D plot
 function plot3(multiargs) {
 	// plot3(x,y,z,"style", x2,y2,z2,"style",... )
-	
+
 	var data = new Array();
-	var styles = new Array();	
-	var legends = new Array();		
-	
+	var styles = new Array();
+	var legends = new Array();
+
 	var p=0; // argument pointer
 	var x;
 	var y;
@@ -511,15 +511,15 @@ function plot3(multiargs) {
 	var n;
 	var c = 0; // index of current curve
 	while ( p < arguments.length)  {
-	
+
 		if ( type( arguments[p] ) == "vector" ) {
 
 			if ( p + 2 < arguments.length && type ( arguments[p+1] ) == "vector" && type ( arguments[p+2] ) == "vector" ) {
 				// classic (x,y,z) arguments
 				x = arguments[p];
 				y = arguments[p+1];
-				z = arguments[p+2];				
-				
+				z = arguments[p+2];
+
 				p += 2;
 			}
 			else {
@@ -533,73 +533,73 @@ function plot3(multiargs) {
 			y = new Array(n);
 			z = new Array(n);
 			for ( i=0; i < n; i++) {
-				x[i] = get(arguments[p], i, 0); 
-				y[i] = get(arguments[p], i, 1);				
-				z[i] = get(arguments[p], i, 2);					
+				x[i] = get(arguments[p], i, 0);
+				y[i] = get(arguments[p], i, 1);
+				z[i] = get(arguments[p], i, 2);
 			}
 		}
 		else {
 			return "undefined";
 		}
-				
+
 		//Style
 		style = undefined;
 		if ( p + 1 < arguments.length && type ( arguments[p+1] ) == "string" ) {
 			style = arguments[p+1];
 			p++;
-		}			
-		legend = "";	
+		}
+		legend = "";
 		if ( p + 1 < arguments.length && type ( arguments[p+1] ) == "string" ) {
 			legend = arguments[p+1];
 			p++;
-		}	
+		}
 
 		// Add the curve (x,y,z, style) to plot
 		data[c] = new Array();
 		for ( i=0; i < x.length; i++) {
-			data[c][i] = [x[i], y[i], z[i]]; 			
+			data[c][i] = [x[i], y[i], z[i]];
 		}
 		styles[c] = style;
 		legends[c] = legend;
-		
+
 		// Next curve
-		c++; 
-		p++; // from next argument	
-				
-	}	
-			
+		c++;
+		p++; // from next argument
+
+	}
+
 
 	var plotinfo =  { "data" : data, "styles" : styles, "legend": legends };
-	
+
 	//////// Part from laloplots.html //////////
-	
+
 	var plotid = "LALOLibPlot" + LALOLibPlotsIndex;
 	var legendwidth = 50;
-	
+
 	LALOLibOutput.innerHTML += '<br><div style="position:relative;left:0px;top:0px;text-align:left;"> <div><a onmousedown="LALOLibPlots[' + LALOLibPlotsIndex + '].mousedown(event);" onmouseup="LALOLibPlots[' + LALOLibPlotsIndex + '].mouseup(event);" onmousemove="LALOLibPlots[' + LALOLibPlotsIndex + '].mouserotation(event);"><canvas id="' + plotid + '" width="500" height="500" style="border: 1px solid black;" title="Hold down the mouse button to change the view and use the mousewheel to zoom in or out." ></canvas></a></div><label id="lblposition' + LALOLibPlotsIndex + '"></label> <div style="position: absolute;left: 550px;top: -1em;"> <canvas id="legend' + LALOLibPlotsIndex + '" width="' + legendwidth + '" height="500"></canvas></div> <div id="legendtxt' + LALOLibPlotsIndex + '" style="position: absolute;left: 610px;top: 0;"></div> </div>';
-	
+
 	var ylegend = 20;
-	
+
 	// do plot
 
 	LALOLibPlots[LALOLibPlotsIndex] = new Plot3D(plotid) ;
-	
-	LALOLibPlots[LALOLibPlotsIndex].cameraDistance = 30; 
-	LALOLibPlots[LALOLibPlotsIndex].angleX = Math.PI/10;	
+
+	LALOLibPlots[LALOLibPlotsIndex].cameraDistance = 30;
+	LALOLibPlots[LALOLibPlotsIndex].angleX = Math.PI/10;
 	LALOLibPlots[LALOLibPlotsIndex].angleZ = Math.PI/10;
-	
+
 	LALOLibPlots[LALOLibPlotsIndex].axisNameX1 = "x";
-	LALOLibPlots[LALOLibPlotsIndex].axisNameX2 = "y";		
-	LALOLibPlots[LALOLibPlotsIndex].axisNameX3 = "z";		
-		
-	
+	LALOLibPlots[LALOLibPlotsIndex].axisNameX2 = "y";
+	LALOLibPlots[LALOLibPlotsIndex].axisNameX3 = "z";
+
+
 	var colors = [1,2,3,4,5,0];
-	
+
 	var p;
 	var color;
 
 	for (p = 0; p<plotinfo.data.length; p++) {
-		
+
 		var linestyle = false;
 		var pointstyle = true;
 		if ( typeof(plotinfo.styles[p]) == "string" ) {
@@ -612,29 +612,29 @@ function plot3(multiargs) {
 				plotinfo.styles[p] = plotinfo.styles[p].replace("_","");
 			}
 			color = parseColor(plotinfo.styles[p]);
-		
+
 			if ( color < 0 )
 				color = colors.splice(0,1)[0];		// pick next unused color
 			else
 				colors.splice(colors.indexOf(color),1); // remove this color
 		}
-		else 
+		else
 			color = color = colors.splice(0,1)[0];	// pick next unused color
-		
+
 		if ( typeof(color) == "undefined")	// pick black if no next unused color
 			color = 0;
-	
+
 		for ( i=0; i < plotinfo.data[p].length; i++) {
 			if ( pointstyle ) {
 				LALOLibPlots[LALOLibPlotsIndex].X.push( plotinfo.data[p][i] );
-				LALOLibPlots[LALOLibPlotsIndex].Y.push( color );	
+				LALOLibPlots[LALOLibPlotsIndex].Y.push( color );
 			}
-			if ( linestyle && i < plotinfo.data[p].length-1 ) 
+			if ( linestyle && i < plotinfo.data[p].length-1 )
 				LALOLibPlots[LALOLibPlotsIndex].plot_line(plotinfo.data[p][i], plotinfo.data[p][i+1], "", color);
 		}
-		
+
 		// Legend
-		if ( plotinfo.legend[p] != "" ) {		
+		if ( plotinfo.legend[p] != "" ) {
 			var ctx = document.getElementById("legend" +LALOLibPlotsIndex).getContext("2d");
 			setcolor(ctx, color);
 			ctx.lineWidth = "3";
@@ -651,8 +651,8 @@ function plot3(multiargs) {
 				ctx.stroke();
 			}
 			ylegend += 20;
-			
-			document.getElementById("legendtxt" +LALOLibPlotsIndex).innerHTML += plotinfo.legend[p] + "<br>";						
+
+			document.getElementById("legendtxt" +LALOLibPlotsIndex).innerHTML += plotinfo.legend[p] + "<br>";
 		}
 	}
 	LALOLibPlots[LALOLibPlotsIndex].computeRanges();
@@ -666,14 +666,14 @@ function image(X, title) {
 	if (type(X) == "vector")  {
 		X = mat([X]);
 	}
-		
+
 	var style;
 	var minX = min(X);
 	var maxX = max(X);
-	var m = X.length;	
+	var m = X.length;
 	var n = X.n;
-	var scale = (maxX - minX) ; 
-	
+	var scale = (maxX - minX) ;
+
 	var i;
 	var j;
 	var k = 0;
@@ -690,9 +690,9 @@ function image(X, title) {
 
 	var imagedata =  { "data" : data, "style" : style, "title": title };
 
-	////// Part from laloplots.html	
-	
-	
+	////// Part from laloplots.html
+
+
 	var plotid = "LALOLibPlot" + LALOLibPlotsIndex;
 	var legendwidth = 50;
 	var pixWidth ;
@@ -700,42 +700,42 @@ function image(X, title) {
 
 		// prepare legend
 	var ylegend = 20;
-	
+
 	// do plot
 
-	
+
 	var i;
 
-	var width = 500; 
-	var height = 500; 	
+	var width = 500;
+	var height = 500;
 
 	var title = imagedata.title;
 	if(title) {
 		LALOLibOutput.innerHTML += "<h3>"+title+"</h3>" + "  ( " + imagedata.style[0] + " by " + imagedata.style[1] + " matrix )";
 	}
-	
+
 	if ( imagedata.style[1] > width ) {
-		width = imagedata.style[1]; 
+		width = imagedata.style[1];
 		plotlegend.style.left = (width+60) +"px";
 	}
 	if ( imagedata.style[0] > height )
 	 	height = imagedata.style[0];
-		
+
 	pixWidth = width / imagedata.style[1];
 	pixHeight = height / imagedata.style[0];
-	
+
 	var legendwidth = 50;
-	
+
 	LALOLibOutput.innerHTML += '<div style="position:relative;left:0px;top:0px;text-align:left;"> <div><a onmousemove="mouseimageposition(event,' + LALOLibPlotsIndex + ');"><canvas id="' +plotid + '"  width="' + width + '" height="' + height + '" style="border: 1px solid black;"></canvas></a></div><label id="lblposition' + LALOLibPlotsIndex + '"></label> <div style="position: absolute;left: 550px;top: -1em;">' + imagedata.style[2].toFixed(3) + '<br> <canvas id="legend' + LALOLibPlotsIndex + '" width="' + legendwidth + '" height="500"></canvas> <br>' + imagedata.style[3].toFixed(3) + ' </div>  </div>';
 
 	var x;
 	var y;
 	var color;
-	
+
 	LALOLibPlots[LALOLibPlotsIndex] = imagedata;
-	LALOLibPlots[LALOLibPlotsIndex].canvasId = plotid; 
+	LALOLibPlots[LALOLibPlotsIndex].canvasId = plotid;
 	var canvas = document.getElementById(plotid);
-	
+
   	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
 
@@ -743,13 +743,13 @@ function image(X, title) {
 			x = canvas.width * LALOLibPlots[LALOLibPlotsIndex].data[i][1];
 			y =  canvas.height * LALOLibPlots[LALOLibPlotsIndex].data[i][0] ;
 			color = LALOLibPlots[LALOLibPlotsIndex].data[i][2];
-		
+
 			ctx.fillStyle = "rgb(" + Math.floor(255*(1-color[0])) + "," + Math.floor(255*(1-color[1])) + "," + Math.floor(255*(1-color[2])) + ")";
 			ctx.fillRect( x , y, pixWidth +1,  pixHeight +1); // +1 to avoid blank lines between pixels
 
 		}
 	}
-	
+
 	// add legend / colormap
 
 	var legend = document.getElementById("legend" +LALOLibPlotsIndex);
@@ -759,10 +759,10 @@ function image(X, title) {
 		y = Math.floor(i * legend.height / 255);
 		ctx.fillStyle = "rgb(" + (255-i) + "," + (255-i) + "," + (255-i) + ")";
 		ctx.fillRect( 0, y, legendwidth , (legend.height / 255) + 1) ;
-	}	
-	
+	}
+
 	// Prepare mouseposition info
-	LALOLibPlots[LALOLibPlotsIndex].pixelWidth = pixWidth; 
+	LALOLibPlots[LALOLibPlotsIndex].pixelWidth = pixWidth;
 	LALOLibPlots[LALOLibPlotsIndex].pixelHeight = pixHeight;
 	LALOLibPlotsIndex++;
 }
@@ -770,9 +770,9 @@ function image(X, title) {
 
 
 function parseColor( str ) {
-	if ( typeof(str) == "undefined") 
+	if ( typeof(str) == "undefined")
 		return -1;
-		
+
 	var color;
 	switch( str ) {
 	case "k":
@@ -799,7 +799,7 @@ function parseColor( str ) {
 	case "yellow":
 		color = 5;
 		break;
-	
+
 	default:
 		color = -1;
 		break;
@@ -808,39 +808,39 @@ function parseColor( str ) {
 }
 
 function mousezoom ( e, delta , plotidx) {
-	if (!e) 
+	if (!e)
     	e = window.event;
- 	
+
  	e.preventDefault();
-	
+
 	if ( typeof(plotidx) == "undefined")
 		var plotidx = 0;
-	
+
 	if ( typeof(delta) == "undefined") {
 		var delta = 0;
-		
+
 		// normalize the delta
 		if (e.wheelDelta) {
 		     // IE and Opera
 		    delta = e.wheelDelta / 30;
-		} 
-		else if (e.detail) { 
+		}
+		else if (e.detail) {
 		    delta = -e.detail ;
 		}
-	} 
+	}
 	else {
 		if (e.button != 0 )
 			delta *= -1;
 	}
-		
+
 	var plotcanvas = document.getElementById(LALOLibPlots[plotidx].canvasId);
 	var rect = plotcanvas.getBoundingClientRect();
 	var x = e.clientX - rect.left;	// mouse coordinates relative to plot
 	var y = e.clientY - rect.top;
-	LALOLibPlots[plotidx].zoom(1+delta/30,1+delta/30, x, y);	
+	LALOLibPlots[plotidx].zoom(1+delta/30,1+delta/30, x, y);
 }
 function zoomoriginal(plotidx) {
-	LALOLibPlots[plotidx].resetzoom(); 
+	LALOLibPlots[plotidx].resetzoom();
 }
 function mouseposition( e , plotidx) {
 	var plotcanvas = document.getElementById(LALOLibPlots[plotidx].canvasId);
@@ -849,20 +849,20 @@ function mouseposition( e , plotidx) {
 	var xmouse = e.clientX - rect.left;	// mouse coordinates relative to plot
 	var ymouse = e.clientY - rect.top;
 
-	if ( LALOLABPLOTMOVING ) {	
+	if ( LALOLABPLOTMOVING ) {
 		var dx = xmouse - LALOLABPLOTxprev ;
 		var dy = ymouse - LALOLABPLOTyprev;
-		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {			
+		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {
 			LALOLibPlots[plotidx].translate(dx, dy);
 		}
 		LALOLABPLOTxprev = xmouse;
-		LALOLABPLOTyprev = ymouse;		
+		LALOLABPLOTyprev = ymouse;
 	}
-	else {		
+	else {
 		var x = xmouse / LALOLibPlots[plotidx].scaleX + LALOLibPlots[plotidx].minX;
 		var y = (plotcanvas.height - ymouse ) / LALOLibPlots[plotidx].scaleY + LALOLibPlots[plotidx].minY;
-	
-		document.getElementById("lblposition" + plotidx).innerHTML = "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);	
+
+		document.getElementById("lblposition" + plotidx).innerHTML = "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);
 	}
 }
 
@@ -890,13 +890,13 @@ function mouseimageposition( e, plotidx ) {
 	var ymouse = e.clientY - rect.top;
 
 	var n = LALOLibPlots[plotidx].style[1];
-	var minX = LALOLibPlots[plotidx].style[2];	
-	var maxX = LALOLibPlots[plotidx].style[3];	
+	var minX = LALOLibPlots[plotidx].style[2];
+	var maxX = LALOLibPlots[plotidx].style[3];
 	var i = Math.floor(ymouse / LALOLibPlots[plotidx].pixelHeight);
 	var j = Math.floor(xmouse / LALOLibPlots[plotidx].pixelWidth );
 	if ( j < n ) {
 		var val = LALOLibPlots[plotidx].data[i*n + j][2][0]*(maxX - minX) + minX;
-	
+
 		document.getElementById("lblposition" + plotidx).innerHTML = "Matrix[ " + i + " ][ " + j + " ] = " + val.toFixed(3);
 	}
 }
@@ -905,10 +905,10 @@ function mouseimageposition( e, plotidx ) {
 ////////////////////////////////
 
 function lalo( Command ) {
-	// Parse command line and execute in current scopes	
+	// Parse command line and execute in current scopes
 	var cmd = laloparse( Command );
-	var res = self.eval(cmd); 
-	return res; 
+	var res = self.eval(cmd);
+	return res;
 }
 function laloparse( WorkerCommand ) {
 	// Parse Commands
@@ -922,25 +922,25 @@ function laloparse( WorkerCommand ) {
 		  		cmd += WorkerCommandList[k];
 		  		if ( WorkerCommandList[k].indexOf("}") >= 0 ) {
 		  			// braces closed, we can end the line
-			  		cmd += " ;\n"; 
-			  	}				  	
+			  		cmd += " ;\n";
+			  	}
 		  	}
 		  	else {
 		  		// standard lalolab line
-		  		cmd += parseCommand(WorkerCommandList[k]) + " ;\n"; 
+		  		cmd += parseCommand(WorkerCommandList[k]) + " ;\n";
 		  	}
 		}
 	}
-	return cmd; 
+	return cmd;
 }
 function parseSplittedCommand( cmd ) {
 	//console.log("parsing : " + cmd);
-	// !!! XXX should parse unary ops before all the others !!! 
-	
+	// !!! XXX should parse unary ops before all the others !!!
+
 	var ops = ["==", "!=", ">=" ,"<=", ">", "<" , "\\" ,":", "+", "-",  ".*", "*", "./" ,  "^", "'"]; // from lowest priority to highest
 	var opsFcts = ["isEqual" , "isNotEqual", "isGreaterOrEqual", "isLowerOrEqual", "isGreater" , "isLower", "solve","range", "add", "sub", "entrywisemul", "mul" , "entrywisediv",  "pow", "undefined" ];
 	var unaryOpsFcts = ["", "", "", "", "","", "","range","", "minus", "", "" , "",  "", "transpose" ];
-	
+
 	var o;
 	var i ;
 	var k;
@@ -948,11 +948,11 @@ function parseSplittedCommand( cmd ) {
 	var operandB;
 
 	for ( o = 0; o < ops.length; o++) {
-		
+
 		var splitted_wrt_op = cmd.split(ops[o]);
-		
-		if ( splitted_wrt_op.length > 1) {			
-			if ( removeSpaces(splitted_wrt_op[0]) != "" ) {				
+
+		if ( splitted_wrt_op.length > 1) {
+			if ( removeSpaces(splitted_wrt_op[0]) != "" ) {
 				// there is actually a left-hand side operand
 				if( removeSpaces(splitted_wrt_op[1]) != "" ) {
 					// and a right-hand side operand
@@ -962,7 +962,7 @@ function parseSplittedCommand( cmd ) {
 						operandB = splitted_wrt_op[k];
 						operandA =  opsFcts[o] + "(" + operandA +  "," + parseSplittedCommand(operandB) + ")";
 					}
-					cmd = operandA; 
+					cmd = operandA;
 				}
 				else {
 					// no right-hand side: like transpose operator
@@ -971,28 +971,28 @@ function parseSplittedCommand( cmd ) {
 			}
 			else {
 				// no left operand: like minus something...
-				
+
 				// Apply unary operator
 				operandA = unaryOpsFcts[o] + "(" + parseSplittedCommand(splitted_wrt_op[1]) + ")";
-				
+
 				// and then binary operator for the remaining occurences
 				for ( k = 2; k< splitted_wrt_op.length ; k++) {
 					operandB = splitted_wrt_op[k];
 					operandA =  opsFcts[o] + "(" + operandA +  "," + parseSplittedCommand(operandB) + ")";
 				}
-				cmd = operandA; 
+				cmd = operandA;
 			}
 		}
 	}
-	
+
 	return cmd;
-	
+
 }
 
 function parseAssignment ( assignmentStr ) {
 	if ( assignmentStr.indexOf("[") < 0 ) {
-		// straightforward assignment 
-		return assignmentStr; 
+		// straightforward assignment
+		return assignmentStr;
 	}
 	else {
 		var assign = removeSpaces(assignmentStr).replace("=","").replace(",","][");
@@ -1001,14 +1001,14 @@ function parseAssignment ( assignmentStr ) {
 		var varname = assign.substr(0,start);
 		if ( middle >= 0 ) {
 			// submatrix assignment
-			var rowsrange = assign.substr( start + 1, middle-start-1); 
+			var rowsrange = assign.substr( start + 1, middle-start-1);
 
 			// find last "]";
 			var end = middle+1;
 			while ( assign.indexOf("]",end+1) >= 0)
 				end = assign.indexOf("]",end+1);
-			
-			var colsrange = assign.substr(middle+2, end - (middle+2)); // everything after "]["	and before last "]"	
+
+			var colsrange = assign.substr(middle+2, end - (middle+2)); // everything after "]["	and before last "]"
 
 			// Parse colon ranges
 			var rowssplit = rowsrange.split(":");
@@ -1020,7 +1020,7 @@ function parseAssignment ( assignmentStr ) {
 			}
 			else if ( rowssplit.length == 3)
 				rowsrange = "range(" + rowssplit[0] + "," + rowssplit[2] + "," + rowssplit[1] + ")";
-			
+
 			var colssplit = colsrange.split(":");
 			if (colssplit.length == 2 ) {
 				if ( colssplit[0] =="" && colssplit[1] =="" )
@@ -1035,14 +1035,14 @@ function parseAssignment ( assignmentStr ) {
 		}
 		else {
 			// subvector assignment
-			
+
 			// find last "]";
 			var end = start;
 			while ( assign.indexOf("]",end+1) >= 0)
 				end = assign.indexOf("]",end+1);
-			
-			var rowsrange = assign.substr( start + 1, end-start-1); 
-			
+
+			var rowsrange = assign.substr( start + 1, end-start-1);
+
 			// Parse colon ranges
 			var rowssplit = rowsrange.split(":");
 			if (rowssplit.length == 2 ){
@@ -1061,33 +1061,33 @@ function parseAssignment ( assignmentStr ) {
 
 function parseBrackets( cmdString ) {
 	// Parse brackets => get matrix entries
-	
+
 	var delimiters = ["[", "(",",",";",")", "\\", "+", "-", "*", "/", ":", "^", "'", "=", ">", "<", "!"];
-	
+
 	cmdString = cmdString.split("][").join(","); // replace ][ by , and ] by )
-	
+
 	var cmd = cmdString.split("");	// string to array of char
-	
-	var i; 
+
+	var i;
 	var j;
 	var k;
 	var l;
 	var lhs;
-	
-	// For the entire string:	
+
+	// For the entire string:
 	i = cmd.length - 1;
 	while ( i >= 0 ) {
 		// Search for the right-most opening bracket:
-		while ( i >= 0 && cmd[i] != "[" ) 
+		while ( i >= 0 && cmd[i] != "[" )
 			i--;
-		
+
 		if ( i >= 0 ) {
 			// found a bracket,  find its corresponding closing bracket
 			j = i+1;
-			while ( j < cmd.length && cmd[j] != "]" ) 
+			while ( j < cmd.length && cmd[j] != "]" )
 				j++;
 
-			if ( j < cmd.length ) {		
+			if ( j < cmd.length ) {
 
 				// then determine its left-hand side operand:
 				l = 0;
@@ -1100,47 +1100,47 @@ function parseBrackets( cmdString ) {
 				lhs = cmd.slice(l,i).join(""); // should be LHS as string or "" if l >= i
 
 				if ( removeSpaces(lhs) == "" ) {
-					// if the LHS operand is empty, leave the brackets untouched 
+					// if the LHS operand is empty, leave the brackets untouched
 					cmd[i] = "#"; // (replace by # and $ re-replace at the end by a matrix creation)
-					
-					// look for semicolon within brackets: 
-					k = i+1; 
-					var rowwise = false; 
-					var colwise = false; 
+
+					// look for semicolon within brackets:
+					k = i+1;
+					var rowwise = false;
+					var colwise = false;
 					while (  k < j ) {
 						if( cmd[k] == "," ) {
 							//colwise = true;
 						}
-						
+
 						if ( cmd[k] == ";" ) {
 							rowwise = true; // mark for rowwise mat
-							
+
 							if ( colwise ) {
-								cmd.splice(k,1, ["@", ","] ); // end previous row vector, replace by comma  
+								cmd.splice(k,1, ["@", ","] ); // end previous row vector, replace by comma
 								colwise = false;
 							}
 							else {
 								cmd[k] = ","; // simply replace by comma
 							}
 						}
-						
-						
-						k++; 
-					} 
-					
-					if ( rowwise ) 
+
+
+						k++;
+					}
+
+					if ( rowwise )
 						cmd[j] = "$";
 					else
 						cmd[j] = "@";
-					
+
 				}
-				else {						
+				else {
 					// if not empty, implement a GET
 					cmd[l]="get(" + lhs ;
 					for ( k = l+1; k < i; k++)
 						cmd[k] = "";
 					cmd[i] = ",";
-					cmd[j] = ")";					
+					cmd[j] = ")";
 				}
 			}
 			else {
@@ -1149,7 +1149,7 @@ function parseBrackets( cmdString ) {
 		}
 		i--;
 	}
-		
+
 	var cmdparsed = cmd.join("").split("#").join("mat([").split("$").join("], true)").split("@").join("])");
 	//console.log(cmdparsed);
 	return cmdparsed;
@@ -1161,35 +1161,35 @@ function parseCommand( cmdString ) {
 	var idxComments = cmdString.indexOf("//");
 	if ( idxComments >= 0 )
 		cmdString = cmdString.substr(0,idxComments);
-	
+
 
 	// Parse "=" sign to divide between assignement String and computeString
 	var idxEqual = cmdString.split("==")[0].split("!=")[0].split(">=")[0].split("<=")[0].indexOf("=");
 	if ( idxEqual > 0 )  {
 		var assignmentStr = parseAssignment( cmdString.substr(0,idxEqual + 1) );
 		var computeStr = cmdString.substr(idxEqual+1);
-		
+
 		// Check for simple assignments like A = B to force copy
 		if ( assignmentStr.indexOf("set(") < 0 && typeof(self[removeSpaces(computeStr)]) != "undefined" ) { //self.hasOwnProperty( removeSpaces(computeStr) ) ) { // self.hasOwnProperty does not work in Safari workers....
-		
+
 			// computeStr is a varaible name
-			if ( !isScalar(self[ removeSpaces(computeStr) ] ) ) { 
+			if ( !isScalar(self[ removeSpaces(computeStr) ] ) ) {
 				// the variable is a vector or matrix
 				var FinalCommand = assignmentStr + "matrixCopy(" + computeStr + ")";
 				console.log(FinalCommand);
 				return FinalCommand;
 			}
-		}		
+		}
 	}
 	else {
-		var assignmentStr = "";		
+		var assignmentStr = "";
 		var computeStr = cmdString;
 	}
-	
+
 	// parse brackets:
 	var cmd =  parseBrackets( computeStr ).split(""); // and convert string to Array
 
-	// Parse delimiters 
+	// Parse delimiters
 	var startdelimiters = ["(","[",",",";"];
 	var enddelimiters = [")","]",",",";"];
 	var i;
@@ -1203,8 +1203,8 @@ function parseCommand( cmdString ) {
 		map[k] = k;
 		parsedCommand[k] = cmd[k];
 	}
-	
-	i = cmd.length - 1; 
+
+	i = cmd.length - 1;
 	while ( i >= 0 ) {
 		// Find the most right starting delimiter
 		while ( i >= 0 && startdelimiters.indexOf(cmd[i]) < 0 )
@@ -1212,29 +1212,29 @@ function parseCommand( cmdString ) {
 		if ( i >= 0 ) {
 			// found a delimiter, search for the closest ending delimiter
 			j = i+1;
-			while ( j < cmd.length && enddelimiters.indexOf(cmd[j] ) < 0 ) {				
+			while ( j < cmd.length && enddelimiters.indexOf(cmd[j] ) < 0 ) {
 				j++;
 			}
-			if ( j < cmd.length ) {			
+			if ( j < cmd.length ) {
 				// starting delimiter is at cmd[i] and ending one at cmd[j]
-				
+
 				// parse content within delimiters
 				parsedContent = parseSplittedCommand( parsedCommand.slice(map[i]+1,map[j]).join("") ) ;
 				// and replace the corresponding content in the parsed command
 				parsedCommand.splice (map[i]+1, map[j]-map[i]-1, parsedContent ) ;
-				
-				// remove delimiters from string to be parsed 
-				if ( cmd[i] != "," ) 
+
+				// remove delimiters from string to be parsed
+				if ( cmd[i] != "," )
 					cmd[i] = " ";	// except for commas that serve twice (once as start once as end)
 				cmd[j] = " ";
-								
+
 				// map position in the original cmd to positions in the parsedCommand to track brackets
 				for ( k=i+1; k < j;k++)
 					map[k] = map[i]+1;
 				var deltamap = map[j] - map[i] - 1;
 				for ( k=j; k < cmd.length;k++)
-					map[k] += 1 - deltamap; 
-					
+					map[k] += 1 - deltamap;
+
 				/*console.log(parsedCommand);
 				console.log(cmd.join(""));
 				console.log(map);
@@ -1242,20 +1242,20 @@ function parseCommand( cmdString ) {
 			}
 			else {
 				return "undefined";
-			}				
+			}
 		}
 		i--;
 	}
 	var FinalCommand = assignmentStr + parseSplittedCommand(parsedCommand.join(""));
-	
+
 	// Parse brackets => get matrix entries
 	//cmdString = cmdString.split("][").join(",").split("]").join(")");	// replace ][ by , and ] by )
-	// consider [ as a left-hand unary operator 
+	// consider [ as a left-hand unary operator
 //	cmd = "get(" + parseSplittedCommand(splitted_wrt_op[0]) + ")";
 
-	
-	
-	if ( assignmentStr.substr(0,4) == "set(" ) 
+
+
+	if ( assignmentStr.substr(0,4) == "set(" )
 		FinalCommand  += " )";
 
 	FinalCommand = parseRangeRange(	FinalCommand );
@@ -1274,20 +1274,20 @@ function parseRangeRange( cmd ) {
 	var incargs;
 	var endargs;
 	for ( i = 0; i< elems.length - 1 ; i++) {
-	
-//		elems[i+1] = elems[i+1].replace(")","");	
-		
+
+//		elems[i+1] = elems[i+1].replace(")","");
+
 		// ivert second and third arguments to get range(start, end, inc) from start:inc:end
 		args = 	elems[i+1].split(",");
 		tmp = args[2].split(")"); // keep only the content of the range and not the remaining commands
 		endargs = tmp[0];
 		j = 0;	// deal with cases like end="minus(4)" where the first closing bracket is not at the complete end
 		while ( tmp[j].indexOf("(") >= 0 ) {
-			endargs = endargs + ")" + tmp[j+1]; 
+			endargs = endargs + ")" + tmp[j+1];
 			j++;
 		}
-			
-		incargs = args[1].substr(0,args[1].length-1); // remove ")" 
+
+		incargs = args[1].substr(0,args[1].length-1); // remove ")"
 		args[1] = endargs;
 		//endargs[0] = incargs;
 		args[2] = incargs + ")" + tmp.slice(j+1).join(")");
@@ -1301,32 +1301,32 @@ function removeSpaces( str ) {
 }
 
 ////////////////////////////
-/// Lab 
+/// Lab
 ////////////////////////////
 function MLlab ( id , path ) {
-	var that = new Lalolab ( id, true, path);	
+	var that = new Lalolab ( id, true, path);
 	return that;
 }
 function Lalolab ( id, mllab , path ) {
 	// constructor for a Lab with independent scope running in a worker
 	this.id = id;
-	
-	this.callbacks = new Array(); 	
-	
-	// Create worker with a Blob  to avoid distributing lalolibworker.js 
+
+	this.callbacks = new Array();
+
+	// Create worker with a Blob  to avoid distributing lalolibworker.js
 	// => does not work due to importScripts with relative path to the Blob unresolved (or cross-origin)
-	
+
 	if ( typeof(path) == "undefined" )
 		var path = "http://mlweb.loria.fr/";
 	else {
 		if (path.length > 0 && path[path.length-1] != "/" )
 			path = [path,"/"].join("");
 	}
-		
+
 	if ( typeof(mllab) != "undefined" && mllab ) {
 		this.worker = new Worker(path+"mlworker.js"); // need mlworker.js in same directory as web page
 		this.labtype = "ml";
-		/* Using a Blob to avoid distributing mlworker.js: 
+		/* Using a Blob to avoid distributing mlworker.js:
 		 	does not work because of importScripts from cross origin...
 		var workerscript = "importScripts(\"ml.js\");\n onmessage = function ( WorkerEvent ) {\n	var WorkerCommand = WorkerEvent.data.cmd;var mustparse = WorkerEvent.data.parse; \n if ( mustparse )\n	var res = lalo(WorkerCommand);\n 	else {\n	if ( WorkerCommand == \"load_mat\" ) {\n	if ( type(WorkerEvent.data.data) == \"matrix\" )\n var res = new Matrix(WorkerEvent.data.data.m,WorkerEvent.data.data.n,WorkerEvent.data.data.val, true);\nelse\n 	var res = mat(WorkerEvent.data.data, true);\n	eval(WorkerEvent.data.varname + \"=res\");\n}\n else\n var res = self.eval( WorkerCommand ) ;\n}\n try {\n	postMessage( { \"cmd\" : WorkerCommand, \"output\" : res } );\n} catch ( e ) {\n try {\n postMessage( { \"cmd\" : WorkerCommand, \"output\" : res.info() } );\n	} catch(e2) { \n postMessage( { \"cmd\" : WorkerCommand, \"output\" : undefined } );\n}\n}\n}";
 		var blob = new Blob([workerscript], { "type" : "text/javascript" });
@@ -1338,7 +1338,7 @@ function Lalolab ( id, mllab , path ) {
 		this.worker = new Worker(path+"lalolibworker.js"); // need lalolibworker.js in same directory as web page
 		this.labtype = "lalo";
 	}
-	this.worker.onmessage = this.onresult; 
+	this.worker.onmessage = this.onresult;
 	this.worker.parent = this;
 }
 Lalolab.prototype.close = function ( ) {
@@ -1346,7 +1346,7 @@ Lalolab.prototype.close = function ( ) {
 	this.worker.parent = null;// delete circular reference
 }
 Lalolab.prototype.onprogress = function ( ratio ) {
-	// do nothing by default; 
+	// do nothing by default;
 	// user must set lab.onprogress = function (ratio) { ... } to do something
 }
 Lalolab.prototype.onresult = function ( WorkerEvent ) {
@@ -1365,32 +1365,32 @@ Lalolab.prototype.onresult = function ( WorkerEvent ) {
 }
 Lalolab.prototype.do = function ( cmd , callback ) {
 	// prepare callback, parse cmd and execute in worker
-	this.callbacks.push(  callback  ) ;	
-	this.worker.postMessage( {cmd: cmd, parse: true} );	 
+	this.callbacks.push(  callback  ) ;
+	this.worker.postMessage( {cmd: cmd, parse: true} );
 }
 Lalolab.prototype.exec = function ( cmd , callback ) {
 	// prepare callback, and execute cmd in worker
-	this.callbacks.push( callback ); 
-	this.worker.postMessage( {cmd: cmd, parse: false} );	
+	this.callbacks.push( callback );
+	this.worker.postMessage( {cmd: cmd, parse: false} );
 }
 Lalolab.prototype.parse = function ( cmd , callback ) {
 	// prepare callback, parse cmd and execute in worker
-	this.callbacks.push( callback ); 
-	this.worker.postMessage( {cmd: cmd, parse: false} );	 
+	this.callbacks.push( callback );
+	this.worker.postMessage( {cmd: cmd, parse: false} );
 }
 Lalolab.prototype.load = function ( data , varname, callback ) {
 	// load data in varname
-	this.callbacks.push(  callback  ) ;	
+	this.callbacks.push(  callback  ) ;
 	if ( typeof(data) == "string" ){
 		this.worker.postMessage( {"cmd" : varname + "= load_data (\"" + data + "\")", parse: false} );
 	}
 	else {
 		this.worker.postMessage( {"cmd" : "load_mat", data: data, varname: varname, parse: false} );
-	}			
+	}
 }
 Lalolab.prototype.import = function ( script, callback ) {
 	// load a script in lalolib language
-	this.do('importLaloScript("' + script + '")', callback);	
+	this.do('importLaloScript("' + script + '")', callback);
 }
 function importLaloScript ( script ) {
 	// load a script in lalolib language in the current Lab worker
@@ -1398,28 +1398,28 @@ function importLaloScript ( script ) {
 	xhr.open('GET', script, false);
 	xhr.send();
 	var cmd = xhr.responseText;
- 	return lalo(cmd); 
+ 	return lalo(cmd);
 }
 Lalolab.prototype.importjs = function ( script, callback ) {
 	// load a script in javascript
-	this.exec("importScripts('" + script + "');", callback); 
+	this.exec("importScripts('" + script + "');", callback);
 }
 Lalolab.prototype.getObject = function ( varname, callback ) {
 	this.exec("getObjectWithoutFunc(" + varname +")", function (res) {callback(renewObject(res));} );
 }
 
 function getObjectWithoutFunc( obj ) {
-	// Functions and Objects with function members cannot be sent 
+	// Functions and Objects with function members cannot be sent
 	// from one worker to another...
-	
-	if ( typeof(obj) != "object" ) 
+
+	if ( typeof(obj) != "object" )
 		return obj;
 	else {
 		var res = {};
 
 		for (var p in obj ) {
 			switch( type(obj[p]) ) {
-			case "vector": 
+			case "vector":
 				res[p] = {type: "vector", data: [].slice.call(obj[p])};
 				break;
 			case "matrix":
@@ -1449,14 +1449,14 @@ function getObjectWithoutFunc( obj ) {
 				break;
 			default:
 				res[p] = getObjectWithoutFunc( obj[p] );
-				break;			
-			}	
+				break;
+			}
 		}
 		return res;
 	}
 }
 function renewObject( obj ) {
-	// Recreate full object with member functions 
+	// Recreate full object with member functions
 	// from an object created by getObjectWithoutFunc()
 
 	var to = type(obj);
@@ -1480,38 +1480,38 @@ function renewObject( obj ) {
 			return new spMatrix(obj.m, obj.n, obj.val, obj.cols, obj.rows);
 			break;
 		case "object":
-			// Object without type property and thus without Class		
-			var newobj = {}; 
-			for ( var p in obj ) 
+			// Object without type property and thus without Class
+			var newobj = {};
+			for ( var p in obj )
 				newobj[p] = renewObject(obj[p]);
 			return newobj;
 			break;
 		case "Array":
 			var newobj = new Array(obj.length);
-			for ( var p in obj ) 
+			for ( var p in obj )
 				newobj[p] = renewObject(obj[p]);
 			return newobj;
 		default:
-			// Structured Object like Classifier etc... 
+			// Structured Object like Classifier etc...
 			// type = Class:subclass
 			var typearray = obj.type.split(":");
 			var Class = eval(typearray[0]);
-			if ( typearray.length == 1 ) 
-				var newobj = new Class(); 
-			else 
+			if ( typearray.length == 1 )
+				var newobj = new Class();
+			else
 				var newobj = new Class(typearray[1]);
-			for ( var p in obj ) 
+			for ( var p in obj )
 				newobj[p] = renewObject(obj[p]);
-				
-			// deal with particular cases: 
-			// Rebuild kernelFunc 
-			if (typearray[1] == "SVM" || typearray[1] == "SVR" ) {				
+
+			// deal with particular cases:
+			// Rebuild kernelFunc
+			if (typearray[1] == "SVM" || typearray[1] == "SVR" ) {
 				newobj["kernelFunc"] = kernelFunction(newobj["kernel"], newobj["kernelpar"], type(newobj["SV"]) == "spmatrix"?"spvector":"vector");
 			}
 			if (typearray[1] == "KernelRidgeRegression" ) {
 				newobj["kernelFunc"] = kernelFunction(newobj["kernel"], newobj["kernelpar"], type(newobj["X"]) == "spmatrix"?"spvector":"vector");
 			}
-			
+
 			return newobj;
 			break;
 	}
@@ -1519,9 +1519,9 @@ function renewObject( obj ) {
 
 function load_data ( datastring ) {
 
-	// convert a string into a matrix data 
+	// convert a string into a matrix data
 	var i;
-	var cmd = "mat( [ "; 
+	var cmd = "mat( [ ";
 	var row;
 	var rows = datastring.split("\n");
 	var ri ;
@@ -1541,9 +1541,9 @@ function load_data ( datastring ) {
 		cmd = cmd.substr(0,cmd.length-1); // remove last comma
 		cmd += "] , true) ";
 	}
-		
+
 	return eval(cmd);
-	
+
 }
 
 function removeFirstSpaces( str ) {
@@ -1553,9 +1553,9 @@ function removeFirstSpaces( str ) {
 		i++;
 	if ( i<str.length ) {
 		// first non-space char at i
-		return str.slice(i);	
+		return str.slice(i);
 	}
-	else 
+	else
 		return "";
 }
 
@@ -1570,7 +1570,7 @@ function notifyProgress( ratio ) {
 //////////////////////////
 //// CONSTANTS and general tools
 ///////////////////////////
-var LALOLIB_ERROR = ""; 
+var LALOLIB_ERROR = "";
 
 const EPS = 2.2205e-16;
 
@@ -1591,7 +1591,7 @@ function tic( T ) {
 function toc ( T ) {
 	if ( typeof(T) == "undefined" )
 		var T = 0;
-	if ( typeof(TICTOCstartTime) != "undefined" && typeof(TICTOCstartTime[T]) != "undefined" ) {		
+	if ( typeof(TICTOCstartTime) != "undefined" && typeof(TICTOCstartTime[T]) != "undefined" ) {
 		// Computing time
 		var startTime = TICTOCstartTime[T];
 		var endTime = new Date();
@@ -1602,34 +1602,34 @@ function toc ( T ) {
 		return undefined;
 }
 /**
- * @return {string} 
+ * @return {string}
  */
 function type( X ) {
 	if ( X == null )
 		return "undefined";
 	else if ( X.type )
- 		return X.type;	 			 	
+ 		return X.type;
  	else {
 	 	var t = typeof( X );
 		if ( t == "object") {
 			if ( Array.isArray(X) ) {
 				if ( isArrayOfNumbers(X) )
 			 		return "vector";	// for array vectors created by hand
-			 	else 
+			 	else
 			 		return "Array";
 			}
-			else if ( X.buffer ) 
+			else if ( X.buffer )
 		 		return "vector"; // Float64Array vector
-		 	else 
+		 	else
 		 		return t;
 		}
-		else 
-			return t;		 
+		else
+			return t;
 	}
 }
 /**
  * @param {Array}
- * @return {boolean} 
+ * @return {boolean}
  */
 function isArrayOfNumbers( A ) {
 	for (var i=0; i < A.length; i++)
@@ -1643,7 +1643,7 @@ function isScalar( x ) {
 		case "number":
 		case "boolean":
 			return true;
-			break;		
+			break;
 		default:
 			if (type(x) == "Complex")
 				return true;
@@ -1655,7 +1655,7 @@ function isScalar( x ) {
 
 /**
  * @param {Float64Array}
- * @return {string} 
+ * @return {string}
  */
 function printVector( x ) {
 	const n = x.length;
@@ -1667,10 +1667,10 @@ function printVector( x ) {
 	}
 	if ( i == n-1 )
 		str += (isInteger( x[i] ) ? x[i] : x[i].toFixed(3) ) + " ]" ;
-	else 
+	else
 		str += "... ] (length = " + n + ")";
 
-	return str;	
+	return str;
 }
 
 
@@ -1682,13 +1682,13 @@ function printVector( x ) {
  * @struct
  */
 function Matrix(m,n, values) {
-	
+
 	/** @const */ this.length = m;
 	/** @const */ this.m = m;
 	/** @const */ this.n = n;
 	/** @const */ this.size = [m,n];
 	/** @const */ this.type = "matrix";
-	
+
 	if ( arguments.length == 2)
 		this.val = new Float64Array( m * n ); // simple m x n zeros
 	else if (arguments.length == 3)
@@ -1698,15 +1698,15 @@ function Matrix(m,n, values) {
 }
 
 Matrix.prototype.get = function ( i,j) {
-	return this.val[i*this.n + j]; 
+	return this.val[i*this.n + j];
 }
 Matrix.prototype.set = function ( i,j, v) {
-	this.val[i*this.n + j] = v; 
+	this.val[i*this.n + j] = v;
 }
 /**
  * return a pointer-like object on a row in a matrix, not a copy!
  * @param {number}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 Matrix.prototype.row = function ( i ) {
 	return this.val.subarray(i*this.n, (i+1)*this.n);
@@ -1715,7 +1715,7 @@ Matrix.prototype.row = function ( i ) {
 /**
  * return a copy of the matrix as an Array of Arrays
  * (do not do this with too many rows...)
- * @return {Array} 
+ * @return {Array}
  */
 Matrix.prototype.toArray = function ( ) {
 	var A = new Array(this.m);
@@ -1725,19 +1725,19 @@ Matrix.prototype.toArray = function ( ) {
 		for ( var j=0; j < this.n; j++)
 			A[i][j] = this.val[ri + j];
 		ri += this.n;
-	}	
+	}
 	return A;
 }
 /**
- * return a view (not a copy) on the matrix as an Array of Float64Array 
+ * return a view (not a copy) on the matrix as an Array of Float64Array
  * (do not do this with too many rows...)
- * @return {Array} 
+ * @return {Array}
  */
 Matrix.prototype.toArrayOfFloat64Array = function ( ) {
 	var A = new Array(this.m);
 	for ( var i=0; i < this.m; i++)
 		A[i] = this.val.subarray(i*this.n, (i+1)*this.n);
-		
+
 	return A;
 }
 
@@ -1764,65 +1764,65 @@ function size( A, sizealongdimension ) {
 		break;
 	case "matrix":
 	case "spmatrix":
-	case "ComplexMatrix":	
-		s = A.size; 
+	case "ComplexMatrix":
+		s = A.size;
 		break;
 	case "object":
 		s = [1,1];
 		break;
-	default: 
-		s = [1,1]; 
+	default:
+		s = [1,1];
 		//error( "Cannot determine size of object" );
 		break;
 	}
-	
-	if ( typeof(sizealongdimension) == "undefined" ) 
+
+	if ( typeof(sizealongdimension) == "undefined" )
 		return s;
 	else
-		return s[sizealongdimension-1];	
+		return s[sizealongdimension-1];
 
 }
 
 function ones(rows, cols) {
-	// Create a matrix or vector full of ONES 
+	// Create a matrix or vector full of ONES
 	if ( arguments.length == 1 || cols == 1 ) {
 		var v = new Float64Array(rows);
-		for (var i = 0; i< rows; i++) 
+		for (var i = 0; i< rows; i++)
 			v[i] = 1;
 		return v;
-	} 
+	}
 	else {
-		var M = new Matrix(rows, cols); 
-		const mn = rows*cols; 
+		var M = new Matrix(rows, cols);
+		const mn = rows*cols;
 		for (var i = 0; i< mn; i++) {
 			M.val[i] = 1;
 		}
 		return M;
 	}
 }
-// Use zeros( m, n) 
+// Use zeros( m, n)
 function zeros(rows, cols) {
-	// Create a matrix or vector of ZERO 
-	if ( arguments.length == 1 || cols == 1 ) { 
+	// Create a matrix or vector of ZERO
+	if ( arguments.length == 1 || cols == 1 ) {
 		return new Float64Array(rows);
-	} 
+	}
 	else {
-		return new Matrix(rows, cols); 
-	}	
+		return new Matrix(rows, cols);
+	}
 }
 
 function eye(m,n) {
-	if ( typeof(n) == "undefined") 
+	if ( typeof(n) == "undefined")
 		var n = m;
 	if ( m == 1 && n == 1)
 		return 1;
-		
+
 	var I = zeros(m,n);
 	const e = (m<n)?m:n;
 	for ( var i = 0; i< e; i ++) {
 		I.val[i*(n+1)] = 1;
 	}
-	
+
 	return I;
 }
 
@@ -1845,7 +1845,7 @@ function diag( A ) {
 		var j = 0;
 		const stride2 = A.n+1;
 		for ( i =0; i< n;i++) {
-			v[i] = A.val[j];	
+			v[i] = A.val[j];
 			j+=stride2;
 		}
 		return v;
@@ -1867,7 +1867,7 @@ function diag( A ) {
 		var j = 0;
 		const stride2 = A.n+1;
 		for ( i =0; i< n;i++) {
-			v.re[i] = A.re[j];	
+			v.re[i] = A.re[j];
 			v.im[i] = A.im[j];
 			j+=stride2;
 		}
@@ -1877,10 +1877,10 @@ function diag( A ) {
 
 /**
  * @param {Matrix}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function vec( A ) {
-	return new Float64Array(A.val); 
+	return new Float64Array(A.val);
 }
 
 function matrixCopy( A ) {
@@ -1913,7 +1913,7 @@ function matrixCopy( A ) {
 }
 /**
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function vectorCopy( a ) {
 	return new Float64Array( a );
@@ -1924,18 +1924,18 @@ function vectorCopy( a ) {
  * @param {Float64Array}
  */
 function vectorCopyInto (x, y) {
-	y.set(x); 
+	y.set(x);
 }
 
 /**
  * @param {Array}
- * @return {Array} 
+ * @return {Array}
  */
 function arrayCopy( A ) {
-	var res = new Array(A.length); 
+	var res = new Array(A.length);
 	for ( var i = 0; i < A.length; i++ )
 		if ( isScalar(A[i]) )
-			res[i] = A[i];	//does not copy 2D Arrays... 
+			res[i] = A[i];	//does not copy 2D Arrays...
 		else
 			res[i] = matrixCopy( A[i] ) ;
 	return res;
@@ -1980,7 +1980,7 @@ function reshape ( A, m, n ) {
 			if ( n == 1 )
 				R = vectorCopy(A.val);
 			else
-				R = new Matrix(m,n,A.val);			
+				R = new Matrix(m,n,A.val);
 		}
 	}
 	else
@@ -1996,36 +1996,36 @@ function reshape ( A, m, n ) {
 
 /*
 	GET function : returns a copy of a subset of entries
-	
+
 	For MATRICES:
 
-	get ( M, rows, cols ) => submatrix of M 
+	get ( M, rows, cols ) => submatrix of M
 	get ( M, rows ) 	  => subset of rows from M (equiv to rows(M,rows) )
 	get ( M, [], cols )   => subset of cols (equiv to cols(M, cols) )
 	get ( M, i, j)		  => M[i][j] converted to dense format (0 instead of undefined)
 	get ( M ) 			  => M in dense format  (with 0 instead of undefined)
-	
+
 	For VECTORS:
 
 	get ( v, rows ) 	  => subvector from v (equiv to rows(v,rows) )
 	get ( v, i )		  => v[i] converted to dense format (0 instead of undefined)
-	get ( v ) 			  => v in dense format  (with 0 instead of undefined)	
+	get ( v ) 			  => v in dense format  (with 0 instead of undefined)
 
 */
 function get ( A , rowsrange, colsrange) {
 
 	var typerows = typeof(rowsrange);
 	var typecols = typeof(colsrange);
-	
-	if (arguments.length == 1 ) 
+
+	if (arguments.length == 1 )
 		return matrixCopy(A);
-	
+
 	var typeA = type ( A );
 	if ( typeA == "vector" ) {
-			
+
 		if ( typerows == "number" ) {
 			if (rowsrange >= 0 && rowsrange < A.length)
-				return A[rowsrange];	// get v[i]			
+				return A[rowsrange];	// get v[i]
 			else {
 				error("Error in a[i] = get(a,i): Index i="+rowsrange+" out of bounds [0,"+(A.length-1)+"]");
 				return undefined;
@@ -2033,88 +2033,88 @@ function get ( A , rowsrange, colsrange) {
 		}
 		else {
 			return getSubVector(A, rowsrange);
-		}	
+		}
 	}
-	else if ( typeA == "matrix") {		
-		
+	else if ( typeA == "matrix") {
+
 		if ( typerows == "number" )
 			rowsrange = [rowsrange];
 
 		if ( typecols == "number" )
 			colsrange = [colsrange];
 
-		if ( rowsrange.length == 1 && colsrange.length == 1 ) 
-			return A.val[rowsrange[0] * A.n + colsrange[0]];	// get ( A, i, j)			
+		if ( rowsrange.length == 1 && colsrange.length == 1 )
+			return A.val[rowsrange[0] * A.n + colsrange[0]];	// get ( A, i, j)
 
-		if ( rowsrange.length == 0 ) 				
+		if ( rowsrange.length == 0 )
 			return getCols(A,colsrange);// get(A,[],4) <=> cols(A,4)
-		
-		if (colsrange.length == 0 ) 			
+
+		if (colsrange.length == 0 )
 			return getRows(A, rowsrange);// get(A,3,[]) <=> rows(A,3)
-			
+
 		// otherwise:
 		return getSubMatrix(A, rowsrange, colsrange);
-		
+
 	}
 	else if ( typeA == "Array" ) {
 		if ( typerows == "number" )
-			return A[rowsrange]; 
+			return A[rowsrange];
 		else
 			return getSubArray(A, rowsrange);
 	}
-	else if ( typeA == "spmatrix") {		
-		
+	else if ( typeA == "spmatrix") {
+
 		if ( typerows == "number" )
 			rowsrange = [rowsrange];
 
 		if ( typecols == "number" )
 			colsrange = [colsrange];
 
-		if ( rowsrange.length == 1 && colsrange.length == 1 ) 
-			return A.get(rowsrange[0], colsrange[0]);   // get ( A, i, j)			
+		if ( rowsrange.length == 1 && colsrange.length == 1 )
+			return A.get(rowsrange[0], colsrange[0]);   // get ( A, i, j)
 
 		if ( rowsrange.length == 1 && A.rowmajor )
 			return A.row(rowsrange[0]);
 		if ( colsrange.length == 1 && !A.rowmajor )
 			return A.col(colsrange[0]);
-		
-		if (colsrange.length == 0 ) 			
+
+		if (colsrange.length == 0 )
 			return spgetRows(A, rowsrange);
-		if ( rowsrange.length == 0 ) 				
+		if ( rowsrange.length == 0 )
 			return spgetCols(A,colsrange);
-		
+
 		// TODO
 	}
 	else if ( typeA == "spvector" ) {
-			
-		if ( typerows == "number" ) 
-			return A.get( rowsrange );	// get v[i]					
-		else 
-			return getSubspVector(A, rowsrange);//TODO		
+
+		if ( typerows == "number" )
+			return A.get( rowsrange );	// get v[i]
+		else
+			return getSubspVector(A, rowsrange);//TODO
 	}
 	else if ( typeA == "ComplexVector") {
-		if ( typerows == "number" ) 
-			return A.get( rowsrange );	// get v[i]	
+		if ( typerows == "number" )
+			return A.get( rowsrange );	// get v[i]
 		else
 			return A.getSubVector(rowsrange);
-	}	
-	else if ( typeA == "ComplexMatrix") {		
-		
+	}
+	else if ( typeA == "ComplexMatrix") {
+
 		if ( typerows == "number" )
 			rowsrange = [rowsrange];
 
 		if ( typecols == "number" )
 			colsrange = [colsrange];
-		
-		if ( rowsrange.length == 1 && colsrange.length == 1 ) 
+
+		if ( rowsrange.length == 1 && colsrange.length == 1 )
 			return A.get(i,j);
 
-		if ( rowsrange.length == 0 ) 				
+		if ( rowsrange.length == 0 )
 			return A.getCols(colsrange);// get(A,[],4) <=> cols(A,4)
-		
-		if (colsrange.length == 0 ) 			
+
+		if (colsrange.length == 0 )
 			return A.getRows(rowsrange);// get(A,3,[]) <=> rows(A,3)
-			
+
 		// otherwise:
 		return A.getSubMatrix(rowsrange, colsrange);
 	}
@@ -2134,8 +2134,8 @@ function getSubMatrix(A, rowsrange, colsrange) {
 	else {
 		res = new Matrix(rowsrange.length, n);
 		var r = 0;
-		
-		for (i= 0; i< rowsrange.length ; i++) {			
+
+		for (i= 0; i< rowsrange.length ; i++) {
 			var rA = rowsrange[i]*A.n;
 			for ( j=0; j < n; j++) {
 				res.val[r+j] = A.val[rA + colsrange[j]];
@@ -2153,7 +2153,7 @@ function getRows(A, rowsrange) {
 		var r=0;
 		for ( var i = 0; i < n; i++) {
 			for (var j=0; j < A.n; j++)
-				res.val[r + j] = A.val[rowsrange[i]*A.n + j]; 
+				res.val[r + j] = A.val[rowsrange[i]*A.n + j];
 			r += A.n;
 		}
 		return res;
@@ -2169,9 +2169,9 @@ function getCols(A, colsrange) {
 		var r = 0;
 		var rA = 0;
 		for ( var i = 0; i < m; i++) {
-			for ( var j = 0; j < n; j++) 
+			for ( var j = 0; j < n; j++)
 				res.val[r + j] = A.val[rA + colsrange[j]];
-				
+
 			r += n;
 			rA += A.n;
 		}
@@ -2190,7 +2190,7 @@ function getCols(A, colsrange) {
 /**
  * @param {Float64Array}
  * @param {Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function getSubVector(a, rowsrange) {
 	const n = rowsrange.length;
@@ -2204,7 +2204,7 @@ function getSubVector(a, rowsrange) {
 /**
  * @param {Array}
  * @param {Array}
- * @return {Array} 
+ * @return {Array}
  */
 function getSubArray(a, rowsrange) {
 	const n = rowsrange.length;
@@ -2223,15 +2223,15 @@ function getrowref(A, i) {
 
 /*
 	SET function : set values in a subset of entries of a matrix or vector
-	
+
 	For MATRICES:
 
-	set ( M, rows, cols, A ) => submatrix of M = A 
+	set ( M, rows, cols, A ) => submatrix of M = A
 	set ( M, rows, A ) 	     => subset of rows from M = A
 	set ( M, [], cols, A )   => subset of cols from M = A
-	set ( M, i, [], A )   	 => fill row M[i] with vector A (transposed) 
+	set ( M, i, [], A )   	 => fill row M[i] with vector A (transposed)
 	set ( M, i, j, A)	     => M[i][j] = A
-	
+
 	For VECTORS:
 
 	set ( v, rows, a ) 	  => subvector from v = a
@@ -2247,10 +2247,10 @@ function set ( A , rowsrange, colsrange, B) {
 
 	var typerows = typeof(rowsrange);
 	var typecols = typeof(colsrange);
-	
-	if (arguments.length == 1 ) 
+
+	if (arguments.length == 1 )
 		return undefined;
-	
+
 	var typeA = type ( A );
 	if ( typeA == "vector" ) {
 		B = colsrange;
@@ -2258,9 +2258,9 @@ function set ( A , rowsrange, colsrange, B) {
 			A[rowsrange] = B;
 			return B;
 		}
-		else if ( rowsrange.length == 0 ) 
+		else if ( rowsrange.length == 0 )
 			rowsrange = range(A.length);
-				
+
 		if ( size(B,1) == 1 ) {
 			setVectorScalar (A, rowsrange, B);
 		}
@@ -2269,44 +2269,44 @@ function set ( A , rowsrange, colsrange, B) {
 		}
 		return B;
 	}
-	else if ( typeA == "matrix") {				
-	
+	else if ( typeA == "matrix") {
+
 		if ( typerows == "number" )
 			rowsrange = [rowsrange];
 		if ( typecols == "number" )
 			colsrange = [colsrange];
-		
+
 		if ( rowsrange.length == 1 && colsrange.length == 1 ) {
-			A.val[rowsrange[0]*A.n + colsrange[0]] = B;	
+			A.val[rowsrange[0]*A.n + colsrange[0]] = B;
 			return B;
 		}
-		
+
 		if ( rowsrange.length == 0 ) {
-			setCols(A, colsrange, B); 
+			setCols(A, colsrange, B);
 			return B;
 		}
-		
+
 		if (colsrange.length == 0 ) {
-			setRows( A, rowsrange, B); 
+			setRows( A, rowsrange, B);
 			return B;
 		}
-		
+
 		// Set a submatrix
 		var sB = size(B);
 		var tB = type(B);
 		if ( sB[0] == 1 && sB[1] == 1 ) {
 			if ( tB == "number" )
 				setMatrixScalar(A, rowsrange, colsrange, B);
-			else if ( tB == "vector" )			
-				setMatrixScalar(A, rowsrange, colsrange, B[0]);			
+			else if ( tB == "vector" )
+				setMatrixScalar(A, rowsrange, colsrange, B[0]);
 			else
-				setMatrixScalar(A, rowsrange, colsrange, B.val[0]);			
+				setMatrixScalar(A, rowsrange, colsrange, B.val[0]);
 		}
 		else {
 			if ( colsrange.length == 1 )
-				setMatrixColVector(A, rowsrange, colsrange[0], B);				
+				setMatrixColVector(A, rowsrange, colsrange[0], B);
 			else if ( rowsrange.length == 1 ) {
-				if ( tB == "vector" ) 
+				if ( tB == "vector" )
 					setMatrixRowVector(A, rowsrange[0], colsrange, B);
 				else
 					setMatrixRowVector(A, rowsrange[0], colsrange, B.val);
@@ -2314,7 +2314,7 @@ function set ( A , rowsrange, colsrange, B) {
 			else
 				setMatrixMatrix(A, rowsrange, colsrange, B);
 		}
-		return B;		
+		return B;
 	}
 	else if ( typeA == "ComplexVector" ) {
 		B = colsrange;
@@ -2322,9 +2322,9 @@ function set ( A , rowsrange, colsrange, B) {
 			A.set(rowsrange, B);
 			return B;
 		}
-		else if ( rowsrange.length == 0 ) 
+		else if ( rowsrange.length == 0 )
 			rowsrange = range(A.length);
-				
+
 		if ( size(B,1) == 1 ) {
 			A.setVectorScalar (rowsrange, B);
 		}
@@ -2334,15 +2334,15 @@ function set ( A , rowsrange, colsrange, B) {
 		return B;
 	}
 }
-		
+
 function setVectorScalar(A, rowsrange, B) {
 	var i;
-	for (i = 0; i< rowsrange.length; i++) 
+	for (i = 0; i< rowsrange.length; i++)
 		A[rowsrange[i]] = B;
 }
 function setVectorVector(A, rowsrange, B) {
 	var i;
-	for (i = 0; i< rowsrange.length; i++) 
+	for (i = 0; i< rowsrange.length; i++)
 		A[rowsrange[i]] = B[i];
 }
 
@@ -2351,7 +2351,7 @@ function setMatrixScalar(A, rowsrange, colsrange, B) {
 	var j;
 	var m = rowsrange.length;
 	var n = colsrange.length;
-	for (i = 0; i< m; i++) 
+	for (i = 0; i< m; i++)
 		for(j=0; j < n; j++)
 			A.val[rowsrange[i]*A.n + colsrange[j]] = B;
 }
@@ -2360,14 +2360,14 @@ function setMatrixMatrix(A, rowsrange, colsrange, B) {
 	var j;
 	var m = rowsrange.length;
 	var n = colsrange.length;
-	for (i = 0; i< m; i++) 
+	for (i = 0; i< m; i++)
 		for(j=0; j < n; j++)
 			A.val[rowsrange[i]*A.n + colsrange[j]] = B.val[i*B.n +j];
 }
 function setMatrixColVector(A, rowsrange, col, B) {
 	var i;
 	var m = rowsrange.length;
-	for (i = 0; i< m; i++) 
+	for (i = 0; i< m; i++)
 		A.val[rowsrange[i]*A.n + col] = B[i];
 }
 function setMatrixRowVector(A, row, colsrange, B) {
@@ -2384,17 +2384,17 @@ function setRows(A, rowsrange, B ) {
 	switch( type(B) ) {
 	case "vector":
 		for ( i=0; i<m; i++) {
-			rA = rowsrange[i]*A.n;		
+			rA = rowsrange[i]*A.n;
 			for ( j=0; j<B.length; j++)
 				A.val[rA + j] = B[j];
 		}
 		break;
-	case "matrix":		
+	case "matrix":
 		var rB = 0;
 		for ( i=0; i<m; i++) {
 			rA = rowsrange[i]*A.n;
 			for ( j=0; j < B.n; j++)
-				A.val[rA + j] = B.val[rB + j];		
+				A.val[rA + j] = B.val[rB + j];
 			rB += B.n;
 		}
 		break;
@@ -2416,18 +2416,18 @@ function setCols(A, colsrange, B ) {
 	case "vector":
 		for ( i=0; i<m; i++) {
 			for (j=0; j < n; j++)
-				A.val[r + colsrange[j]] = B[i]; 
+				A.val[r + colsrange[j]] = B[i];
 			r += A.n;
 		}
 		break;
 	case "matrix":
 		for ( i=0; i<m; i++) {
 			for (j=0; j < n; j++)
-				A.val[r + colsrange[j]] = B.val[i* B.n + j]; 
+				A.val[r + colsrange[j]] = B.val[i* B.n + j];
 			r += A.n;
-		}			
+		}
 		break;
-	default:		
+	default:
 		for ( i=0; i<m; i++) {
 			for(j=0; j < n; j++)
 				A.val[r + colsrange[j]] = B;
@@ -2448,11 +2448,11 @@ function supp( x ) {
 		var indexes = [];
 		var i;
 		for ( i = 0; i < x.length;  i++ ) {
-			if ( !isZero(x[i]) ) 
+			if ( !isZero(x[i]) )
 				indexes.push(i);
 		}
-		
-		return indexes; 
+
+		return indexes;
 	}
 	else if (tx == "spvector" ) {
 		return new Float64Array(x.ind);
@@ -2463,18 +2463,18 @@ function supp( x ) {
 
 // Range
 function range(start, end, inc) {
-	// python-like range function 
+	// python-like range function
 	// returns [0,... , end-1]
-	if ( typeof(start) == "undefined" ) 
+	if ( typeof(start) == "undefined" )
 		return [];
-		
-	if ( typeof(inc) == "undefined" ) 
+
+	if ( typeof(inc) == "undefined" )
 		var inc = 1;
 	if ( typeof(end) == "undefined" ) {
 		var end = start;
 		start = 0;
-	}		
-	
+	}
+
 	if ( start == end-inc) {
 		return start;
 	}
@@ -2482,27 +2482,27 @@ function range(start, end, inc) {
 		return [];
 	}
 	else if ( start > end ) {
-		if ( inc > 0) 
+		if ( inc > 0)
 			inc *= -1;
 		var r = new Array( Math.floor ( ( start - end ) / Math.abs(inc) ) );
 		var k = 0;
 		for ( var i = start; i> end; i+=inc) {
 			r[k] = i;
 			k++;
-		}	
+		}
 	}
-	else {		
+	else {
 		var r = new Array( Math.floor ( ( end - start ) / inc ) );
 		var k = 0;
 		for ( var i = start; i< end; i+=inc) {
 			r[k] = i;
 			k++;
-		}	
+		}
 	}
 	return r;
 }
 
-// Swaping 
+// Swaping
 /**
  * @param {Matrix}
  */
@@ -2531,7 +2531,7 @@ function swapcols ( A , j, k ) {
 ////////////////////////////
 
 // Gaussian random number (mean = 0, variance = 1;
-//	Gaussian noise with the polar form of the Box-Muller transformation 
+//	Gaussian noise with the polar form of the Box-Muller transformation
 function randnScalar() {
 
     var x1;
@@ -2548,20 +2548,20 @@ function randnScalar() {
 	 w = Math.sqrt( (-2.0 * Math.log( w ) ) / w );
 	 y1 = x1 * w;
 	 y2 = x2 * w;
-	 
+
 	 return y1;
 }
 function randn( dim1, dim2 ) {
     var res;
 
 	if ( typeof ( dim1 ) == "undefined" || (dim1 == 1 && typeof(dim2)=="undefined") || (dim1 == 1 && dim2==1)) {
-		return randnScalar();		
-	} 
+		return randnScalar();
+	}
 	else if (typeof(dim2) == "undefined" || dim2 == 1 ) {
 		res = new Float64Array(dim1);
-		for (var i=0; i< dim1; i++) 			
+		for (var i=0; i< dim1; i++)
 			res[i] = randnScalar();
-		
+
 		return res;
 	}
 	else  {
@@ -2580,20 +2580,20 @@ function randn( dim1, dim2 ) {
  */
 function randVector(dim1) {
 	var res = new Float64Array(dim1);
-	for (var i=0; i< dim1; i++) {			
+	for (var i=0; i< dim1; i++) {
 		res[i] = Math.random();
 	}
 	return res;
 }
 /*
  * @param{number}
- * @param{number} 
+ * @param{number}
  * @return{Matrix}
  */
 function randMatrix(dim1,dim2) {
-	const n = dim1*dim2;	
+	const n = dim1*dim2;
 	var res = new Float64Array(n);
-	for (var i=0; i< n; i++) {			
+	for (var i=0; i< n; i++) {
 		res[i] = Math.random();
 	}
 	return new Matrix(dim1,dim2,res,true);
@@ -2602,12 +2602,12 @@ function rand( dim1, dim2 ) {
 	var res;
 	if ( typeof ( dim1 ) == "undefined" || (dim1 == 1 && typeof(dim2)=="undefined") || (dim1 == 1 && dim2==1)) {
 		 return Math.random();
-	} 
+	}
 	else if (typeof(dim2) == "undefined" || dim2 == 1) {
 		return randVector(dim1);
 	}
 	else  {
-		return randMatrix(dim1,dim2);	
+		return randMatrix(dim1,dim2);
 	}
 }
 
@@ -2616,22 +2616,22 @@ function randnsparse(NZratio, dim1, dim2) {
 	var NZ;
 	if ( NZratio > 1 )
 		NZ = NZratio;
-	else 
+	else
 		NZ = Math.floor(NZratio *dim1*dim2);
-		
-	var indexes; 
+
+	var indexes;
 	var i;
 	var j;
 	var k;
 	var res;
-	
+
 	if ( typeof ( dim1 ) == "undefined" ) {
 		return randn();
-	} 
+	}
 	else if (typeof(dim2) == "undefined" || dim2 == 1) {
-	
+
 		indexes = randperm( dim1 );
-	
+
 		res = zeros(dim1);
 		for (i=0; i< NZ; i++) {
 			res[indexes[i]] = randn();
@@ -2644,7 +2644,7 @@ function randnsparse(NZratio, dim1, dim2) {
 		for (k=0; k< NZ; k++) {
 			i = Math.floor(indexes[k] / dim2);
 			j = indexes[k] - i * dim2;
-			res.val[i*dim2+j] = randn();		
+			res.val[i*dim2+j] = randn();
 		}
 		return res;
 	}
@@ -2653,26 +2653,26 @@ function randsparse(NZratio, dim1, dim2) {
 	// Generates a sparse random matrix with NZratio * dim1*dim2 (or NZ if NZratio > 1 ) nonzeros
 	if (typeof(dim2) == "undefined")
 		var dim2 = 1;
-	
+
 	var NZ;
 	if ( NZratio > 1 )
 		NZ = NZratio;
-	else 
+	else
 		NZ = Math.floor(NZratio *dim1*dim2);
-		
-	var indexes; 
+
+	var indexes;
 	var i;
 	var j;
 	var k;
 	var res;
-	
+
 	if ( typeof ( dim1 ) == "undefined" ) {
 		return randn();
-	} 
+	}
 	else if (dim2 == 1) {
-	
+
 		indexes = randperm( dim1 );
-	
+
 		res = zeros(dim1);
 		for (i=0; i< NZ; i++) {
 			res[indexes[i]] = Math.random();
@@ -2686,7 +2686,7 @@ function randsparse(NZratio, dim1, dim2) {
 		for (k=0; k< NZ; k++) {
 			i = Math.floor(indexes[k] / dim2);
 			j = indexes[k] - i * dim2;
-			res.val[i*dim2+j] = Math.random();			
+			res.val[i*dim2+j] = Math.random();
 		}
 		return res;
 	}
@@ -2696,33 +2696,33 @@ function randperm( x ) {
 	// return a random permutation of x (or of range(x) if x is a number)
 
 	if ( typeof( x ) == "number" ) {
-		var perm = range(x); 
+		var perm = range(x);
 	}
-	else {		
+	else {
 		var perm = new Float64Array(x);
 	}
 	var i;
 	var j;
 	var k;
 
-	// shuffle	
+	// shuffle
 	for(i=perm.length - 1 ; i > 1; i--) {
 		j = Math.floor(Math.random() * i);
-		k = perm[j];		
+		k = perm[j];
 		perm[j] = perm[i];
 		perm[i] = k;
 	}
 	return perm;
 }
 ///////////////////////////////
-/// Basic Math function: give access to Math.* JS functions 
-///  and vectorize them 
+/// Basic Math function: give access to Math.* JS functions
+///  and vectorize them
 ///////////////////////////////
 
 
 // automatically generate (vectorized) wrappers for Math functions
 var MathFunctions = Object.getOwnPropertyNames(Math);
-for ( var mf in MathFunctions ) {	
+for ( var mf in MathFunctions ) {
 	if ( eval( "typeof(Math." + MathFunctions[mf] + ")") == "function") {
 		if ( eval( "Math." + MathFunctions[mf] + ".length") == 1 ) {
 			// this is a function of a scalar
@@ -2731,17 +2731,17 @@ for ( var mf in MathFunctions ) {
 			// make vectorized version:
 			eval( MathFunctions[mf] + "Vector = function (x) { return applyVector(Math."+ MathFunctions[mf] + " , x );};");
 			// make matrixized version:
-			eval( MathFunctions[mf] + "Matrix = function (x) { return applyMatrix(Math."+ MathFunctions[mf] + " , x );};");			
+			eval( MathFunctions[mf] + "Matrix = function (x) { return applyMatrix(Math."+ MathFunctions[mf] + " , x );};");
 		}
 	}
 	else if (  eval( "typeof(Math." + MathFunctions[mf] + ")") == "number") {
-		// Math constant: 
+		// Math constant:
 		eval( MathFunctions[mf] + " = Math."+ MathFunctions[mf] ) ;
 	}
 }
 
 function apply( f, x ) {
-	// Generic wrapper to apply scalar functions 
+	// Generic wrapper to apply scalar functions
 	// element-wise to vectors and matrices
 	if ( typeof(f) != "function")
 		return undefined;
@@ -2783,29 +2783,29 @@ function apply( f, x ) {
 		else
 			return applyComplexMatrix(f, x);
 		break;
-	default: 
+	default:
 		return "undefined";
 	}
 }
 function applyVector( f, x ) {
 	const nv = x.length;
 	var res = new Float64Array(nv);
-	for (var i=0; i< nv; i++) 
-		res[i] = f(x[i]);	
+	for (var i=0; i< nv; i++)
+		res[i] = f(x[i]);
 	return res;
 }
 function applyComplexVector( f, x ) {
 	const nv = x.length;
 	var res = new ComplexVector(nv);
-	for (var i=0; i< nv; i++) 
-		res.set(i, f(x.get(i) ) );	
+	for (var i=0; i< nv; i++)
+		res.set(i, f(x.get(i) ) );
 	return res;
 }
 function applyComplexMatrix( f, x ) {
 	const m = x.m;
 	const n = x.n;
 	var res = new ComplexMatrix(m, n);
-	for (var i=0; i< m; i++) 
+	for (var i=0; i< m; i++)
 		for ( var j =0; j < n; j++)
 			res.set(i, j, f(x.get(i,j) ) );
 	return res;
@@ -2819,10 +2819,10 @@ function applyMatrix(f, x) {
 
 function mul(a,b) {
 	var sa = size(a);
-	var sb = size(b); 
-	if ( !isScalar(a) && sa[0] == 1 && sa[1] == 1 ) 
+	var sb = size(b);
+	if ( !isScalar(a) && sa[0] == 1 && sa[1] == 1 )
 		a = get(a, 0, 0);
-	if ( !isScalar(b) && sb[0] == 1 && sb[1] == 1 ) 
+	if ( !isScalar(b) && sb[0] == 1 && sb[1] == 1 )
 		b = get(b, 0, 0);
 
 	switch( type(a) ) {
@@ -2834,13 +2834,13 @@ function mul(a,b) {
 		case "Complex":
 			return mulComplexReal(b,a);
 			break;
-		case "vector":			
+		case "vector":
 			return mulScalarVector(a,b);
 			break;
 		case "spvector":
 			return mulScalarspVector(a,b);
 			break;
-		case "ComplexVector":			
+		case "ComplexVector":
 			return mulScalarComplexVector(a,b);
 			break;
 		case "matrix":
@@ -2865,10 +2865,10 @@ function mul(a,b) {
 		case "Complex":
 			return mulComplex(a,b);
 			break;
-		case "vector":			
+		case "vector":
 			return mulComplexVector(a,b);
 			break;
-		case "ComplexVector":			
+		case "ComplexVector":
 			return mulComplexComplexVector(a,b);
 			break;
 		case "spvector":
@@ -2887,38 +2887,38 @@ function mul(a,b) {
 			return undefined;
 			break;
 		}
-		break;		
+		break;
 	case "vector":
 		switch( type(b) ) {
 		case "number":
 			return mulScalarVector(b,a);
 			break;
-		case "Complex":			
+		case "Complex":
 			return mulComplexVector(b,a);
 			break;
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dot(a,b);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dotspVectorVector(b,a);
 			break;
 		case "ComplexVector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dotComplexVectorVector(b,a);
-			break;		
+			break;
 		case "matrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodVectors(a , b.val );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -2926,7 +2926,7 @@ function mul(a,b) {
 			}
 			break;
 		case "spmatrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodVectors(a , fullMatrix(b).val );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -2934,7 +2934,7 @@ function mul(a,b) {
 			}
 			break;
 		case "ComplexMatrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return transpose(outerprodComplexVectorVector(new ComplexVector(b.re,b.im,true), a , b.val ));
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -2954,19 +2954,19 @@ function mul(a,b) {
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dotspVectorVector(a,b);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return spdot(b,a);
 			break;
 		case "matrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodspVectorVector(a , b.val );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -2974,7 +2974,7 @@ function mul(a,b) {
 			}
 			break;
 		case "spmatrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodspVectorVector(a, fullMatrix(b).val);
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -2997,19 +2997,19 @@ function mul(a,b) {
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dotComplexVectorVector(a,b);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in mul(a,b) (dot product): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return dotComplexVectorspVector(a,b);
 			break;
 		case "matrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodComplexVectorVector(a , b.val );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -3017,7 +3017,7 @@ function mul(a,b) {
 			}
 			break;
 		case "spmatrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodComplexVectorVector(a , fullMatrix(b).val );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -3025,7 +3025,7 @@ function mul(a,b) {
 			}
 			break;
 		case "ComplexMatrix":
-			if ( b.m == 1) 
+			if ( b.m == 1)
 				return outerprodComplexVectors(a , new ComplexVector(b.re,b.im, true) );
 			else {
 				error("Inconsistent dimensions in mul(a,B): size(a) = [" + sa[0] + "," + sa[1] + "], size(B) = [" + sb[0] + "," + sb[1] + "]");
@@ -3037,7 +3037,7 @@ function mul(a,b) {
 			break;
 		}
 		break;
-		
+
 	case "matrix":
 		switch( type(b) ) {
 		case "number":
@@ -3051,14 +3051,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dot(a.val, b);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulMatrixVector(a,b);
 			}
@@ -3068,14 +3068,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotspVectorVector(b, a.val);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulMatrixspVector(a,b);
 			}
@@ -3085,14 +3085,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotComplexVectorVector(b, a.val);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulMatrixComplexVector(a,b);
 			}
@@ -3100,21 +3100,21 @@ function mul(a,b) {
 		case "matrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulMatrixMatrix(a,b);
 			break;
 		case "spmatrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulMatrixspMatrix(a,b);
 			break;
 		case "ComplexMatrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return transpose(mulComplexMatrixMatrix(transpose(b),transpose(a)));
 			break;
@@ -3133,14 +3133,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.n != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dot(fullMatrix(a).val, b);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulspMatrixVector(a,b);
 			}
@@ -3150,14 +3150,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.n != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotspVectorVector(b, fullMatrix(a).val);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulspMatrixspVector(a,b);
 			}
@@ -3165,14 +3165,14 @@ function mul(a,b) {
 		case "matrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulspMatrixMatrix(a,b);
 			break;
 		case "spmatrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulspMatrixspMatrix(a,b);
 			break;
@@ -3194,14 +3194,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotComplexVectorVector(new ComplexVector(a.re,a.im,true), b);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulComplexMatrixVector(a,b);
 			}
@@ -3211,14 +3211,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotComplexVectorspVector(new ComplexVector(a.re,a.im,true), b);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulComplexMatrixspVector(a,b);
 			}
@@ -3228,14 +3228,14 @@ function mul(a,b) {
 				// dot product with explicit transpose
 				if ( a.val.length != b.length ) {
 					error("Error in mul(a',b): a.length = " + a.val.length + " != " + b.length + " =  b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return dotComplexVectors(new ComplexVector(a.re,a.im,true), b);
 			}
-			else {			
+			else {
 				if ( a.n != b.length ) {
 					error("Error in mul(A,b): A.n = " + a.n + " != " + b.length + " = b.length.");
-					return undefined; 
+					return undefined;
 				}
 				return mulComplexMatrixComplexVector(a,b);
 			}
@@ -3243,21 +3243,21 @@ function mul(a,b) {
 		case "matrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulComplexMatrixMatrix(a,b);
 			break;
 		case "spmatrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulComplexMatrixspMatrix(a,b);
 			break;
 		case "ComplexMatrix":
 			if ( a.n != b.m ) {
 				error("Error in mul(A,B): A.n = " + a.n + " != " + b.m + " = B.m.");
-				return undefined; 
+				return undefined;
 			}
 			return mulComplexMatrices(a,b);
 			break;
@@ -3275,7 +3275,7 @@ function mul(a,b) {
 /**
  * @param {number}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function mulScalarVector( scalar, vec ) {
 	var i;
@@ -3288,24 +3288,24 @@ function mulScalarVector( scalar, vec ) {
 /**
  * @param {number}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function mulScalarMatrix( scalar, A ) {
 	var res = new Matrix(A.m,A.n, mulScalarVector(scalar, A.val), true );
 
-	return res;	
+	return res;
 }
 
 /**
  * @param {Float64Array}
  * @param {Float64Array}
- * @return {number} 
+ * @return {number}
  */
 function dot(a, b) {
 	const n = a.length;
 	var i;
 	var res = 0;
-	for ( i=0; i< n; i++) 
+	for ( i=0; i< n; i++)
 		res += a[i]*b[i];
 	return res;
 }
@@ -3313,33 +3313,33 @@ function dot(a, b) {
 /**
  * @param {Matrix}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function mulMatrixVector( A, b ) {
 	const m = A.length;
-	var c = new Float64Array(m); 	
+	var c = new Float64Array(m);
 	var r = 0;
 	for (var i=0; i < m; i++) {
 		c[i] = dot(A.val.subarray(r, r+A.n), b);
 		r += A.n;
 	}
-	
+
 	return c;
 }
 /**
  * @param {Matrix}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function mulMatrixTransVector( A, b ) {
 	const m = A.length;
 	const n = A.n;
-	var c = new Float64Array(n); 	
+	var c = new Float64Array(n);
 	var rj = 0;
 	for (var j=0; j < m; j++) {
 		var bj = b[j];
 		for (var i=0; i < n; i++) {
-			c[i] += A.val[rj + i] * bj;			
+			c[i] += A.val[rj + i] * bj;
 		}
 		rj += A.n;
 	}
@@ -3348,38 +3348,38 @@ function mulMatrixTransVector( A, b ) {
 /**
  * @param {Matrix}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function mulMatrixMatrix(A, B) {
 	const m = A.length;
 	const n = B.n;
 	const n2 = B.length;
-	
-	var Av = A.val; 
+
+	var Av = A.val;
 	var Bv = B.val;
-	
+
 	var C = new Float64Array(m*n);
 	var aik;
 	var Aik = 0;
 	var Ci = 0;
-	for (var i=0;i < m ; i++) {		
+	for (var i=0;i < m ; i++) {
 		var bj = 0;
 		for (var k=0; k < n2; k++ ) {
 			aik = Av[Aik];
 			for (var j =0; j < n; j++) {
 				C[Ci + j] += aik * Bv[bj];
 				bj++;
-			}	
-			Aik++;					
+			}
+			Aik++;
 		}
 		Ci += n;
 	}
-	return  new Matrix(m,n,C, true);	
+	return  new Matrix(m,n,C, true);
 }
 /**
  * @param {Float64Array}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function entrywisemulVector( a, b) {
 	var i;
@@ -3392,20 +3392,20 @@ function entrywisemulVector( a, b) {
 /**
  * @param {Matrix}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function entrywisemulMatrix( A, B) {
-	var res = new Matrix(A.m,A.n, entrywisemulVector(A.val, B.val), true );	
+	var res = new Matrix(A.m,A.n, entrywisemulVector(A.val, B.val), true );
 	return res;
 }
 
 
 function entrywisemul(a,b) {
 	var sa = size(a);
-	var sb = size(b); 
-	if (typeof(a) != "number" && sa[0] == 1 && sa[1] == 1 ) 
+	var sb = size(b);
+	if (typeof(a) != "number" && sa[0] == 1 && sa[1] == 1 )
 		a = get(a, 0, 0);
-	if (typeof(b) != "number" && sb[0] == 1 && sb[1] == 1 ) 
+	if (typeof(b) != "number" && sb[0] == 1 && sb[1] == 1 )
 		b = get(b, 0, 0);
 
 	switch( type(a) ) {
@@ -3417,7 +3417,7 @@ function entrywisemul(a,b) {
 		case "Complex":
 			return mulComplexReal(b,a);
 			break;
-		case "vector":			
+		case "vector":
 			return mulScalarVector(a,b);
 			break;
 		case "spvector":
@@ -3451,29 +3451,29 @@ function entrywisemul(a,b) {
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulVector(a,b);
 			break;
 		case "ComplexVector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulComplexVectorVector(b,a);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulspVectorVector(b,a);
 			break;
 		case "matrix":
 		case "spmatrix":
 		case "ComplexMatrix":
 			error("Error in entrywisemul(a,B): a is a vector and B is a matrix.");
-			return undefined;			
+			return undefined;
 			break;
 		default:
 			return undefined;
@@ -3488,24 +3488,24 @@ function entrywisemul(a,b) {
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulspVectorVector(a,b);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulspVectors(a,b);
 			break;
 		case "matrix":
 			error("Error in entrywisemul(a,B): a is a vector and B is a Matrix.");
-			return undefined;		
+			return undefined;
 			break;
 		case "spmatrix":
 			error("Error in entrywisemul(a,B): a is a vector and B is a Matrix.");
-			return undefined;		
+			return undefined;
 			break;
 		default:
 			return undefined;
@@ -3595,29 +3595,29 @@ function entrywisemul(a,b) {
 		case "vector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulComplexVectorVector(a,b);
 			break;
 		case "ComplexVector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulComplexVectors(a,b);
 			break;
 		case "spvector":
 			if ( a.length != b.length ) {
 				error("Error in entrywisemul(a,b): a.length = " + a.length + " != " + b.length + " = b.length.");
-				return undefined; 
-			}	
+				return undefined;
+			}
 			return entrywisemulComplexVectorspVector(a,b);
 			break;
 		case "matrix":
 		case "spmatrix":
 		case "ComplexMatrix":
 			error("Error in entrywisemul(a,B): a is a vector and B is a matrix.");
-			return undefined;			
+			return undefined;
 			break;
 		default:
 			return undefined;
@@ -3678,7 +3678,7 @@ function entrywisemul(a,b) {
  */
 function saxpy ( a, x, y) {
 	const n = y.length;
-	for ( var i=0; i < n; i++) 
+	for ( var i=0; i < n; i++)
 		y[i] += a*x[i];
 }
 /** GAXPY : y = y + Ax
@@ -3699,7 +3699,7 @@ function gaxpy ( A, x, y) {
 /**
  * @param {Float64Array}
  * @param {number}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function divVectorScalar( a, b) {
 	var i;
@@ -3712,7 +3712,7 @@ function divVectorScalar( a, b) {
 /**
  * @param {number}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function divScalarVector ( a, b) {
 	var i;
@@ -3725,7 +3725,7 @@ function divScalarVector ( a, b) {
 /**
  * @param {Float64Array}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function divVectors( a, b) {
 	var i;
@@ -3738,7 +3738,7 @@ function divVectors( a, b) {
 /**
  * @param {Matrix}
  * @param {number}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function divMatrixScalar( A, b) {
 	var res = new Matrix(A.m, A.n, divVectorScalar(A.val , b ), true);
@@ -3747,7 +3747,7 @@ function divMatrixScalar( A, b) {
 /**
  * @param {number}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function divScalarMatrix( a, B) {
 	var res = new Matrix(B.m, B.n, divScalarVector(a, B.val ), true);
@@ -3756,7 +3756,7 @@ function divScalarMatrix( a, B) {
 /**
  * @param {Matrix}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function divMatrices( A, B) {
 	var res = new Matrix(A.m, A.n, divVectors(A.val, B.val ), true);
@@ -3765,10 +3765,10 @@ function divMatrices( A, B) {
 
 function entrywisediv(a,b) {
 	var ta = type(a);
-	var tb = type(b); 
+	var tb = type(b);
 
 	switch(ta) {
-		case "number": 
+		case "number":
 			switch(tb) {
 			case "number":
 				return a/b;
@@ -3790,7 +3790,7 @@ function entrywisediv(a,b) {
 				return undefined;
 			}
 			break;
-		case "vector": 
+		case "vector":
 			switch(tb) {
 			case "number":
 				return divVectorScalar(a,b);
@@ -3810,7 +3810,7 @@ function entrywisediv(a,b) {
 				return undefined;
 			}
 			break;
-		case "spvector": 
+		case "spvector":
 			switch(tb) {
 			case "number":
 				return mulScalarspVector(1/b, a);
@@ -3831,7 +3831,7 @@ function entrywisediv(a,b) {
 				return undefined;
 			}
 			break;
-		case "matrix": 
+		case "matrix":
 			switch(tb) {
 			case "number":
 				return divMatrixScalar(a,b);
@@ -3851,7 +3851,7 @@ function entrywisediv(a,b) {
 				error("Error in entrywisediv(A,b): a is a matrix and B is a " + tb + ".");
 				return undefined;
 			}
-		case "spmatrix": 
+		case "spmatrix":
 			switch(tb) {
 			case "number":
 				return mulScalarspMatrix(1/b,a);
@@ -3887,12 +3887,12 @@ function outerprodVectors(a, b, scalar) {
 	const n = b.length;
 	var res = new Matrix(m,n);
 	if( arguments.length == 3 ) {
-		for (i=0; i< m; i++) 
-			res.val.set( mulScalarVector(scalar*a[i], b), i*n);	
+		for (i=0; i< m; i++)
+			res.val.set( mulScalarVector(scalar*a[i], b), i*n);
 	}
 	else {
-		for (i=0; i< m; i++) 
-			res.val.set( mulScalarVector(a[i], b), i*n);	
+		for (i=0; i< m; i++)
+			res.val.set( mulScalarVector(a[i], b), i*n);
 	}
 	return res;
 }
@@ -3910,7 +3910,7 @@ function outerprod( u , v, scalar ) {
 			if ( arguments.length == 2 )
 				return new Matrix(1,v.length, mulScalarVector(u, v), true );
 			else
-				return new Matrix(1,v.length, mulScalarVector(u*scalar, v), true ); 
+				return new Matrix(1,v.length, mulScalarVector(u*scalar, v), true );
 		}
 	}
 	if ( u.length == 1 ) {
@@ -3924,11 +3924,11 @@ function outerprod( u , v, scalar ) {
 			if ( arguments.length == 2 )
 				return new Matrix(1,v.length, mulScalarVector(u[0], v) , true);
 			else
-				return new Matrix(1,v.length, mulScalarVector(u[0]*scalar, v), true ); 
+				return new Matrix(1,v.length, mulScalarVector(u[0]*scalar, v), true );
 		}
 	}
 	if (typeof(v) == "number" ) {
-		if (arguments.length == 2 ) 
+		if (arguments.length == 2 )
 			return mulScalarVector(v, u);
 		else
 			return mulScalarVector( scalar * v , u);
@@ -3939,7 +3939,7 @@ function outerprod( u , v, scalar ) {
 		else
 			return mulScalarVector( scalar * v[0] , u);
 	}
-	
+
 	if ( arguments.length == 2 )
 		return outerprodVectors(u,v);
 	else
@@ -3948,20 +3948,20 @@ function outerprod( u , v, scalar ) {
 /**
  * @param {number}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function addScalarVector ( scalar, vec ) {
 	const n = vec.length;
 	var res = new Float64Array(vec);
-	for (var i = 0 ; i< n; i++) 
+	for (var i = 0 ; i< n; i++)
 		res[i] += scalar ;
-	
+
 	return res;
 }
 /**
  * @param {number}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function addScalarMatrix(a, B ) {
 	return new Matrix(B.m, B.n, addScalarVector(a, B.val), true );
@@ -3969,7 +3969,7 @@ function addScalarMatrix(a, B ) {
 /**
  * @param {Float64Array}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function addVectors(a,b) {
 	const n = a.length;
@@ -3981,13 +3981,13 @@ function addVectors(a,b) {
 /**
  * @param {Matrix}
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function addMatrices(A,B) {
 	return new Matrix(A.m, A.n, addVectors(A.val, B.val) , true);
 }
 function add(a,b) {
-	
+
 	const ta = type(a);
 	const tb = type(b);
 	if ( ta == "number" && tb == "number" || ta == "string" || tb == "string")
@@ -3998,26 +3998,26 @@ function add(a,b) {
 			return addComplexReal(b,a);
 			break;
 		case "vector":
-			return addScalarVector(a,b); 
+			return addScalarVector(a,b);
 			break;
 		case "matrix":
 			return addScalarMatrix(a,b);
 			break;
 		case "spvector":
-			return addScalarspVector(a,b); 
+			return addScalarspVector(a,b);
 			break;
 		case "spmatrix":
 			return addScalarspMatrix(a,b);
 			break;
 		case "ComplexVector":
-			return addScalarComplexVector(a,b); 
+			return addScalarComplexVector(a,b);
 			break;
 		case "ComplexMatrix":
-			return addScalarComplexMatrix(a,b); 
+			return addScalarComplexMatrix(a,b);
 			break;
 		default:
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( tb == "number" ) {
@@ -4026,26 +4026,26 @@ function add(a,b) {
 			return addComplexReal(a,b);
 			break;
 		case "vector":
-			return addScalarVector(b,a); 
+			return addScalarVector(b,a);
 			break;
 		case "matrix":
 			return addScalarMatrix(b,a);
 			break;
 		case "spvector":
-			return addScalarspVector(b,a); 
+			return addScalarspVector(b,a);
 			break;
 		case "spmatrix":
 			return addScalarspMatrix(b,a);
 			break;
 		case "ComplexVector":
-			return addScalarComplexVector(b,a); 
+			return addScalarComplexVector(b,a);
 			break;
 		case "ComplexMatrix":
-			return addScalarComplexMatrix(b,a); 
+			return addScalarComplexMatrix(b,a);
 			break;
 		default:
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( ta == "vector" ) {
@@ -4077,7 +4077,7 @@ function add(a,b) {
 		default:
 			error("Error in add(a,B): a is a vector and B is a " + tb + ".");
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( ta == "matrix" ) {
@@ -4111,8 +4111,8 @@ function add(a,b) {
 		default:
 			error("Error in add(A,b): a is a matrix and B is a " + tb + ".");
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else if ( ta == "spvector" ) {
 		switch(tb) {
@@ -4136,7 +4136,7 @@ function add(a,b) {
 		default:
 			error("Error in add(a,B): a is a sparse vector and B is a " + tb + ".");
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( ta == "spmatrix" ) {
@@ -4162,8 +4162,8 @@ function add(a,b) {
 		default:
 			error("Error in add(A,b): a is a sparse matrix and B is a " + tb + ".");
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else if ( ta == "ComplexVector" ) {
 		switch(tb) {
@@ -4194,7 +4194,7 @@ function add(a,b) {
 		default:
 			error("Error in add(a,B): a is a vector and B is a " + tb + ".");
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( ta == "ComplexMatrix" ) {
@@ -4228,8 +4228,8 @@ function add(a,b) {
 		default:
 			error("Error in add(A,b): a is a matrix and B is a " + tb + ".");
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else
 		return undefined;
@@ -4237,41 +4237,41 @@ function add(a,b) {
 /**
  * @param {number}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function subScalarVector ( scalar, vec ) {
 	const n = vec.length;
 	var res = new Float64Array(n);
-	for (var i = 0 ; i< n; i++) 
-		res[i] = scalar - vec[i];		
-	
+	for (var i = 0 ; i< n; i++)
+		res[i] = scalar - vec[i];
+
 	return res;
 }
 /**
  * @param {Float64Array}
  * @param {number}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function subVectorScalar ( vec, scalar ) {
 	const n = vec.length;
 	var res = new Float64Array(vec);
-	for (var i = 0 ; i< n; i++) 
+	for (var i = 0 ; i< n; i++)
 		res[i] -= scalar;
-	
+
 	return res;
 }
 /**
  * @param {number}
- * @param {Matrix} 
- * @return {Matrix} 
+ * @param {Matrix}
+ * @return {Matrix}
  */
 function subScalarMatrix(a, B ) {
 	return new Matrix(B.m, B.n, subScalarVector(a, B.val), true );
 }
 /**
  * @param {Matrix}
- * @param {number} 
- * @return {Matrix} 
+ * @param {number}
+ * @return {Matrix}
  */
 function subMatrixScalar(B, a ) {
 	return new Matrix(B.m, B.n, subVectorScalar(B.val, a) , true);
@@ -4279,7 +4279,7 @@ function subMatrixScalar(B, a ) {
 /**
  * @param {Float64Array}
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function subVectors(a,b) {
 	const n = a.length;
@@ -4290,14 +4290,14 @@ function subVectors(a,b) {
 }
 /**
  * @param {Matrix}
- * @param {Matrix} 
- * @return {Matrix} 
+ * @param {Matrix}
+ * @return {Matrix}
  */
 function subMatrices(A,B) {
 	return new Matrix(A.m, A.n, subVectors(A.val, B.val), true );
 }
 function sub(a,b) {
-	
+
 	const ta = type(a);
 	const tb = type(b);
 	if ( ta == "number" && tb == "number" )
@@ -4308,20 +4308,20 @@ function sub(a,b) {
 			return addComplexReal(minusComplex(b),a);
 			break;
 		case "vector":
-			return subScalarVector(a,b); 
+			return subScalarVector(a,b);
 			break;
 		case "matrix":
 			return subScalarMatrix(a,b);
 			break;
 		case "spvector":
-			return subScalarspVector(a,b); 
+			return subScalarspVector(a,b);
 			break;
 		case "spmatrix":
 			return subScalarspMatrix(a,b);
 			break;
 		default:
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( tb == "number" ) {
@@ -4336,15 +4336,15 @@ function sub(a,b) {
 			return subMatrixScalar(a,b);
 			break;
 		case "spvector":
-			return addScalarspVector(-b,a); 
+			return addScalarspVector(-b,a);
 			break;
 		case "spmatrix":
 			return addScalarspMatrix(-b,a);
 			break;
 		default:
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else if ( ta == "vector" ) {
 		switch(tb) {
@@ -4369,8 +4369,8 @@ function sub(a,b) {
 		default:
 			error("Error in sub(a,B): a is a vector and B is a " + tb + ".");
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else if ( ta == "matrix" ) {
 		switch(tb) {
@@ -4395,8 +4395,8 @@ function sub(a,b) {
 		default:
 			error("Error in sub(A,b): A is a matrix and b is a " + tb + ".");
 			return undefined;
-			break;			
-		}	
+			break;
+		}
 	}
 	else if ( ta == "spvector" ) {
 		switch(tb) {
@@ -4419,7 +4419,7 @@ function sub(a,b) {
 		default:
 			error("Error in sub(a,B): a is a sparse vector and B is a " + tb + ".");
 			return undefined;
-			break;			
+			break;
 		}
 	}
 	else if ( ta == "spmatrix" ) {
@@ -4443,8 +4443,8 @@ function sub(a,b) {
 		default:
 			error("Error in sub(A,b): a is a sparse matrix and B is a " + tb + ".");
 			return undefined;
-			break;			
-		}		
+			break;
+		}
 	}
 	else
 		return undefined;
@@ -4454,7 +4454,7 @@ function pow(a,b) {
 	var i;
 	const ta = type(a);
 	const tb = type(b);
-	
+
 	if ( ta == "number" && tb == "number" )
 		return Math.pow(a, b);
 	else if ( ta == "number") {
@@ -4462,7 +4462,7 @@ function pow(a,b) {
 			var c = zeros(b.length);
 			if ( !isZero(a) ) {
 				for (i=0;i<b.length;i++) {
-					c[i] = Math.pow(a, b[i]);					
+					c[i] = Math.pow(a, b[i]);
 				}
 			}
 			return c;
@@ -4470,16 +4470,16 @@ function pow(a,b) {
 		else {
 			var c = new Matrix( b.m, b.n, pow(a, b.val), true);
 			return c;
-		}	
+		}
 	}
 	else if ( tb == "number" ) {
-		if ( ta == "vector" ) {			
+		if ( ta == "vector" ) {
 			var c = zeros(a.length);
 			for (i=0; i < a.length; i++)
 				c[i] = Math.pow(a[i], b);
 			return c;
 		}
-		else {			
+		else {
 			var c = new Matrix( a.m, a.n, pow(a.val, b), true);
 			return c;
 		}
@@ -4504,7 +4504,7 @@ function pow(a,b) {
 	}
 	else {
 		if ( tb == "vector" ) {
-			// matrix + vector 
+			// matrix + vector
 			return "undefined";
 		}
 		else {
@@ -4516,7 +4516,7 @@ function pow(a,b) {
 }
 
 function minus ( x ) {
-	
+
 	switch(type(x)) {
 	case "number":
 		return -x;
@@ -4525,16 +4525,16 @@ function minus ( x ) {
 		return minusVector(x);
 		break;
 	case "spvector":
-		return new spVector(x.length, minusVector(x.val), x.ind );		
+		return new spVector(x.length, minusVector(x.val), x.ind );
 		break;
 	case "ComplexVector":
 		return minusComplexVector(x);
 		break;
 	case "matrix":
-		return new Matrix(x.m, x.n, minusVector(x.val), true );		
+		return new Matrix(x.m, x.n, minusVector(x.val), true );
 		break;
 	case "spmatrix":
-		return new spMatrix(x.m, x.n, minusVector(x.val), x.cols, x.rows );		
+		return new spMatrix(x.m, x.n, minusVector(x.val), x.cols, x.rows );
 		break;
 	case "ComplexMatrix":
 		return minusComplexMatrix(x);
@@ -4545,26 +4545,26 @@ function minus ( x ) {
 }
 /**
  * @param {Float64Array}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function minusVector( x ) {
 	var res = new Float64Array(x.length);
 	for (var i =0; i < x.length; i++)
-		res[i] = -x[i];	
+		res[i] = -x[i];
 	return res;
 }
 /**
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function minusMatrix( x ) {
-	return new Matrix(x.m, x.n, minusVector(x.val), true );		
+	return new Matrix(x.m, x.n, minusVector(x.val), true );
 }
 // minimum
 
 /**
  * @param {Float64Array}
- * @return {number} 
+ * @return {number}
  */
 function minVector( a ) {
 	const n = a.length;
@@ -4573,19 +4573,19 @@ function minVector( a ) {
 		if ( a[i] < res)
 			res = a[i];
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
- * @return {number} 
+ * @return {number}
  */
-function minMatrix( A ) {	
+function minMatrix( A ) {
 	return minVector(A.val);
 }
 /**
  * @param {Float64Array}
  * @param {number}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function minVectorScalar(vec, scalar ) {
 	var n = vec.length;
@@ -4594,19 +4594,19 @@ function minVectorScalar(vec, scalar ) {
 		if ( scalar < vec[i])
 			res[i] = scalar;
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
  * @param {number}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function minMatrixScalar(A, scalar ) {
 	return new Matrix(A.m, A.n, minVectorScalar(A.val, scalar), true);
 }
 /**
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function minMatrixRows( A ) {
 	const m = A.m;
@@ -4615,16 +4615,16 @@ function minMatrixRows( A ) {
 	var j;
 	var r = n;
 	for ( var i=1; i < m; i++) {
-		for ( j = 0; j < n; j++) 
+		for ( j = 0; j < n; j++)
 			if( A.val[r + j] < res[j])
 				res[j] = A.val[r + j];
-		r += n;		
+		r += n;
 	}
 	return new Matrix(1,n,res, true);
 }
 /**
  * @param {Matrix}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function minMatrixCols( A ) {
 	var m = A.m;
@@ -4638,8 +4638,8 @@ function minMatrixCols( A ) {
 }
 /**
  * @param {Float64Array}
- * @param {Float64Array} 
- * @return {Float64Array} 
+ * @param {Float64Array}
+ * @return {Float64Array}
  */
 function minVectorVector(a, b) {
 	const n = a.length;
@@ -4648,19 +4648,19 @@ function minVectorVector(a, b) {
 		if ( b[i] < a[i])
 			res[i] = b[i];
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
- * @param {Matrix} 
- * @return {Matrix} 
+ * @param {Matrix}
+ * @return {Matrix}
  */
 function minMatrixMatrix( A, B ) {
 	return new Matrix(A.m, A.n, minVectorVector(A.val, B.val), true);
 }
 function min(a,b) {
 	var ta = type(a);
-	
+
 	if ( arguments.length == 1 ) {
 		switch( ta ) {
 		case "vector":
@@ -4689,7 +4689,7 @@ function min(a,b) {
 		}
 	}
 
-	var tb = type(b); 
+	var tb = type(b);
 	if (ta == "spvector" ) {
 		a = fullVector(a);
 		ta = "vector";
@@ -4707,45 +4707,45 @@ function min(a,b) {
 		tb = "matrix";
 	}
 
-	if ( ta == "number" && tb == "number" ) 
+	if ( ta == "number" && tb == "number" )
 		return Math.min(a,b);
 	else if ( ta == "number") {
-		if ( tb == "vector" )  
+		if ( tb == "vector" )
 			return minVectorScalar(b, a ) ;
-		else 
+		else
 			return minMatrixScalar(b, a ) ;
-	}	
+	}
 	else if ( tb == "number" ) {
-		if ( ta == "vector" ) 
+		if ( ta == "vector" )
 			return minVectorScalar(a, b);
 		else {
-			// MAtrix , scalar 
-			if ( b == 1) 
+			// MAtrix , scalar
+			if ( b == 1)
 				return minMatrixRows(a); // return row vector of min of columns
-			else if ( b == 2 ) 
+			else if ( b == 2 )
 				return minMatrixCols(a); // return column vector of min of rows
-			else 
+			else
 				return minMatrixScalar(a, b);
 		}
 	}
 	else if ( ta == "vector" ) {
-		if ( tb == "vector" ) 
+		if ( tb == "vector" )
 			return minVectorVector(a,b);
-		else 
+		else
 			return "undefined";
 	}
 	else {
-		if ( tb == "matrix" ) 
+		if ( tb == "matrix" )
 			return minMatrixMatrix(a,b);
-		else 
-			return "undefined";				
+		else
+			return "undefined";
 	}
 }
 
 // maximum
 /**
  * @param {Float64Array}
- * @return {number} 
+ * @return {number}
  */
 function maxVector( a ) {
 	const n = a.length;
@@ -4754,19 +4754,19 @@ function maxVector( a ) {
 		if ( a[i] > res)
 			res = a[i];
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
- * @return {number} 
+ * @return {number}
  */
 function maxMatrix( A ) {
 	return maxVector(A.val);
 }
 /**
  * @param {Float64Array}
- * @param {number} 
- * @return {Float64Array} 
+ * @param {number}
+ * @return {Float64Array}
  */
 function maxVectorScalar(vec, scalar ) {
 	const n = vec.length;
@@ -4775,19 +4775,19 @@ function maxVectorScalar(vec, scalar ) {
 		if ( scalar > vec[i])
 			res[i] = scalar;
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
- * @param {number} 
- * @return {Matrix} 
+ * @param {number}
+ * @return {Matrix}
  */
 function maxMatrixScalar(A, scalar ) {
 	return maxVectorScalar(A.val, scalar);
 }
 /**
  * @param {Matrix}
- * @return {Matrix} 
+ * @return {Matrix}
  */
 function maxMatrixRows( A ) {
 	const m = A.m;
@@ -4796,16 +4796,16 @@ function maxMatrixRows( A ) {
 	var j;
 	var r = n;
 	for ( var i=1; i < m; i++) {
-		for ( j = 0; j < n; j++) 
+		for ( j = 0; j < n; j++)
 			if( A.val[r + j] > res[j])
 				res[j] = A.val[r + j];
-		r += n;		
+		r += n;
 	}
 	return new Matrix(1,n,res,true);
 }
 /**
  * @param {Matrix}
- * @return {Float64Array} 
+ * @return {Float64Array}
  */
 function maxMatrixCols( A ) {
 	const m = A.m;
@@ -4819,8 +4819,8 @@ function maxMatrixCols( A ) {
 }
 /**
  * @param {Float64Array}
- * @param {Float64Array} 
- * @return {Float64Array} 
+ * @param {Float64Array}
+ * @return {Float64Array}
  */
 function maxVectorVector(a, b) {
 	var n = a.length;
@@ -4829,12 +4829,12 @@ function maxVectorVector(a, b) {
 		if ( b[i] > a[i])
 			res[i] = b[i];
 	}
-	return res; 
+	return res;
 }
 /**
  * @param {Matrix}
- * @param {Matrix} 
- * @return {Matrix} 
+ * @param {Matrix}
+ * @return {Matrix}
  */
 function maxMatrixMatrix( A, B ) {
 	return new Matrix(A.m, A.n, maxVectorVector(A.val, B.val), true);
@@ -4870,7 +4870,7 @@ function max(a,b) {
 		}
 	}
 
-	var tb = type(b); 
+	var tb = type(b);
 	if (ta == "spvector" ) {
 		a = fullVector(a);
 		ta = "vector";
@@ -4887,43 +4887,43 @@ function max(a,b) {
 		b = fullMatrix(b);
 		tb = "matrix";
 	}
-	
-	if ( ta == "number" && tb == "number" ) 
+
+	if ( ta == "number" && tb == "number" )
 		return Math.max(a,b);
 	else if ( ta == "number") {
-		if ( tb == "vector" )  
+		if ( tb == "vector" )
 			return maxVectorScalar(b, a ) ;
-		else 
+		else
 			return maxMatrixScalar(b, a ) ;
-	}	
+	}
 	else if ( tb == "number" ) {
-		if ( ta == "vector" ) 
+		if ( ta == "vector" )
 			return maxVectorScalar(a, b);
 		else {
-			// MAtrix , scalar 
-			if ( b == 1) 
+			// MAtrix , scalar
+			if ( b == 1)
 				return maxMatrixRows(a); // return row vector of max of columns
-			else if ( b == 2 ) 
+			else if ( b == 2 )
 				return maxMatrixCols(a); // return column vector of max of rows
-			else 
+			else
 				return maxMatrixScalar(a, b);
 		}
 	}
 	else if ( ta == "vector" ) {
-		if ( tb == "vector" ) 
+		if ( tb == "vector" )
 			return maxVectorVector(a,b);
-		else 
+		else
 			return "undefined";
 	}
 	else {
-		if ( tb == "matrix" ) 
+		if ( tb == "matrix" )
 			return maxMatrixMatrix(a,b);
-		else 
-			return "undefined";				
+		else
+			return "undefined";
 	}
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  */
 function transposeMatrix ( A ) {
 	var i;
@@ -4948,13 +4948,13 @@ function transposeMatrix ( A ) {
 	}
 }
 /**
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Matrix}
  */
 function transposeVector ( a ) {
 	return new Matrix(1,a.length, a);
 }
-function transpose( A ) {	
+function transpose( A ) {
 	var i;
 	var j;
 	switch( type( A ) ) {
@@ -4972,7 +4972,7 @@ function transpose( A ) {
 			var res = new ComplexMatrix(1,A.length, conj(A));
 			return res;	// matrix with a single row
 			break;
-		case "matrix":	
+		case "matrix":
 			return transposeMatrix(A);
 			break;
 		case "spmatrix":
@@ -4988,14 +4988,14 @@ function transpose( A ) {
 }
 
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {number}
  */
-function det( A ) {	
+function det( A ) {
 	const n = A.n;
-	if ( A.m != n || typeof(A.m) =="undefined") 
-		return undefined; 
-	
+	if ( A.m != n || typeof(A.m) =="undefined")
+		return undefined;
+
 	if ( n == 2 ) {
 		return A.val[0]*A.val[3] - A.val[1]*A.val[2];
 	}
@@ -5004,17 +5004,17 @@ function det( A ) {
 		var i,j;
 		for ( i=0; i < n; i++ ) {
 			var proddiag = 1;
-			for ( j=0; j < n ; j++) 
-				proddiag *= A.val[( (i+j)%n ) * n + j];			
-			
-			detA += proddiag;			
+			for ( j=0; j < n ; j++)
+				proddiag *= A.val[( (i+j)%n ) * n + j];
+
+			detA += proddiag;
 		}
 		for ( i=0; i < n; i++ ) {
 			var proddiag = 1;
-			for ( j=0; j < n ; j++) 
-				proddiag *= A.val[( (i+n-1-j)%n ) * n + j];			
-			
-			detA -= proddiag;			
+			for ( j=0; j < n ; j++)
+				proddiag *= A.val[( (i+n-1-j)%n ) * n + j];
+
+			detA -= proddiag;
 		}
 	}
 	return detA;
@@ -5022,10 +5022,10 @@ function det( A ) {
 function trace ( A ) {
 	if ( type(A) == "matrix") {
 		var n = A.length;
-		if ( A.m  != n ) 
+		if ( A.m  != n )
 			return "undefined";
 		var res = 0;
-		for ( var i =0; i< n;i++) 
+		for ( var i =0; i< n;i++)
 			res += A.val[i*n + i];
 		return res;
 	}
@@ -5034,7 +5034,7 @@ function trace ( A ) {
 	}
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Matrix}
  */
 function triu ( A ) {
@@ -5050,16 +5050,16 @@ function triu ( A ) {
 	var r = 0;
 	for (i=0; i < im; i++) {
 		for ( j=i; j < n; j++)
-			res.val[r + j] = A.val[r + j]; 
+			res.val[r + j] = A.val[r + j];
 		r += n;
 	}
 	return res;
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Matrix}
  */
-function tril ( A ) {	
+function tril ( A ) {
 	// return the lower triangular part of A
 	var i;
 	var j;
@@ -5069,42 +5069,42 @@ function tril ( A ) {
 	var im = m;
 	if ( n < m )
 		im = n;
-	var r = 0;		
+	var r = 0;
 	for (i=0; i < im; i++) {
 		for ( j=0; j <= i; j++)
-			res.val[r + j] = A.val[r + j]; 
+			res.val[r + j] = A.val[r + j];
 		r += n;
 	}
 	if ( m > im ) {
 		for (i=im; i < m; i++) {
 			for ( j=0; j < n; j++)
-				res.val[r + j] = A.val[r + j]; 
-			r += n;	
+				res.val[r + j] = A.val[r + j];
+			r += n;
 		}
 	}
 	return res;
 }
 
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {boolean}
  */
-function issymmetric ( A ) {	
+function issymmetric ( A ) {
 	const m = A.m;
 	const n= A.n;
 	if ( m != n )
 		return false;
-		
+
 	for (var i=0;i < m; i++)
-		for ( var j=0; j < n; j++) 
+		for ( var j=0; j < n; j++)
 			if ( A.val[i*n+j] != A.val[j*n+i] )
 				return false;
-				
+
 	return true;
 }
 
 /** Concatenate matrices/vectors
- * @param {Array} 
+ * @param {Array}
  * @param {boolean}
  * @return {Matrix}
  */
@@ -5114,29 +5114,29 @@ function mat( elems, rowwise ) {
 	var elemtypes = new Array(elems.length);
 	for ( k=0; k < elems.length; k++) {
 		elemtypes[k] = type(elems[k]);
-		if ( elemtypes[k] == "number" ) 
-			concatWithNumbers = true;		
+		if ( elemtypes[k] == "number" )
+			concatWithNumbers = true;
 	}
-	
-	
+
+
 	if (typeof(rowwise ) == "undefined") {
 		// check if vector of numbers
 		if ( type(elems) == "vector" )
 			return new Float64Array(elems);
-			
+
 		// check if 2D Array => toMatrix rowwise
-		var rowwise = true;		
+		var rowwise = true;
 		for (k=0; k < elems.length; k++) {
 			if ( !Array.isArray(elems[k] ) || elemtypes[k] == "vector" ) {
 				rowwise = false;
-				if ( elemtypes[k] == "string" ) 
+				if ( elemtypes[k] == "string" )
 					return elems; // received vector of strings => return it directly
 			}
 		}
 	}
 
 	if ( elems.length == 0 ) {
-		return []; 
+		return [];
 	}
 
 	var m = 0;
@@ -5145,7 +5145,7 @@ function mat( elems, rowwise ) {
 	var j;
 	if ( rowwise ) {
 		var res = new Array( ) ;
-		
+
 		for ( k= 0; k<elems.length; k++) {
 			switch( elemtypes[k] ) {
 			case "matrix":
@@ -5153,8 +5153,8 @@ function mat( elems, rowwise ) {
 				m += elems[k].m;
 				n = elems[k].n;
 				break;
-			
-			case "vector": 				
+
+			case "vector":
 				if ( concatWithNumbers ) {
 					// return a column by concatenating vectors and numbers
 					for ( var l=0; l < elems[k].length; l++)
@@ -5169,10 +5169,10 @@ function mat( elems, rowwise ) {
 					n = elems[k].length;
 				}
 				break;
-			
+
 			case "number":
-				res.push(elems[k]) ; 
-				m += 1; 
+				res.push(elems[k]) ;
+				m += 1;
 				n = 1;
 				break;
 
@@ -5180,15 +5180,15 @@ function mat( elems, rowwise ) {
 				return spmat(elems);
 
 			default:
-				// Array containing not only numbers... 
+				// Array containing not only numbers...
 				// probably calling mat( Array2D ) => return Array2D
 				return elems;
 				break;
 			}
 		}
 		if ( n == 1) {
-			var M = new Float64Array(res); 
-			return M; 
+			var M = new Float64Array(res);
+			return M;
 		}
 		var M = new Matrix( m , n ) ;
 		var p = 0;
@@ -5211,14 +5211,14 @@ function mat( elems, rowwise ) {
 		for ( k= 0; k<elems.length; k++) {
 			if ( elemtypes[k] == "matrix")
 				n += elems[k].n;
-			else 
+			else
 				n++;
 			if ( size( elems[k], 1) != m)
-				return "undefined";			
+				return "undefined";
 		}
 
 		// Build matrix
-		var res = new Matrix(m, n); 
+		var res = new Matrix(m, n);
 		var c;
 		for (i=0;i<m;i++) {
 			c = 0; // col index
@@ -5230,14 +5230,14 @@ function mat( elems, rowwise ) {
 					}
 					c += elems[k].n;
 					break;
-				
-				case "vector": //vector 
+
+				case "vector": //vector
 					res.val[i*n +c]= elems[k][i] ;
 					c++;
 					break;
-				
+
 				case "number":
-					res.val[i*n+c] = elems[k]; 
+					res.val[i*n+c] = elems[k];
 					c++;
 					break;
 				default:
@@ -5245,7 +5245,7 @@ function mat( elems, rowwise ) {
 				}
 			}
 		}
-		
+
 		return res;
 	}
 }
@@ -5257,10 +5257,10 @@ function isEqual( a, b) {
 	var res;
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isEqual(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
@@ -5268,7 +5268,7 @@ function isEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( isZero( a[i] - b ) )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5290,7 +5290,7 @@ function isEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( isZero( a[i] - b[i] ) )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5302,19 +5302,19 @@ function isEqual( a, b) {
 				return (a==b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 function isNotEqual( a, b) {
 	var i;
 	var j;
 	var res;
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isNotEqual(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
@@ -5322,7 +5322,7 @@ function isNotEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( !isZero( a[i] - b ) )
-						res[i] = 1;		
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5344,7 +5344,7 @@ function isNotEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( !isZero( get(a, i) - get(b,i) ) )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5356,9 +5356,9 @@ function isNotEqual( a, b) {
 				return (a!=b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 
 function isGreater( a, b) {
 	var i;
@@ -5366,10 +5366,10 @@ function isGreater( a, b) {
 	var res;
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isGreater(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
@@ -5377,7 +5377,7 @@ function isGreater( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if (  a[i] - b > EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5399,7 +5399,7 @@ function isGreater( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if (  a[i] - b[i] > EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5411,19 +5411,19 @@ function isGreater( a, b) {
 				return (a>b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 function isGreaterOrEqual( a, b) {
 	var i;
 	var j;
 	var res;
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isGreaterOrEqual(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
@@ -5431,7 +5431,7 @@ function isGreaterOrEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if (  a[i] - b > -EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5453,7 +5453,7 @@ function isGreaterOrEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( a[i] - b[i] > -EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5465,9 +5465,9 @@ function isGreaterOrEqual( a, b) {
 				return (a>=b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 
 function isLower( a, b) {
 	var i;
@@ -5475,18 +5475,18 @@ function isLower( a, b) {
 	var res;
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isLower(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
 			case "vector":
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
-					if (  b - a[i] > EPS ) 
-						res[i] = 1;					
+					if (  b - a[i] > EPS )
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5508,7 +5508,7 @@ function isLower( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if (  b[i] - a[i] > EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5520,20 +5520,20 @@ function isLower( a, b) {
 				return (a<b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 function isLowerOrEqual( a, b) {
 	var i;
 	var j;
 	var res;
-	
+
 	var ta = type(a);
 	var tb = type(b);
-	
+
 	if ( ta == "number" && tb != "number" )
 		return isLowerOrEqual(b,a);
-	
+
 	if( ta != "number" && tb == "number" ) {
 		// vector/matrix + scalar
 		switch( ta ) {
@@ -5541,7 +5541,7 @@ function isLowerOrEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if (  b - a[i] > -EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5563,7 +5563,7 @@ function isLowerOrEqual( a, b) {
 				res = new Float64Array(a.length);
 				for ( i=0; i<a.length; i++) {
 					if ( b[i] - a[i] > -EPS )
-						res[i] = 1;					
+						res[i] = 1;
 				}
 				return res;
 				break;
@@ -5575,9 +5575,9 @@ function isLowerOrEqual( a, b) {
 				return (a<=b?1:0);
 		}
 	}
-	else 
+	else
 		return "undefined";
-}	 
+}
 
 
 function find( b ) {
@@ -5588,7 +5588,7 @@ function find( b ) {
 	var res = new Array();
 	for ( i=0; i < n; i++) {
 		if ( b[i] != 0 )
-			res.push(i);			
+			res.push(i);
 	}
 	return res;
 }
@@ -5596,7 +5596,7 @@ argmax = findmax;
 function findmax( x ) {
 	// return the index of the maximum in x
 	var i;
-	
+
 	switch ( type(x)) {
 	case "number":
 		return 0;
@@ -5611,7 +5611,7 @@ function findmax( x ) {
 			}
 		}
 		return idx;
-		break;	
+		break;
 	case "spvector":
 		var maxi = x.val[0];
 		var idx = x.ind[0];
@@ -5628,17 +5628,17 @@ function findmax( x ) {
 				idx++;
 		}
 		return idx;
-		break;			
+		break;
 	default:
 		return "undefined";
-	}	
+	}
 
 }
 argmin = findmin;
 function findmin( x ) {
 	// return the index of the minimum in x
 	var i;
-	
+
 	switch ( type(x)) {
 	case "number":
 		return 0;
@@ -5651,7 +5651,7 @@ function findmin( x ) {
 				mini = x[i];
 				idx = i;
 			}
-		}		
+		}
 		return idx;
 		break;
 	case "spvector":
@@ -5670,7 +5670,7 @@ function findmin( x ) {
 				idx++;
 		}
 		return idx;
-		break;				
+		break;
 	default:
 		return "undefined";
 	}
@@ -5679,54 +5679,54 @@ function findmin( x ) {
 
 /**
  * @param {Float64Array}
- * @param {boolean} 
- * @param {boolean}  
- * @return {Float64Array|Array} 
+ * @param {boolean}
+ * @param {boolean}
+ * @return {Float64Array|Array}
  */
 function sort( x, decreasingOrder , returnIndexes) {
-	// if returnIndexes = true : replace x with its sorted version 
+	// if returnIndexes = true : replace x with its sorted version
 	// otherwise return a sorted copy without altering x
 
 	if ( typeof(decreasingOrder) == "undefined")
 		var decreasingOrder = false;
 	if ( typeof(returnIndexes) == "undefined")
 		var returnIndexes = false;
-	
+
 	var i;
 	var j;
 	var tmp;
-		
+
 	const n = x.length;
 	if ( returnIndexes ) {
 		var indexes = range(n);
 		for ( i=0; i < n - 1; i++) {
-			if ( decreasingOrder ) 
+			if ( decreasingOrder )
 				j = findmax( get ( x, range(i,n) ) ) + i ;
-			else 
-				j = findmin( get ( x, range(i,n) ) ) + i;		
+			else
+				j = findmin( get ( x, range(i,n) ) ) + i;
 
 			if ( i!=j) {
-				tmp = x[i]; 
+				tmp = x[i];
 				x[i] = x[j];
 				x[j] = tmp;
-			
-				tmp = indexes[i]; 
+
+				tmp = indexes[i];
 				indexes[i] = indexes[j];
 				indexes[j] = tmp;
-			}			
+			}
 		}
 		return indexes;
 	}
 	else {
 		var xs = vectorCopy(x);
 		for ( i=0; i < n - 1; i++) {
-			if ( decreasingOrder ) 
+			if ( decreasingOrder )
 				j = findmax( get ( xs, range(i,n) ) ) + i;
-			else 
-				j = findmin( get ( xs, range(i,n) ) ) + i;		
-			
+			else
+				j = findmin( get ( xs, range(i,n) ) ) + i;
+
 			if ( i!=j) {
-				tmp = xs[i]; 
+				tmp = xs[i];
 				xs[i] = xs[j];
 				xs[j] = tmp;
 			}
@@ -5737,26 +5737,26 @@ function sort( x, decreasingOrder , returnIndexes) {
 
 /// Stats
 /**
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {number}
  */
 function sumVector ( a ) {
 	var i;
 	const n = a.length;
 	var res = a[0];
-	for ( i=1; i< n; i++) 
+	for ( i=1; i< n; i++)
 		res += a[i];
 	return res;
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {number}
  */
 function sumMatrix ( A ) {
 	return sumVector(A.val);
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Matrix}
  */
 function sumMatrixRows( A ) {
@@ -5764,17 +5764,17 @@ function sumMatrixRows( A ) {
 	var j;
 	const m = A.m;
 	const n = A.n;
-	var res = new Float64Array(n); 
+	var res = new Float64Array(n);
 	var r = 0;
 	for ( i=0; i< m; i++) {
 		for (j=0; j < n; j++)
-			res[j] += A.val[r + j]; 
+			res[j] += A.val[r + j];
 		r += n;
 	}
-	return new Matrix(1,n,res, true); // return row vector 
+	return new Matrix(1,n,res, true); // return row vector
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Float64Array}
  */
 function sumMatrixCols( A ) {
@@ -5789,7 +5789,7 @@ function sumMatrixCols( A ) {
 	return res;
 }
 function sum( A , sumalongdimension ) {
-	
+
 	switch ( type( A ) ) {
 	case "vector":
 		if ( arguments.length == 1 || sumalongdimension == 1 ) {
@@ -5800,9 +5800,9 @@ function sum( A , sumalongdimension ) {
 		}
 		break;
 	case "spvector":
-		if ( arguments.length == 1 || sumalongdimension == 1 ) 
-			return sumVector(A.val);		
-		else 
+		if ( arguments.length == 1 || sumalongdimension == 1 )
+			return sumVector(A.val);
+		else
 			return A.copy();
 		break;
 
@@ -5811,12 +5811,12 @@ function sum( A , sumalongdimension ) {
 			return sumMatrix( A ) ;
 		}
 		else if ( sumalongdimension == 1 ) {
-			return sumMatrixRows( A );	
+			return sumMatrixRows( A );
 		}
 		else if ( sumalongdimension == 2 ) {
-			return sumMatrixCols( A );	
+			return sumMatrixCols( A );
 		}
-		else 
+		else
 			return undefined;
 		break;
 	case "spmatrix":
@@ -5824,40 +5824,40 @@ function sum( A , sumalongdimension ) {
 			return sumVector( A.val ) ;
 		}
 		else if ( sumalongdimension == 1 ) {
-			return sumspMatrixRows( A );	
+			return sumspMatrixRows( A );
 		}
 		else if ( sumalongdimension == 2 ) {
-			return sumspMatrixCols( A );	
+			return sumspMatrixCols( A );
 		}
-		else 
+		else
 			return undefined;
 		break;
-	default: 
+	default:
 		return A;
 		break;
 	}
 }
 /**
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {number}
  */
 function prodVector ( a ) {
 	var i;
 	const n = a.length;
 	var res = a[0];
-	for ( i=1; i< n; i++) 
+	for ( i=1; i< n; i++)
 		res *= a[i];
 	return res;
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {number}
  */
 function prodMatrix ( A ) {
 	return prodVector(A.val);
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Matrix}
  */
 function prodMatrixRows( A ) {
@@ -5865,17 +5865,17 @@ function prodMatrixRows( A ) {
 	var j;
 	const m = A.m;
 	const n = A.n;
-	var res = new Float64Array(A.row(0)); 
+	var res = new Float64Array(A.row(0));
 	var r = n;
 	for ( i=1; i< m; i++) {
 		for (j=0; j < n; j++)
-			res[j] *= A.val[r + j]; 
+			res[j] *= A.val[r + j];
 		r += A.n;
 	}
-	return new Matrix(1,n,res, true); // return row vector 
+	return new Matrix(1,n,res, true); // return row vector
 }
 /**
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Float64Array}
  */
 function prodMatrixCols( A ) {
@@ -5891,12 +5891,12 @@ function prodMatrixCols( A ) {
 	return res;
 }
 function prod( A , prodalongdimension ) {
-	
+
 	switch ( type( A ) ) {
 	case "vector":
-		if ( arguments.length == 1 || prodalongdimension == 1 ) 
+		if ( arguments.length == 1 || prodalongdimension == 1 )
 			return prodVector(A);
-		else 
+		else
 			return vectorCopy(A);
 		break;
 	case "spvector":
@@ -5906,7 +5906,7 @@ function prod( A , prodalongdimension ) {
 			else
 				return prodVector(A.val);
 		}
-		else 
+		else
 			return A.copy();
 		break;
 	case "matrix":
@@ -5914,38 +5914,38 @@ function prod( A , prodalongdimension ) {
 			return prodMatrix( A ) ;
 		}
 		else if ( prodalongdimension == 1 ) {
-			return prodMatrixRows( A );	
+			return prodMatrixRows( A );
 		}
 		else if ( prodalongdimension == 2 ) {
-			return prodMatrixCols( A );	
+			return prodMatrixCols( A );
 		}
-		else 
+		else
 			return undefined;
 		break;
 	case "spmatrix":
-		if( arguments.length == 1  ) { 
+		if( arguments.length == 1  ) {
 			if ( A.val.length < A.m * A.n )
 				return 0;
 			else
 				return prodVector( A.val ) ;
 		}
 		else if ( prodalongdimension == 1 ) {
-			return prodspMatrixRows( A );	
+			return prodspMatrixRows( A );
 		}
 		else if ( prodalongdimension == 2 ) {
-			return prodspMatrixCols( A );	
+			return prodspMatrixCols( A );
 		}
-		else 
+		else
 			return undefined;
 		break;
-	default: 
+	default:
 		return A;
 		break;
 	}
 }
 
 function mean( A , sumalongdimension ) {
-	
+
 	switch ( type( A ) ) {
 	case "vector":
 		if ( arguments.length == 1 || sumalongdimension == 1 ) {
@@ -5956,10 +5956,10 @@ function mean( A , sumalongdimension ) {
 		}
 		break;
 	case "spvector":
-		if ( arguments.length == 1 || sumalongdimension == 1 ) 
-			return sumVector(A.val) / A.length;		
-		else 
-			return A.copy();		
+		if ( arguments.length == 1 || sumalongdimension == 1 )
+			return sumVector(A.val) / A.length;
+		else
+			return A.copy();
 		break;
 
 	case "matrix":
@@ -5967,12 +5967,12 @@ function mean( A , sumalongdimension ) {
 			return sumMatrix( A ) / ( A.m * A.n);
 		}
 		else if ( sumalongdimension == 1 ) {
-			return mulScalarMatrix( 1/A.m, sumMatrixRows( A ));	
+			return mulScalarMatrix( 1/A.m, sumMatrixRows( A ));
 		}
 		else if ( sumalongdimension == 2 ) {
-			return mulScalarVector( 1/A.n, sumMatrixCols( A )) ;	
+			return mulScalarVector( 1/A.n, sumMatrixCols( A )) ;
 		}
-		else 
+		else
 			return undefined;
 		break;
 	case "spmatrix":
@@ -5985,10 +5985,10 @@ function mean( A , sumalongdimension ) {
 		else if ( sumalongdimension == 2 ) {
 			return mulScalarVector(1/A.n, sumspMatrixCols(A));
 		}
-		else 
+		else
 			return undefined;
 		break;
-	default: 
+	default:
 		return A;
 		break;
 	}
@@ -5996,7 +5996,7 @@ function mean( A , sumalongdimension ) {
 
 function variance(A, alongdimension ) {
 	// variance = sum(A^2)/n - mean(A)^2
-	if ( arguments.length > 1 )	
+	if ( arguments.length > 1 )
 		var meanA = mean(A, alongdimension);
 	else
 		var meanA = mean(A);
@@ -6006,7 +6006,7 @@ function variance(A, alongdimension ) {
 		return 0;
 		break;
 	case "vector":
-		if ( arguments.length == 1 || alongdimension == 1 ) {		
+		if ( arguments.length == 1 || alongdimension == 1 ) {
 			var res = ( dot(A,A) / A.length ) - meanA*meanA;
 			return res ;
 		}
@@ -6015,15 +6015,15 @@ function variance(A, alongdimension ) {
 		}
 		break;
 	case "spvector":
-		if ( arguments.length == 1 || alongdimension == 1 ) {		
+		if ( arguments.length == 1 || alongdimension == 1 ) {
 			var res = ( dot(A.val,A.val) / A.length ) - meanA*meanA;
 			return res ;
 		}
-		else 
+		else
 			return zeros(A.length);
-		
+
 		break;
-			
+
 	case "matrix":
 	case "spmatrix":
 		if( typeof(alongdimension) == "undefined" ) {
@@ -6032,24 +6032,24 @@ function variance(A, alongdimension ) {
 		}
 		else if ( alongdimension == 1 ) {
 			// var of columns
-			var res = sub( entrywisediv(sum(entrywisemul(A,A),1) , A.length ) , entrywisemul(meanA,meanA) );			
-			return res;		
+			var res = sub( entrywisediv(sum(entrywisemul(A,A),1) , A.length ) , entrywisemul(meanA,meanA) );
+			return res;
 		}
 		else if ( alongdimension == 2 ) {
 			// sum all columns, result is column vector
 			res = sub( entrywisediv(sum(entrywisemul(A,A),2) , A.n ) , entrywisemul(meanA,meanA) );
-			return res;		
+			return res;
 		}
-		else 
+		else
 			return undefined;
 		break;
-	default: 
+	default:
 		return undefined;
 	}
 }
 
 function std(A, alongdimension)  {
-	if ( arguments.length > 1 )	
+	if ( arguments.length > 1 )
 		return sqrt(variance(A,alongdimension));
 	else
 		return sqrt(variance(A));
@@ -6060,7 +6060,7 @@ function std(A, alongdimension)  {
  * @param {Matrix|Float64Array|spVector}
  * @return {Matrix|number}
  */
-function cov( X ) {	
+function cov( X ) {
 	switch ( type( X ) ) {
 	case "number":
 		return 0;
@@ -6068,7 +6068,7 @@ function cov( X ) {
 	case "vector":
 		var mu = mean(X);
 		return ( dot(X,X) / X.length - mu*mu);
-		break;		
+		break;
 	case "spvector":
 		var mu = mean(X);
 		return ( dot(X.val,X.val) / X.length - mu*mu);
@@ -6081,7 +6081,7 @@ function cov( X ) {
 		var mu = mean(X,1).row(0);
 		return divMatrixScalar(xtx( subspMatrixMatrix(X, outerprod(ones(X.m), mu ) ) ), X.m);
 		break;
-	default: 
+	default:
 		return undefined;
 	}
 }
@@ -6092,23 +6092,23 @@ function cov( X ) {
  */
 function xtx( X ) {
 	const N = X.m;
-	const d = X.n; 
+	const d = X.n;
 
-	var C = new Matrix(d,d); 
+	var C = new Matrix(d,d);
 	for (var i=0; i < N; i++) {
 		var xi= X.row(i);
 		for(var k = 0; k < d; k++) {
 			var xik = xi[k];
 			for (var j=k; j < d; j++) {
-				C.val[k*d + j] += xik * xi[j]; 
+				C.val[k*d + j] += xik * xi[j];
 			}
 		}
 	}
 	// Symmetric lower triangular part:
 	for(var k = 0; k < d; k++) {
 		var kd = k*d;
-		for (var j=k; j < d; j++) 
-			C.val[j*d+k] = C.val[kd+j]; 
+		for (var j=k; j < d; j++)
+			C.val[j*d+k] = C.val[kd+j];
 	}
 	return C;
 }
@@ -6125,14 +6125,14 @@ function norm( A , sumalongdimension ) {
 		if ( arguments.length == 1 || sumalongdimension == 1 ) {
 			return Math.sqrt(dot(A,A));
 		}
-		else 
+		else
 			return abs(A);
 		break;
 	case "spvector":
 		if ( arguments.length == 1 || sumalongdimension == 1 ) {
 			return Math.sqrt(dot(A.val,A.val));
 		}
-		else 
+		else
 			return abs(A);
 		break;
 	case "matrix":
@@ -6142,16 +6142,16 @@ function norm( A , sumalongdimension ) {
 		else if ( sumalongdimension == 1 ) {
 			// norm of columns, result is row vector
 			const n = A.n;
-			var res = zeros(1, n);			
+			var res = zeros(1, n);
 			var r = 0;
-			for (i=0; i< A.m; i++) {				
-				for(j=0; j<n; j++) 
+			for (i=0; i< A.m; i++) {
+				for(j=0; j<n; j++)
 					res.val[j] += A.val[r+j]*A.val[r + j];
 				r += n;
 			}
 			for(j=0;j<n; j++)
 				res.val[j] = Math.sqrt(res.val[j]);
-			return res;		
+			return res;
 		}
 		else if ( sumalongdimension == 2 ) {
 			// norm of rows, result is column vector
@@ -6162,11 +6162,11 @@ function norm( A , sumalongdimension ) {
 					res[i] += A.val[r + j] * A.val[r + j];
 				r += A.n;
 				res[i] = Math.sqrt(res[i]);
-			}			
-			
-			return res;		
+			}
+
+			return res;
 		}
-		else 
+		else
 			return "undefined";
 		break;
 	case "spmatrix":
@@ -6184,7 +6184,7 @@ function norm( A , sumalongdimension ) {
 					res.val[j] += A.val[k]*A.val[k];
 				res.val[j] = Math.sqrt(res.val[j]);
 			}
-			return res;		
+			return res;
 		}
 		else if ( sumalongdimension == 2 && A.rowmajor ) {
 			// norm of rows, result is column vector
@@ -6196,13 +6196,13 @@ function norm( A , sumalongdimension ) {
 					res[i] += A.val[k] * A.val[k];
 				res[i] = Math.sqrt(res[i]);
 			}
-			
-			return res;		
+
+			return res;
 		}
-		else 
+		else
 			return "undefined";
 		break;
-	default: 
+	default:
 		return "undefined";
 	}
 }
@@ -6232,10 +6232,10 @@ function normnuc( A ) {
 	// nuclear norm
 	switch( type(A) ) {
 	case "matrix":
-		return sumVector(svd(A)); 
+		return sumVector(svd(A));
 		break;
 	case "spmatrix":
-		return sumVector(svd(fullMatrix(A))); 
+		return sumVector(svd(fullMatrix(A)));
 		break;
 	case "number":
 		return A;
@@ -6252,11 +6252,11 @@ function normnuc( A ) {
 function norm0( A , sumalongdimension, epsilonarg ) {
 	// l0-pseudo-norm of vectors and matrices
 	// if epsilon > 0, consider values < epsilon as 0
-	
+
 	var epsilon = EPS;
-	if ( arguments.length == 3 ) 
+	if ( arguments.length == 3 )
 		epsilon = epsilonarg;
-	
+
 	var i;
 	var j;
 	switch ( type( A ) ) {
@@ -6264,17 +6264,17 @@ function norm0( A , sumalongdimension, epsilonarg ) {
 		return (Math.abs(A) > epsilon);
 		break;
 	case "vector":
-		if ( arguments.length == 1 || sumalongdimension == 1 ) {		
+		if ( arguments.length == 1 || sumalongdimension == 1 ) {
 			return norm0Vector(A, epsilon);
 		}
-		else 
+		else
 			return isGreater(abs(a), epsilon);
 		break;
 	case "spvector":
-		if ( arguments.length == 1 || sumalongdimension == 1 ) {		
+		if ( arguments.length == 1 || sumalongdimension == 1 ) {
 			return norm0Vector(A.val, epsilon);
 		}
-		else 
+		else
 			return isGreater(abs(a), epsilon);
 		break;
 	case "matrix":
@@ -6284,24 +6284,24 @@ function norm0( A , sumalongdimension, epsilonarg ) {
 		else if ( sumalongdimension == 1 ) {
 			// norm of columns, result is row vector
 			var res = zeros(1, A.n);
-			for (i=0; i< A.m; i++) {				
-				for(j = 0; j < A.n; j++) 
+			for (i=0; i< A.m; i++) {
+				for(j = 0; j < A.n; j++)
 					if ( Math.abs(A[i*A.n + j]) > epsilon )
 						res.val[j]++;
 			}
-			return res;		
+			return res;
 		}
 		else if ( sumalongdimension == 2 ) {
 			// norm of rows, result is column vector
 			var res = zeros(A.m);
 			for (i=0; i< A.m; i++) {
-				for(j = 0; j < A.n; j++) 
+				for(j = 0; j < A.n; j++)
 					if ( Math.abs(A[i*A.n + j]) > epsilon )
-						res[i]++;	
+						res[i]++;
 			}
-			return res;		
+			return res;
 		}
-		else 
+		else
 			return undefined;
 		break;
 	case "spmatrix":
@@ -6320,26 +6320,26 @@ function norm0( A , sumalongdimension, epsilonarg ) {
 				for ( var i=0; i<A.n; i++)
 					res.val[i] = norm0Vector(A.col(i).val, epsilon);
 			}
-			return res;		
+			return res;
 		}
 		else if ( sumalongdimension == 2 ) {
 			// norm of rows, result is column vector
 			var res = zeros(A.m);
 			if ( A.rowmajor ) {
 				for ( var i=0; i<A.m; i++)
-					res[i] = norm0Vector(A.row(i).val, epsilon);			
+					res[i] = norm0Vector(A.row(i).val, epsilon);
 			}
 			else {
 				for ( var k=0; k < A.val.length; k++)
 					if (Math.abs(A.val[k]) > epsilon)
 						res[A.rows[k]]++;
 			}
-			return res;		
+			return res;
 		}
-		else 
+		else
 			return undefined;
 		break;
-	default: 
+	default:
 		return undefined;
 	}
 }
@@ -6350,7 +6350,7 @@ function norm0( A , sumalongdimension, epsilonarg ) {
  */
 function norm0Vector( x, epsilon ) {
 	const n = x.length;
-	var res = 0;	
+	var res = 0;
 	for (var i=0; i < n; i++)
 		if ( Math.abs(x[i]) > epsilon )
 			res++;
@@ -6367,12 +6367,12 @@ function solve( A, b ) {
 	var tA = type(A);
 
 	if ( tA == "vector" || tA == "spvector" || (tA == "matrix" && A.m == 1) ) {
-		// One-dimensional least squares problem: 
+		// One-dimensional least squares problem:
 		var AtA = mul(transpose(A),A);
 		var Atb = mul(transpose(A), b);
-		return Atb / AtA; 		
+		return Atb / AtA;
 	}
-	
+
 	if ( tA == "spmatrix" ) {
 		/*if ( A.m == A.n )
 			return spsolvecg(A, b); // assume A is positive definite
@@ -6382,9 +6382,9 @@ function solve( A, b ) {
 
 	if( type(b) == "vector" ) {
 		if ( A.m == A.n )
-			return solveGaussianElimination(A, b) ; 			
+			return solveGaussianElimination(A, b) ;
 		else
-			return solveWithQRcolumnpivoting(A, b) ; 
+			return solveWithQRcolumnpivoting(A, b) ;
 	}
 	else
 		return solveWithQRcolumnpivotingMultipleRHS(A, b) ; // b is a matrix
@@ -6392,7 +6392,7 @@ function solve( A, b ) {
 /**
  * Solve the linear system Ax = b given the Cholesky factor L of A
  * @param {Matrix}
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Float64Array}
  */
 function cholsolve ( L, b ) {
@@ -6403,7 +6403,7 @@ function cholsolve ( L, b ) {
 
 /**
  * @param {Matrix}
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Float64Array}
  */
 function solveWithQRfactorization ( A, b ) {
@@ -6412,45 +6412,45 @@ function solveWithQRfactorization ( A, b ) {
 	var QRfact = qr(A);
 	var R = QRfact.R;
 	var beta = QRfact.beta;
-	
+
 	var btmp = vectorCopy(b);
 	var j;
 	var i;
 	var k;
 	var v;
-	
+
 	var smallb;
-	
+
 	for (j=0;j<n-1; j++) {
 		v = get(R, range(j,m), j) ; // get Householder vectors
 		v[0] = 1;
 		// b(j:m) = (I - beta v v^T ) * b(j:m)
-		smallb = get(btmp, range(j,m) );		
+		smallb = get(btmp, range(j,m) );
 		set ( btmp, range(j,m), sub ( smallb , mul( beta[j] * mul( v, smallb) , v ) ) );
 	}
 	// last iteration only if m>n
 	if ( m > n ) {
 		j = n-1;
-		
+
 		v = get(R, range(j,m), j) ; // get Householder vectors
 		v[0] = 1;
 		// b(j:m) = (I - beta v v^T ) * b(j:m)
-		smallb = get(btmp, range(j,m) );		
+		smallb = get(btmp, range(j,m) );
 		set ( btmp, range(j,m), sub ( smallb , mul( beta[j] * mul( v, smallb) , v ) ) );
 
 	}
-	
-	// Solve R x = b with backsubstitution (R is upper triangular, well it is not really here because we use the lower part to store the vectors v): 
+
+	// Solve R x = b with backsubstitution (R is upper triangular, well it is not really here because we use the lower part to store the vectors v):
 	return backsubstitution ( R , get ( btmp, range(n)) );
-	
-	
+
+
 //	return backsubstitution ( get ( R, range(n), range(n) ) , rows ( btmp, range(1,n)) );
 //	we can spare the get and copy of R : backsubstitution will only use this part anyway
 }
 
 /**
  * @param {Matrix}
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Float64Array}
  */
 function backsubstitution ( U, b ) {
@@ -6459,25 +6459,25 @@ function backsubstitution ( U, b ) {
 	const n = b.length;
 	var j = n-1;
 	var x = zeros(n);
-	
+
 	if ( ! isZero(U.val[j*n+j]) )
 		x[j] = b[j] / U.val[j*n+j];
-	
+
 	j = n-2;
 	if ( !isZero(U.val[j*n+j]) )
 		x[j] = ( b[j] - U.val[j*n+n-1] * x[n-1] ) / U.val[j*n+j];
-		
+
 	for ( j=n-3; j >= 0 ; j-- ) {
 		if ( ! isZero(U.val[j*n+j]) )
-			x[j] = ( b[j] - dot( U.row(j).subarray(j+1,n) , x.subarray(j+1,n) ) ) / U.val[j*n+j];		
+			x[j] = ( b[j] - dot( U.row(j).subarray(j+1,n) , x.subarray(j+1,n) ) ) / U.val[j*n+j];
 	}
-	
+
 	// solution
 	return x;
 }
 /**
  * @param {Matrix}
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Float64Array}
  */
 function forwardsubstitution ( L, b ) {
@@ -6486,28 +6486,28 @@ function forwardsubstitution ( L, b ) {
 	const n = b.length;
 	var j;
 	var x = zeros(n);
-		
+
 	if ( !isZero(L.val[0]) )
 		x[0] = b[0] / L.val[0];
-	
+
 	if ( ! isZero(L.val[n+1]) )
 		x[1] = ( b[1] - L.val[n] * x[0] ) / L.val[n+1];
-		
+
 	for ( j=2; j < n ; j++ ) {
 		if ( ! isZero(L.val[j*n+j]) )
-			x[j] = ( b[j] - dot( L.row(j).subarray(0,j) , x.subarray(0,j) ) ) / L.val[j*n+j];		
+			x[j] = ( b[j] - dot( L.row(j).subarray(0,j) , x.subarray(0,j) ) ) / L.val[j*n+j];
 	}
-	
+
 	// solution
 	return x;
 }
 /**
  * @param {Matrix}
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {Float64Array}
  */
 function solveWithQRcolumnpivoting ( A, b ) {
-	
+
 	var m;
 	var n;
 	var R;
@@ -6545,10 +6545,10 @@ function solveWithQRcolumnpivoting ( A, b ) {
 	var smallb;
 	// b = Q' * b
 	for (j=0;j < r; j++) {
-	
+
 		// b(j:m) = (I - beta v v^T ) * b(j:m)
-		smallb = get(btmp, range(j,m) );		
-		
+		smallb = get(btmp, range(j,m) );
+
 		set ( btmp, range(j,m), sub ( smallb , mul( beta[j] * mul( V[j], smallb) , V[j] ) ) );
 	}
 	// Solve R x = b with backsubstitution
@@ -6561,7 +6561,7 @@ function solveWithQRcolumnpivoting ( A, b ) {
 	else {
 		x[0] = btmp[0] / R.val[0];
 	}
-	
+
 	// and apply permutations
 	for ( j=r-1; j>=0; j--) {
 		if ( piv[j] != j ) {
@@ -6570,16 +6570,16 @@ function solveWithQRcolumnpivoting ( A, b ) {
 			x[piv[j]] = tmp;
 		}
 	}
-	return x;	
-	
+	return x;
+
 }
 /**
  * @param {Matrix}
- * @param {Matrix} 
+ * @param {Matrix}
  * @return {Matrix}
  */
 function solveWithQRcolumnpivotingMultipleRHS ( A, B ) {
-	
+
 	var m;
 	var n;
 	var R;
@@ -6617,54 +6617,54 @@ function solveWithQRcolumnpivotingMultipleRHS ( A, B ) {
 	var smallb;
 	// B = Q' * B
 	for (j=0;j < r; j++) {
-	
+
 		// b(j:m) = (I - beta v v^T ) * b(j:m)
 		smallb = get(btmp, range(j,m), [] );
-		
+
 		set ( btmp, range(j,m), [], sub ( smallb , mul(mul( beta[j], V[j]), mul( transpose(V[j]), smallb) ) ) );
 	}
 	// Solve R X = B with backsubstitution
 	var X = zeros(n,m);
 
 	if ( r > 1 ) {
-		for ( j=0; j < m; j++) 
+		for ( j=0; j < m; j++)
 			set ( X, range(0,r), j, backsubstitution ( R , get ( btmp, range(r), j) ) );
 		// note: if m < n, backsubstitution only uses n columns of R.
 	}
 	else {
 		set(X, 0, [], entrywisediv(get(btmp, 0, []) , R.val[0]) );
 	}
-	
+
 	// and apply permutations
 	for ( j=r-1; j>=0; j--) {
 		if ( piv[j] != j ) {
 			swaprows(X, j, piv[j]);
 		}
 	}
-	return X;	
-	
+	return X;
+
 }
 
 function solveGaussianElimination(Aorig, borig) {
 
 	// Solve square linear system Ax = b with Gaussian elimination
-	
+
 	var i;
 	var j;
 	var k;
-	
+
 	var A = matrixCopy( Aorig ).toArrayOfFloat64Array(); // useful to quickly switch rows
-	var b = vectorCopy( borig ); 
-		
+	var b = vectorCopy( borig );
+
 	const m = Aorig.m;
 	const n = Aorig.n;
 	if ( m != n)
 		return undefined;
-	
+
 	// Set to zero small values... ??
-	
+
 	for (k=0; k < m ; k++) {
-		
+
 		// Find imax = argmax_i=k...m |A_i,k|
 		var imax = k;
 		var Aimaxk = Math.abs(A[imax][k]);
@@ -6678,8 +6678,8 @@ function solveGaussianElimination(Aorig, borig) {
 		if ( isZero( Aimaxk ) ) {
 			console.log("** Warning in solve(A,b), A is square but singular, switching from Gaussian elimination to QR method.");
 			return solveWithQRcolumnpivoting(A,b);
-		} 
-		
+		}
+
 		if ( imax != k ) {
 			// Permute the rows
 			var a = A[k];
@@ -6687,38 +6687,38 @@ function solveGaussianElimination(Aorig, borig) {
 			A[imax] = a;
 			var tmpb = b[k];
 			b[k] = b[imax];
-			b[imax] = tmpb;			
-		}		
+			b[imax] = tmpb;
+		}
 		var Ak = A[k];
-		
-		// Normalize row k 
+
+		// Normalize row k
 		var Akk = Ak[k];
 		b[k] /= Akk;
-		
+
 		//Ak[k] = 1; // not used afterwards
-		for ( j=k+1; j < n; j++) 
+		for ( j=k+1; j < n; j++)
 			Ak[j] /= Akk;
-		
+
 		if ( Math.abs(Akk) < 1e-8 ) {
 			console.log("** Warning in solveGaussianElimination: " + Akk + " " + k + ":" + m );
 		}
-			
+
 		// Substract the kth row from others to get 0s in kth column
-		var Aik ;			
+		var Aik ;
 		var bk = b[k];
 		for ( i=0; i< m; i++) {
 			if ( i != k ) {
-				var Ai = A[i]; 
+				var Ai = A[i];
 				Aik = Ai[k];
 				for ( j=k+1; j < n; j++) { // Aij = 0  with j < k and Aik = 0 after this operation but is never used
-					Ai[j] -= Aik * Ak[j]; 						
+					Ai[j] -= Aik * Ak[j];
 				}
-				b[i] -= Aik * bk;				
+				b[i] -= Aik * bk;
 			}
-		}	
+		}
 	}
 
-	// Solution: 
+	// Solution:
 	return b;
 }
 
@@ -6727,7 +6727,7 @@ function inv( M ) {
 		return 1/M;
 
 	// inverse matrix with Gaussian elimination
-		
+
 	var i;
 	var j;
 	var k;
@@ -6735,14 +6735,14 @@ function inv( M ) {
 	const n = M.n;
 	if ( m != n)
 		return "undefined";
-		
-	// Make extended linear system:	
+
+	// Make extended linear system:
 	var A = matrixCopy(M) ;
-	var B = eye(n); 
-		
+	var B = eye(n);
+
 	for (k=0; k < m ; k++) {
 		var kn = k*n;
-		
+
 		// Find imax = argmax_i=k...m |A_i,k|
 		var imax = k;
 		var Aimaxk = Math.abs(A.val[imax*n + k]);
@@ -6754,24 +6754,24 @@ function inv( M ) {
 		}
 		if ( Math.abs( Aimaxk ) < 1e-12 ) {
 			return "singular";
-		} 
-		
+		}
+
 		if ( imax != k ) {
 			// Permute the rows
 			swaprows(A, k, imax);
-			swaprows(B,k, imax);		
-		}		
-		
-		// Normalize row k 
+			swaprows(B,k, imax);
+		}
+
+		// Normalize row k
 		var Akk = A.val[kn + k];
 		for ( j=0; j < n; j++) {
 			A.val[kn + j] /= Akk;
 			B.val[kn + j] /= Akk;
 		}
-		
+
 		if ( Math.abs(Akk) < 1e-8 )
 			console.log("!! Warning in inv(): " + Akk + " " + k + ":" + m );
-			
+
 		// Substract the kth row from others to get 0s in kth column
 		var Aik ;
 		for ( i=0; i< m; i++) {
@@ -6780,55 +6780,55 @@ function inv( M ) {
 				Aik = A.val[ri+k];
 				if ( ! isZero(Aik) ) {
 					for ( j=0; j < n; j++) {
-						A.val[ri + j] -= Aik * A.val[kn+j]; 
+						A.val[ri + j] -= Aik * A.val[kn+j];
 						B.val[ri + j] -= Aik * B.val[kn+j] ;
 					}
 				}
 			}
-		}		
+		}
 	}
 
-	// Solution: 
+	// Solution:
 	return B;
 }
 
 function chol( A ) {
-	// Compute the Cholesky factorization A = L L^T with L lower triangular 
+	// Compute the Cholesky factorization A = L L^T with L lower triangular
 	// for a positive definite and symmetric A
 	// returns L or undefined if A is not positive definite
 	const n = A.m;
 	if ( A.n != n) {
 		error("Cannot compute the cholesky factorization: the matrix is not square.");
-		return undefined; 
+		return undefined;
 	}
 	const n2= n*n;
 	const Aval = A.val;
 	var L = new Float64Array(n2);
-		
+
 	var i,j;
 	// first column = A(:,0) / sqrt(L(0,0)
 	var sqrtLjj = Math.sqrt(Aval[0]);
 	for ( i=0; i < n2 ; i+=n) { 	// i = i*n = ptr to row i
 		L[i] = Aval[i] / sqrtLjj;
 	}
-	// other colums 
+	// other colums
 	j = 1;
 	var jn = n;
-	while ( j < n && !isNaN(sqrtLjj)) {				
+	while ( j < n && !isNaN(sqrtLjj)) {
 		for ( i = jn; i < n2; i+=n ) {	// i = i*n
 			var Lij = Aval[i+j];
 			for ( var k=0; k < j; k++) {
-				Lij -= L[jn + k] * L[i + k]; 
+				Lij -= L[jn + k] * L[i + k];
 			}
 			if (i == jn)
 				sqrtLjj = Math.sqrt(Lij);
-				
+
 			L[i +j] = Lij / sqrtLjj;
 		}
 		j++;
 		jn += n;
 	}
-	if ( isNaN(sqrtLjj) ) 
+	if ( isNaN(sqrtLjj) )
 		return undefined; // not positive definite
 	else
 		return new Matrix(n,n,L,true);
@@ -6846,22 +6846,22 @@ function ldlsymmetricpivoting ( Aorig ) {
 	var piv = zeros(n);
 	var alpha;
 	var v;
-	
+
 	for ( k=0; k < n-1; k++) {
-		
+
 		piv[k] = findmax(get(diag(A ), range(k,n) ));
 		swaprows(A, k, piv[k] );
 		swapcols(A, k, piv[k] );
 		alpha = A.val[k*n + k];
 		v = getCols ( A, [k]).subarray(k+1,n);
-		
+
 		for ( var i=k+1;i < n; i++)
 			A.val[i*n + k] /= alpha;
-		
-		set( A, range(k+1,n),range(k+1,n), sub (get(A,range(k+1,n), range(k+1,n)), outerprod(v,v, 1/alpha)));		
-		
+
+		set( A, range(k+1,n),range(k+1,n), sub (get(A,range(k+1,n), range(k+1,n)), outerprod(v,v, 1/alpha)));
+
 	}
-	
+
 	// Make it lower triangular
 	for (var j=0; j < n-1; j++) {
 		for (var k=j+1; k < n ; k++)
@@ -6870,27 +6870,27 @@ function ldlsymmetricpivoting ( Aorig ) {
 	return {L: A, piv: piv};
 }
 /**
- * @param {Float64Array} 
+ * @param {Float64Array}
  * @return {{v: Float64Array, beta: number}}
  */
 function house ( x ) {
-	// Compute Houselholder vector v such that 
+	// Compute Houselholder vector v such that
 	// P = (I - beta v v') is orthogonal and Px = ||x|| e_1
 
-	const n = x.length; 
+	const n = x.length;
 	var i;
 	var mu;
 	var beta;
-	var v = zeros(n);	
+	var v = zeros(n);
 	var v0;
 	var sigma ;
-	
+
 	var x0 = x[0];
 	var xx = dot(x,x);
-	
-	// sigma = x(2:n)^T x(2:n) 
-	sigma = xx -x0*x0;	
-		
+
+	// sigma = x(2:n)^T x(2:n)
+	sigma = xx -x0*x0;
+
 	if ( isZero( sigma ) ) {
 		// x(2:n) is zero =>  v=[1,0...0], beta = 0
 		beta = 0;
@@ -6904,15 +6904,15 @@ function house ( x ) {
 		else {
 			v0 = -sigma / (x0 + mu);
 		}
-		
+
 		beta = 2 * v0 * v0 / (sigma + v0 * v0 );
-		
+
 		// v = [v0,x(2:n)] / v0
 		v[0] = 1;
-		for ( i=1; i< n; i++) 
-			v[i] = x[i] / v0;		
+		for ( i=1; i< n; i++)
+			v[i] = x[i] / v0;
 	}
-	
+
 	return { "v" : v , "beta" : beta};
 }
 /**
@@ -6922,27 +6922,27 @@ function house ( x ) {
 function qroriginal( A, compute_Q ) {
 	// QR factorization based on Householder reflections WITHOUT column pivoting
 	// A with m rows and n cols; m >= n
-	
+
 	// test with A = [[12,-51,4],[6,167,-68],[-4,24,-41]]
 	// then R = [ [14 -21 -14 ], [ -3, 175, -70], [2, -0.75, 35]]
-	
+
 	var m = A.length;
 	var n = A.n;
 	if ( n > m)
 		return "QR factorization unavailable for n > m.";
-	
+
 	var i;
 	var j;
 	var k;
 	var householder;
 	var R = matrixCopy(A);
-	var beta = zeros(n); 
+	var beta = zeros(n);
 	var outer;
-	var smallR; 
+	var smallR;
 	var Q;
 	var V = new Array(); // store householder vectors
 
-	
+
 	for ( j=0; j < n - 1 ; j++) {
 		householder = house( get( R, range(j,m), j) );
 		// R(j:m,j:n) = ( I - beta v v' ) * R(j:m,j:n) = R - (beta v) (v'R)
@@ -6951,12 +6951,12 @@ function qroriginal( A, compute_Q ) {
 
 		 V[j] = householder.v;
 		 beta[j] = householder.beta;
-	
+
 	}
-	// Last iteration only if m > n: if m=n, (I - beta v v' ) = 1 => R(n,n) is unchanged		
+	// Last iteration only if m > n: if m=n, (I - beta v v' ) = 1 => R(n,n) is unchanged
 	if ( m > n ) {
 		j = n-1;
-		smallR = get( R, range(j,m), j) 
+		smallR = get( R, range(j,m), j)
 		householder = house( smallR );
 		 // R(j:m,n) = ( I - beta v v' ) * R(j:m, n) = R(j:m,n) - (beta v) (v'R(j:m,n) ) = Rn - ( beta *(v' * Rn) )* v
 		set ( R, range(j,m), n-1 , subVectors (  smallR , mulScalarVector( dot( householder.v, smallR ) *  householder.beta, householder.v  ) ) ) ;
@@ -6970,86 +6970,86 @@ function qroriginal( A, compute_Q ) {
 		var r;
 		if ( typeof( compute_Q ) == "number") {
 			// compute only first r columns of Q
-			r = compute_Q; 
-			Q = eye(m,r);			
+			r = compute_Q;
+			Q = eye(m,r);
 		}
 		else {
 			Q = eye(m);
 			r = m;
-		}	
+		}
 		var smallQ;
 		var nmax = n-1;
 		if ( m<=n)
 			nmax = n-2;
 		if ( nmax >= r )
-			nmax = r-1;			
+			nmax = r-1;
 
 		for ( j=nmax; j >=0; j--) {
-			smallQ =  get(Q, range(j,m), range(j,r) ); 
-			
+			smallQ =  get(Q, range(j,m), range(j,r) );
+
 			if ( r > 1 ) {
-				if ( j == r-1) 
+				if ( j == r-1)
 					set ( Q, range(j,m), [j] , subVectors (  smallQ ,  mulScalarVector( dot( smallQ, V[j]) * beta[j],  V[j] ) ) );
 				else
 					set ( Q, range(j,m), range(j,r), sub (  smallQ , outerprod( V[j], mul( transpose( smallQ), V[j]), beta[j] ) ) );
 			}
 			else
 				Q = subVectors (  smallQ , mulScalarVector( dot( smallQ, V[j]) * beta[j],  V[j] ) );
-		}		 
+		}
 	}
 
 	return {"Q" : Q, "R" : R, "beta" : beta };
-}	
+}
 
 /**
  * @param {Matrix}
  * @return {{Q: (Matrix|undefined), R: Matrix, V: Array, beta: Float64Array, piv: Float64Array, rank: number}
  */
-function qr( A, compute_Q ) {	
+function qr( A, compute_Q ) {
 	// QR factorization with column pivoting AP = QR based on Householder reflections
 	// A with m rows and n cols; m >= n (well, it also works with m < n)
 	// piv = vector of permutations : P = P_rank with P_j = identity with swaprows ( j, piv(j) )
-	
+
 	// Implemented with R transposed for faster computations on rows instead of columns
-	
+
 	/* TEST
 	A  = [[12,-51,4],[6,167,-68],[-4,24,-41]]
 	QR = qr(A)
 	QR.R
-	
-	
+
+
 	*/
 	const m = A.m;
 	const n = A.n;
-	
+
 	/*
 	if ( n > m)
 		return "QR factorization unavailable for n > m.";
 	*/
-	
+
 	var i;
 	var j;
 
 	var householder;
 	var R = transpose(A);// transposed for faster implementation
 	var Q;
-	
+
 	var V = new Array(); // store householder vectors in this list (not a matrix)
-	var beta = zeros(n); 
+	var beta = zeros(n);
 	var piv = zeros(n);
-	
-	var smallR; 
-	
+
+	var smallR;
+
 	var r = -1; // rank estimate -1
-	
+
 	var normA = norm(A);
 	var normR22 = normA;
 	var Rij;
-	
+
 	const TOL = 1e-5;
 	var TOLnormR22square = TOL * normA;
 	TOLnormR22square *= TOLnormR22square;
-	
+
 	var tau = 0;
 	var k = 0;
 	var c = zeros (n);
@@ -7064,14 +7064,14 @@ function qr( A, compute_Q ) {
 
 	var updateR = function (r, v, beta) {
 		// set ( R, range(r,n), range(r,m) , subMatrices (  smallR , outerprodVectors( mulMatrixVector( smallR, householder.v), householder.v,  householder.beta ) ) ) ;
-		// most of the time is spent here... 
+		// most of the time is spent here...
 		var i,j,l;
 		var m_r = m-r;
 		for ( i=r; i < n; i++) {
 			var smallRiv = 0;
 			var Ri = i*m + r; // =  i * R.n + r
 			var Rval = R.val.subarray(Ri,Ri+m_r);
-			for ( l = 0 ; l < m_r ; l ++) 
+			for ( l = 0 ; l < m_r ; l ++)
 				smallRiv += Rval[l] * v[l];	//smallRiv += R.val[Ri + l] * v[l];
 			smallRiv *= beta ;
 			for ( j=0; j < m_r ; j ++) {
@@ -7086,7 +7086,7 @@ function qr( A, compute_Q ) {
 		for (j=r+1; j < n; j++) {
 			var Rjr = R.val[j*m + r];
 			c[j] -= Rjr * Rjr;
-		}			
+		}
 
 		// tau, k = max ( c[r+1 : n] )
 		k=r+1;
@@ -7098,7 +7098,7 @@ function qr( A, compute_Q ) {
 			}
 		}
 	};
-	
+
 	// Compute norm of residuals
 	var computeNormR22 = function(r) {
 		//normR22 = norm(get ( R, range(r+1,n), range(r+1,m), ) );
@@ -7121,11 +7121,11 @@ function qr( A, compute_Q ) {
 	while ( tau > EPS  && r < n-1 &&  normR22 > TOLnormR22square ) {
 
 		r++;
-						
+
 		piv[r] = k;
 		swaprows ( R, r, k);
 		c[k] = c[r];
-		c[r] = tau;		
+		c[r] = tau;
 
 		if ( r < m-1) {
 			householder = house( R.val.subarray(r*R.n + r,r*R.n + m) ); // house only reads vec so subarray is ok
@@ -7135,13 +7135,13 @@ function qr( A, compute_Q ) {
 			householder.beta = 0;
 			//smallR = R[m-1][m-1];
 		}
-		
+
 		if (r < n-1) {
 			// smallR is a matrix
 			updateR(r, householder.v, householder.beta);
 		}
 		else {
-			// smallR is a row vector (or a number if m=n):	
+			// smallR is a row vector (or a number if m=n):
 			if ( r < m-1) {
 				updateR(r, householder.v, householder.beta);
 			/*
@@ -7155,20 +7155,20 @@ function qr( A, compute_Q ) {
 			}
 		}
 
-		// Store householder vectors and beta 			
+		// Store householder vectors and beta
 		V[r] = vectorCopy( householder.v );
 		beta[r] = householder.beta;
 
 		if ( r<n-1 ) {
 			// Update c
-			updateC(r);			
+			updateC(r);
 
 			// stopping criterion for rank estimation
-			if ( r < m-1 ) 
+			if ( r < m-1 )
 				normR22 = computeNormR22(r);
 			else
 				normR22 = 0;
-		}	
+		}
 	}
 
 	if ( compute_Q ) {
@@ -7196,44 +7196,44 @@ function qrRnotTransposed( A, compute_Q ) {
 	// QR factorization with column pivoting AP = QR based on Householder reflections
 	// A with m rows and n cols; m >= n (well, it also works with m < n)
 	// piv = vector of permutations : P = P_rank with P_j = identity with swaprows ( j, piv(j) )
-	
-	// original implementation working on columns 
-	
+
+	// original implementation working on columns
+
 	/* TEST
 	A  = [[12,-51,4],[6,167,-68],[-4,24,-41]]
 	QR = qr(A)
 	QR.R
-	
-	
+
+
 	*/
 	var m = A.m;
 	var n = A.n;
-	
+
 	/*
 	if ( n > m)
 		return "QR factorization unavailable for n > m.";
 	*/
-	
+
 	var i;
 	var j;
 
 	var householder;
 	var R = matrixCopy(A);
 	var Q;
-	
+
 	var V = new Array(); // store householder vectors in this list (not a matrix)
-	var beta = zeros(n); 
+	var beta = zeros(n);
 	var piv = zeros(n);
-	
-	var smallR; 
-	
+
+	var smallR;
+
 	var r = -1; // rank estimate -1
-	
+
 	var normA = norm(A);
 	var normR22 = normA;
-	
+
 	var TOL = 1e-6;
-	
+
 	var tau = 0;
 	var k = 0;
 	var c = zeros (n);
@@ -7247,13 +7247,13 @@ function qrRnotTransposed( A, compute_Q ) {
 	}
 
 	while ( tau > EPS  && r < n-1 &&  normR22 > TOL * normA ) {
-	
+
 		r++;
-						
+
 		piv[r] = k;
 		swapcols ( R, r, k);
 		c[k] = c[r];
-		c[r] = tau;		
+		c[r] = tau;
 
 		if ( r < m-1) {
 			householder = house( get( R, range(r,m), r) );
@@ -7264,7 +7264,7 @@ function qrRnotTransposed( A, compute_Q ) {
 			householder.beta = 0;
 			smallR = R[m-1][m-1];
 		}
-		
+
 		if (r < n-1) {
 			// smallR is a matrix
 			set ( R, range(r,m), range(r,n) , subMatrices (  smallR , outerprodVectors( householder.v, mulMatrixVector( transposeMatrix(smallR), householder.v) ,  householder.beta ) ) ) ;
@@ -7274,7 +7274,7 @@ function qrRnotTransposed( A, compute_Q ) {
 			set ( R, range(r,m), r , sub (  smallR , mul( householder.beta * mul( smallR, householder.v) ,householder.v  ) ) ) ;
 		}
 
-		// Store householder vectors and beta 			
+		// Store householder vectors and beta
 		if ( m > r+1 )
 			V[r] = vectorCopy( householder.v );
 		beta[r] = householder.beta;
@@ -7283,8 +7283,8 @@ function qrRnotTransposed( A, compute_Q ) {
 			// Update c
 			for ( j=r+1; j < n; j++) {
 				c[j] -= R[r][j] * R[r][j];
-			}			
-	
+			}
+
 			// tau, k = max ( c[r+1 : n] )
 			k=r+1;
 			tau = c[r+1];
@@ -7311,7 +7311,7 @@ function qrRnotTransposed( A, compute_Q ) {
 				normR22 = 0;
 		}
 	}
-	
+
 	if ( compute_Q ) {
 		Q = eye(m);
 		var smallQ;
@@ -7327,7 +7327,7 @@ function qrRnotTransposed( A, compute_Q ) {
 				set ( Q, range(j,m), range(j,m) , subMatrices (  smallQ , outerprodVectors(  V[j], mulMatrixVector( transposeMatrix(smallQ), V[j]), beta[j] ) ) );
 			}
 		}
-		 
+
 	}
 
 	return {"Q" : Q, "R" : R, "V": V, "beta" : beta, "piv" : piv, "rank" : r+1 };
@@ -7339,10 +7339,10 @@ function qrRnotTransposed( A, compute_Q ) {
  * @return{Float64Array}
  */
 function solvecg ( A, b) {
-	if( A.type == "spmatrix" ) 
+	if( A.type == "spmatrix" )
 		return spsolvecg(A,b);
 	else
-		return solvecgdense(A,b);		
+		return solvecgdense(A,b);
 }
 
 /** Conjugate gradient method for solving the symmetyric positie definite system Ax = b
@@ -7365,8 +7365,8 @@ xh=solvecg(A'*A, A'*b)
 t2 = toc()
 e = norm(A*xh - b)
 */
-	
-	const n = A.n;	
+
+	const n = A.n;
 	const m = A.m;
 
 	var x = randn(n); //vectorCopy(x0);
@@ -7375,7 +7375,7 @@ e = norm(A*xh - b)
 	const TOL = 1e-8;
 	var delta2 = TOL * norm(b);
 	delta2 *= delta2;
-	
+
 	// first iteration:
 	var p = vectorCopy(r);
 	var w = mulMatrixVector(A,p);
@@ -7391,7 +7391,7 @@ e = norm(A*xh - b)
 		for ( var i=0; i < m; i++)
 			p[i] = r[i] + tau * p[i];
 	}
-	
+
 	while ( rhoc > delta2 && k < n ) {
 		updateP(rhoc/rho_, r);
 		w = mulMatrixVector(A,p);
@@ -7410,10 +7410,10 @@ e = norm(A*xh - b)
  * @return{Float64Array}
  */
 function cgnr ( A, b) {
-	if( A.type == "spmatrix" ) 
+	if( A.type == "spmatrix" )
 		return spcgnr(A,b);
 	else
-		return cgnrdense(A,b);		
+		return cgnrdense(A,b);
 }
 /** Conjugate gradient normal equation residual method for solving the rectangular system Ax = b
  * @param{Matrix}
@@ -7435,25 +7435,25 @@ xh=cgnr(A, b)
 t2 = toc()
 e = norm(A*xh - b)
 */
-	
-	const n = A.n;	
+
+	const n = A.n;
 	const m = A.m;
 
 	var x = randn(n); // vectorCopy(x0);
 	var At = transposeMatrix(A);
-	var r = subVectors(b, mulMatrixVector(A, x));	
+	var r = subVectors(b, mulMatrixVector(A, x));
 	const TOL = 1e-8;
 	var delta2 = TOL * norm(b);
 	delta2 *= delta2;
-	
+
 	// first iteration:
 	var z = mulMatrixVector(At, r);
-	var rhoc = dot(z,z);	
+	var rhoc = dot(z,z);
 	var p = vectorCopy(z);
 	var w = mulMatrixVector(A,p);
 	var mu = rhoc / dot(w, w);
 	saxpy( mu, p, x);
-	saxpy( -mu, w, r);	
+	saxpy( -mu, w, r);
 	z = mulMatrixVector(At, r);
 	var rho_ = rhoc;
 	rhoc = dot(z,z);
@@ -7464,7 +7464,7 @@ e = norm(A*xh - b)
 		for ( var i=0; i < m; i++)
 			p[i] = z[i] + tau * p[i];
 	}
-	
+
 	while ( rhoc > delta2 && k < n ) {
 		updateP(rhoc/rho_, z);
 		w = mulMatrixVector(A,p);
@@ -7485,7 +7485,7 @@ e = norm(A*xh - b)
 function lanczos ( A, q1 ) {
 
 	const maxIters = 300;
-	const TOL = EPS * norm(A); 
+	const TOL = EPS * norm(A);
 	const n = A.n;
 	var i;
 	var k = 0;
@@ -7494,20 +7494,20 @@ function lanczos ( A, q1 ) {
 	var alpha = dot(w,v);
 	saxpy(-alpha, w, v);
 	beta = norm(b);
-	
+
 	while ( beta > TOL && k < maxIters ) {
-	
+
 		for ( i=0; i < n; i++) {
 			var t = w[i];
 			w[i] = v[i] / beta;
 			v[i] = -beta / t;
 		}
-		
+
 		var Aw = mulMatrixVector(A,w);
-		
-		for ( i=0; i < n; i++) 
+
+		for ( i=0; i < n; i++)
 			v[i] += Aw[i];
-		
+
 		alpha = dot(w,v);
 		saxpy(-alpha,w,v);
 		beta = norm(v);
@@ -7539,10 +7539,10 @@ function tridiagonalize( A, returnQ ) {
 		T = matrixCopy(A);
 	var p;
 	var w;
-	var vwT; 
+	var vwT;
 	var normTkp1k;
 	var householder;
-	
+
 	for (k=0; k < n-2; k++) {
 		Tkp1k = get ( T, range(k+1, n), k);
 		Tkp1kp1 = get ( T, range(k+1,n), range(k+1, n));
@@ -7550,15 +7550,15 @@ function tridiagonalize( A, returnQ ) {
 		householder = house ( Tkp1k );
 		p = mulScalarVector( householder.beta , mulMatrixVector( Tkp1kp1, householder.v ) );
 		w = subVectors ( p, mulScalarVector( 0.5*householder.beta * dot(p, householder.v ), householder.v) );
-		
+
 		/*
 		T[k+1][k] = norm ( Tkp1k );
-		T[k][k+1] = T[k+1][k];		
+		T[k][k+1] = T[k+1][k];
 		*/
 		// make T really tridiagonal: the above does not modify the other entries to set them to 0
 		normTkp1k = zeros(n-k-1);
 		normTkp1k[0] = norm ( Tkp1k );
-		set ( T, k, range(k+1,n ), normTkp1k );		
+		set ( T, k, range(k+1,n ), normTkp1k );
 		set ( T, range(k+1,n), k, normTkp1k);
 
 		vwT = outerprodVectors(householder.v,w);
@@ -7573,24 +7573,24 @@ function tridiagonalize( A, returnQ ) {
 		var updateQ = function(j, v, b) {
 			// Q = Q - b* v (Q'v)'
 			//smallQ =  get(Q, range(j,n), range(j,n) );// matrix
-			//set ( Q, range(j,n), range(j,n) , subMatrices (  smallQ , outerprodVectors(  V[k], mulMatrixVector( transposeMatrix(smallQ), V[k]), beta[k] ) ) );			
+			//set ( Q, range(j,n), range(j,n) , subMatrices (  smallQ , outerprodVectors(  V[k], mulMatrixVector( transposeMatrix(smallQ), V[k]), beta[k] ) ) );
 			var i,k;
 			var Qtv = zeros(n-j);
 			var n_j = n-j;
 			for ( i=0; i<n_j; i++) {
 				var Qi = (i+j)*n + j;
-				for ( k=0;k<n_j; k++) 
+				for ( k=0;k<n_j; k++)
 					Qtv[k] += v[i] * Q.val[Qi + k];
 			}
 			for ( i=0; i < n_j; i++) {
 				var Qi = (i+j)*n + j;
-				var betavk = b * v[i];				
+				var betavk = b * v[i];
 				for ( k=0; k < n_j ; k++) {
 					Q.val[Qi + k] -= betavk * Qtv[k];
 				}
 			}
 		};
-		
+
 		// Backaccumulation of Q
 		for ( k=n-3; k >=0; k--) {
 			updateQ(k+1,V[k], beta[k]);
@@ -7606,11 +7606,11 @@ function givens(a,b,Gi,Gk,n) {
 	var s;
 	var tau;
 	var G;
-	
+
 	// Compute c and s
 	if ( b == 0) {
 		c = 1;
-		s = 0;		
+		s = 0;
 	}
 	else {
 		if ( Math.abs(b) > Math.abs(a) ) {
@@ -7622,9 +7622,9 @@ function givens(a,b,Gi,Gk,n) {
 			tau = -b / a;
 			c = 1 / Math.sqrt(1+tau*tau);
 			s = c * tau;
-		}		
+		}
 	}
-	
+
 	if ( arguments.length == 5 ) {
 		// Build Givens matrix G from c and s:
 		G = eye(n) ;
@@ -7637,12 +7637,12 @@ function givens(a,b,Gi,Gk,n) {
 	else {
 		return [c,s];
 	}
-	
+
 }
 /**
  * @param {number}
  * @param {number}
- * @param {number}  
+ * @param {number}
  * @param {number}
  * @param {Matrix}
  */
@@ -7658,16 +7658,16 @@ function premulGivens ( c, s, i, k, A) {
 	var t1;
 	var t2;
 	for ( j=0; j < n; j++) {
-		t1 = A.val[ri + j]; 
-		t2 = A.val[rk + j]; 
-		A.val[ri + j] = c * t1 - s * t2; 
+		t1 = A.val[ri + j];
+		t2 = A.val[rk + j];
+		A.val[ri + j] = c * t1 - s * t2;
 		A.val[rk + j] = s * t1 + c * t2;
-	}	
+	}
 }
 /**
  * @param {number}
  * @param {number}
- * @param {number}  
+ * @param {number}
  * @param {number}
  * @param {Matrix}
  */
@@ -7682,17 +7682,17 @@ function postmulGivens ( c, s, i, k, A) {
 	var t2;
 	var rj = 0;
 	for ( j=0; j < m; j++) {
-		t1 = A.val[rj + i]; 
-		t2 = A.val[rj + k]; 
-		A.val[rj + i] = c * t1 - s * t2; 
+		t1 = A.val[rj + i];
+		t2 = A.val[rj + k];
+		A.val[rj + i] = c * t1 - s * t2;
 		A.val[rj + k] = s * t1 + c * t2;
 		rj += A.n;
-	}	
+	}
 }
 
 function implicitSymQRWilkinsonShift( T , computeZ) {
 	// compute T = Z' T Z
-	// if computeZ:  return {T,cs} such that T = Z' T Z  with Z = G1.G2... 
+	// if computeZ:  return {T,cs} such that T = Z' T Z  with Z = G1.G2...
 	// and givens matrices Gk of parameters cs[k]
 
 	const n = T.length;
@@ -7708,8 +7708,8 @@ function implicitSymQRWilkinsonShift( T , computeZ) {
 	if ( computeZ)
 		var csArray = new Array(n-1);
 		//var Z = eye(n);
-		
-	var k;	
+
+	var k;
 	for ( k = 0; k < n-1; k++) {
 		/*
 		G = givens(x,z, k, k+1, n);
@@ -7724,7 +7724,7 @@ function implicitSymQRWilkinsonShift( T , computeZ) {
 		if( computeZ )
 			csArray[k] = [cs[0], cs[1]];
 			//postmulGivens(cs[0], cs[1], k, k+1, Z);
-		
+
 		if ( k < n-2 ) {
 			var r = n*(k+1) + k;
 			x = T.val[r];
@@ -7735,31 +7735,31 @@ function implicitSymQRWilkinsonShift( T , computeZ) {
 		return {"T": T, "cs": csArray} ;
 //		return {"T": T, "Z": Z} ;
 	}
-	else 
+	else
 		return T;
 }
 
 function eig( A , computeEigenvectors ) {
 	// Eigendecomposition of a symmetric matrix A (QR algorithm)
-	
-	var Q; 
-	var D;	
+
+	var Q;
+	var D;
 	if ( computeEigenvectors ) {
 		D = matrixCopy(A);
 		Q = tridiagonalize( D, true );
 	}
 	else {
-		D = tridiagonalize( A ); 
-	}	
-	
+		D = tridiagonalize( A );
+	}
+
 	var q;
 	var p;
 	const n = A.length;
 	var i;
-	
+
 	const TOL = 1e-12; //10 * EPS;
 
-	do { 
+	do {
 		for ( i=0; i<n-1; i++) {
 			if ( Math.abs( D.val[i*n + i+1] ) < TOL * ( Math.abs(D.val[i*n+i] ) + Math.abs(D.val[(i+1)*n+i+1] ) ) ) {
 				D.val[i*n+i+1] = 0;
@@ -7767,21 +7767,21 @@ function eig( A , computeEigenvectors ) {
 			}
 		}
 
-		// find largest q such that D[n-p-q:n][n-p-q:n] is diagonal: 
-		if ( !isZero( D.val[(n-1)*n+n-2] )  || !isZero( D.val[(n-2)*n + n-1] )  ) 
+		// find largest q such that D[n-p-q:n][n-p-q:n] is diagonal:
+		if ( !isZero( D.val[(n-1)*n+n-2] )  || !isZero( D.val[(n-2)*n + n-1] )  )
 			q = 0;
 		else {
-			q = 1;		
+			q = 1;
 			while ( q < n-1 && isZero( D.val[(n-q-1)*n+ n-q-2] ) && isZero( D.val[(n-q-2)*n + n-q-1] ) )
-				q++;	
-			if ( q >= n-1 ) 
-				q = n;			
+				q++;
+			if ( q >= n-1 )
+				q = n;
 		}
-		
+
 		// find smallest p such that D[p:q][p:q] is unreduced ( without zeros on subdiagonal?)
 		p = -1;
 		var zerosOnSubdiagonal ;
-		do { 
+		do {
 			p++;
 			zerosOnSubdiagonal = false;
 			k=p;
@@ -7790,11 +7790,11 @@ function eig( A , computeEigenvectors ) {
 					zerosOnSubdiagonal = true;
 				k++;
 			}
-		} while (  zerosOnSubdiagonal && p + q < n  ); 
+		} while (  zerosOnSubdiagonal && p + q < n  );
 
 		// Apply implicit QR iteration
 		if ( q < n ) {
-			
+
 			if ( computeEigenvectors ) {
 				var res = implicitSymQRWilkinsonShift( get ( D, range(p,n-q), range(p,n-q)), true);
 				set( D, range(p,n-q), range(p,n-q), res.T );
@@ -7802,8 +7802,8 @@ function eig( A , computeEigenvectors ) {
 					postmulGivens(res.cs[kk][0], res.cs[kk][1], p+kk, p+kk+1, Q);
 				//Z = eye(n);
 				//set(Z, range(p,n-q), range(p,n-q), DZ22.Z );
-				// Q = mulMatrixMatrix ( Q, Z );	
-				
+				// Q = mulMatrixMatrix ( Q, Z );
+
 			}
 			else {
 				set( D, range(p,n-q), range(p,n-q), implicitSymQRWilkinsonShift( get ( D, range(p,n-q), range(p,n-q)) , false)) ;
@@ -7814,8 +7814,8 @@ function eig( A , computeEigenvectors ) {
 
 	if ( computeEigenvectors ) {
 		return { "V" : diag(D), "U": Q};
-	}	
-	else 
+	}
+	else
 		return diag(D);
 }
 
@@ -7823,20 +7823,20 @@ function eigs( A, r, smallest ) {
 	// Compute r largest or smallest eigenvalues and eigenvectors
 	if( typeof(r) == "undefined")
 		var r = 1;
-	if( typeof(smallest) == "undefined" || smallest == false || smallest !="smallest" ) {		
+	if( typeof(smallest) == "undefined" || smallest == false || smallest !="smallest" ) {
 		if ( r == 1)
 			return eig_powerIteration ( A );
-		else 
+		else
 			return eig_orthogonalIteration ( A , r) ;
 	}
 	else {
 		// look for smallest eigenvalues
 		if ( r == 1)
 			return eig_inverseIteration ( A , 0);
-		else 
+		else
 			return eig_bisect( A, r);
 			//return eig_inverseOrthogonalIteration ( A , r) ;
-	}			
+	}
 }
 
 function eig_powerIteration ( A , u0) {
@@ -7844,7 +7844,7 @@ function eig_powerIteration ( A , u0) {
 	const maxIters = 1000;
 	var k;
 	const n = A.length;
-	
+
 	// init with a random u or an initial guess u0
 	var u;
 	if ( typeof(u0) == "undefined")
@@ -7853,38 +7853,38 @@ function eig_powerIteration ( A , u0) {
 		u = u0;
 	u = mulScalarVector(1/norm(u), u);
 	var lambda = 1;
-	for ( k=0; k< maxIters; k++) {		
+	for ( k=0; k< maxIters; k++) {
 		// Apply the iteration : u = Au / norm(Au)
 		u = mulMatrixVector(A, u) ;
 		lambda = norm(u);
-		u = mulScalarVector(1/ lambda, u);				
+		u = mulScalarVector(1/ lambda, u);
 	}
 	return { "v" : lambda, "u" : u};
 }
 
 function eig_orthogonalIteration ( A, r ) {
 
-	if ( r == 1 )	
+	if ( r == 1 )
 		return eig_powerIteration ( A );
 
 // Compute the r largest eigenvalue and eigenvector with the power method (orthogonal iteration)
 	const maxIters = 1000;
 	var k;
 	const n = A.length;
-	
+
 	// init with a random Q
 	var Q = randn(n,r);
 	var normQ = norm(Q,1);
 	Q = entrywisediv(Q, mul(ones(n),normQ) );
 	var QR;
-	var Z; 
+	var Z;
 
 	const TOL = 1e-11;
 	var V;
 
-	for ( k=0; k< maxIters; k++) {		
+	for ( k=0; k< maxIters; k++) {
 
-		// Z = AQ		
+		// Z = AQ
 		Z = mulMatrixMatrix(A, Q);
 		if ( Math.floor(k / 50) == k / 50) {
 			// convergence test
@@ -7892,11 +7892,11 @@ function eig_orthogonalIteration ( A, r ) {
 
 			if ( norm ( subMatrices ( Z, mulMatrixMatrix(Q, diag(diag(V)) ) ) ) < TOL )
 				break;
-		}	
-			
+		}
+
 		// QR = Z	// XXX maybe not do this at every iteration...
-		Q = qroriginal(Z,r).Q;	
-	
+		Q = qroriginal(Z,r).Q;
+
 	}
 
 	V = mulMatrixMatrix(transpose(Q), mulMatrixMatrix(A, Q) );
@@ -7910,7 +7910,7 @@ function eig_inverseIteration ( A, lambda ) {
 
 	if ( typeof(maxIters) == "undefined" )
 		var maxIters = 100;
-		
+
 	var k;
 	const n = A.length;
 
@@ -7924,9 +7924,9 @@ function eig_inverseIteration ( A, lambda ) {
 		QR = qr( A_lambdaI ); // and precompute QR factorization
 		//console.log(perturbation);
 	}
-	
+
 	// init
-	var u = sub(mul(2,rand(n)),1); //ones(n); // 
+	var u = sub(mul(2,rand(n)),1); //ones(n); //
 	u = mulScalarVector( 1/norm(u), u );
 	var v;
 	var r;
@@ -7934,14 +7934,14 @@ function eig_inverseIteration ( A, lambda ) {
 	k = 0;
 	do {
 		// u =  solve(A_lambdaI , u) ;
-		
-		u = solveWithQRcolumnpivoting ( QR, u ); // QR factorization precomputed
-		
-		v = norm(u);
-		u = entrywisediv(u , v);	
 
-		r = mulMatrixVector(A_lambdaI, u); 
-		
+		u = solveWithQRcolumnpivoting ( QR, u ); // QR factorization precomputed
+
+		v = norm(u);
+		u = entrywisediv(u , v);
+
+		r = mulMatrixVector(A_lambdaI, u);
+
 		k++;
 	} while ( k < maxIters && maxVector(absVector(r)) < 1e-10 * norminfA); // && Math.abs(v * perturbation - 1 ) < EPS );
 	return u;
@@ -7949,14 +7949,14 @@ function eig_inverseIteration ( A, lambda ) {
 }
 function eigenvector ( A, lambda ) {
 	return eig_inverseIteration(A, lambda, 2);
-} 
+}
 
 function eig_inverseOrthogonalIteration ( A, r ) {
 
-	if ( r == 1 )	
+	if ( r == 1 )
 		return eig_inverseIteration ( A );
 
-// Compute the r smallest eigenvalue and eigenvectors with the inverse power method 
+// Compute the r smallest eigenvalue and eigenvectors with the inverse power method
 // (orthogonal iteration)
 	const maxIters = 1000;
 	var k;
@@ -7968,27 +7968,27 @@ function eig_inverseOrthogonalIteration ( A, r ) {
 	var normQ = norm(Q,1);
 	Q = entrywisediv(Q, mul(ones(n),normQ) );
 	var QR;
-	var Z; 
+	var Z;
 
 	const TOL = 1e-11;
 	var V;
 
-	for ( k=0; k< maxIters; k++) {		
+	for ( k=0; k< maxIters; k++) {
 
 		// Z = A^-1 Q
 		Z = solveWithQRcolumnpivotingMultipleRHS ( QR, Q );
-		
+
 		if ( Math.floor(k / 50) == k / 50) {
 			// convergence test
 			V = mulMatrixMatrix(transpose(Q), Z);
 
 			if ( norm ( subMatrices ( Z, mulMatrixMatrix(Q, V ) ) ) < TOL )
 				break;
-		}	
-			
+		}
+
 		// QR = Z	// XXX maybe not do this at every iteration...
-		Q = qroriginal(Z,r).Q;	
-	
+		Q = qroriginal(Z,r).Q;
+
 	}
 
 	V = mulMatrixMatrix(transpose(Q), mulMatrixMatrix(A, Q) );
@@ -7998,7 +7998,7 @@ function eig_inverseOrthogonalIteration ( A, r ) {
 
 
 function eig_bisect( A, K ) {
-// find K smallest eigenvalues 
+// find K smallest eigenvalues
 
 /*
 TEST
@@ -8008,18 +8008,18 @@ A = X*X'
 v = eig(A)
 eig_bisect(A,3)
 */
-	
+
 	var x,y,z;
-	
-	// Tridiagonalize A	
-	var T = tridiagonalize( A ); 	
+
+	// Tridiagonalize A
+	var T = tridiagonalize( A );
 	const n = T.n;
 	var a = diag(T);
 	var b = zeros(n);
 	var i;
-	for ( i=0; i < n-1; i++) 
+	for ( i=0; i < n-1; i++)
 		b[i] =  T.val[i*n + i + 1];
-		
+
 	// Initialize [y,z] with Gershgorin disk theorem
 	var y0 = a[0] - b[0];
 	var z0 = a[0] + b[0];
@@ -8031,7 +8031,7 @@ eig_bisect(A,3)
 		if( zi > z0 )
 			z0 = zi;
 	}
-	
+
 	/*
 	// polynomial evaluation and counting sign changes (original method)
 	var polya = function (x,a,b,n) {
@@ -8041,7 +8041,7 @@ eig_bisect(A,3)
 		var signchanges = 0;
 		if (  pr_1 < EPS )
 			signchanges = 1;
-			
+
 		var r;
 		for ( r = 1; r < n ; r++) {
 			pr = (a[r] - x) * pr_1 - b[r-1] * b[r-1] * pr_2;
@@ -8050,12 +8050,12 @@ eig_bisect(A,3)
 				signchanges ++;
 
 			pr_2 = pr_1;
-			pr_1 = pr;			
+			pr_1 = pr;
 		}
 		return signchanges;
 	};
 	*/
-	
+
 	// ratio of polynomials evaluation and counting sign changes
 	// (modification discussed in Barth et al., 1967 for better stability due to pr ~ 0 in the above)
 	var polyq = function (x,a,b,n) {
@@ -8064,73 +8064,73 @@ eig_bisect(A,3)
 		var signchanges = 0;
 		if (  qi_1 < EPS )
 			signchanges = 1;
-			
+
 		var i;
 		for ( i = 1; i < n ; i++) {
 			qi = (a[i] - x) - b[i-1] * b[i-1] / qi_1;
 
-			if ( qi < EPS ) 
+			if ( qi < EPS )
 				signchanges ++;
 
 			if ( Math.abs(qi) < EPS )
 				qi_1 = EPS;
 			else
-				qi_1 = qi;			
+				qi_1 = qi;
 		}
 		return signchanges;
 	};
 
 
 	// Start bisection
-	const TOL = 1e-10; 
+	const TOL = 1e-10;
 	var lambda = zeros(K);
 	var xu = entrywisemul(z0,ones(K)); // upper bounds on lambdas
 	y = y0;
 	var n_lowerthan_x;// nb of eigenvalues lower than x
 	for ( var k = 1; k <= K ; k++ ) {
-		// k is the number of desired eigenvalues in this sweep 
-		
+		// k is the number of desired eigenvalues in this sweep
+
 		z = xu[k-1];
 		//y=y; from previous sweep
-		
+
 		// find the (n-k+1)th eigenvalue
 		while ( Math.abs(z - y) > TOL*(Math.abs(y) + Math.abs(z)) ) {
 			x = (y+z)/2;
 			n_lowerthan_x = polyq(x,a,b,n);
 
-			if(n_lowerthan_x  >= k ) 
+			if(n_lowerthan_x  >= k )
 				z = x; // enough eigenvalues below x, decrease upper bound to x
 			else
 				y = x; // not enough ev below x, increase lower bound to x
-				
+
 			// update boudns on other lambdas
-			for ( var j=k+1; j <= K; j++) 
+			for ( var j=k+1; j <= K; j++)
 				if ( n_lowerthan_x >= j )
-					xu[j-1] = x;			
-			
+					xu[j-1] = x;
+
 		}
 		lambda[k-1] = (y+z)/2;
 	}
 	//return lambda;
-	
-	// Compute eigenvectors: XXX can be faster by using inverse iteration on the tridiagonal matrix 
+
+	// Compute eigenvectors: XXX can be faster by using inverse iteration on the tridiagonal matrix
 	//						 with faster system solving
-	
-	var u = eigenvector( A, lambda[0] ); 
+
+	var u = eigenvector( A, lambda[0] );
 	var U = mat([u],false);
-	
+
 	for ( k = 1; k < K; k++) {
 		// deal with too close eigenvalues
-		var perturbtol = 10 * Math.max(EPS, Math.abs(EPS * lambda[k-1])); 
-		if ( lambda[k] < lambda[k-1] + perturbtol ) 
+		var perturbtol = 10 * Math.max(EPS, Math.abs(EPS * lambda[k-1]));
+		if ( lambda[k] < lambda[k-1] + perturbtol )
 			lambda[k] = lambda[k-1] + perturbtol;
-	
-		u = eigenvector( A, lambda[k] ); 
-		U = mat([U, u], false ); 
+
+		u = eigenvector( A, lambda[k] );
+		U = mat([U, u], false );
 		U = qroriginal( U, U.n ).Q; // orthogonalize
 	}
 
-	
+
 	return {U: U, V: lambda};
 }
 
@@ -8143,13 +8143,13 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 	const n = A.n;
 	var B;
 	B = matrixCopy( A );
-	
-	var householder; 
-	
+
+	var householder;
+
 	if ( computeU ) {
 		if ( thinU ) {
 			var U = eye(m,n);
-			var nU = n;						
+			var nU = n;
 		}
 		else {
 			var U = eye(m);
@@ -8157,22 +8157,22 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 		}
 	}
 	if ( computeV ) {
-		var V = eye(n);		
+		var V = eye(n);
 	}
-	
-	
+
+
 	var updateB1 = function (j, v, beta) {
 		// B = B - (beta v) ( v'* B) = B-outer(beta v, B'*v)
 		//Bjmjn = get ( B, range(j,m), range(j, n));
 		//set ( B, range(j,m), range(j,n), sub ( Bjmjn , outerprod ( householder.v, mul(transpose(Bjmjn), householder.v), householder.beta) ) );
-			
+
 		var i,k;
 		var Btv = zeros(n-j);
 		var n_j = n-j;
 		var m_j = m-j;
 		for ( i=0; i<m_j; i++) {
 			var Bi = (i+j)*n + j;
-			for ( k=0;k<n_j; k++) 
+			for ( k=0;k<n_j; k++)
 				Btv[k] += v[i] * B.val[Bi+k];
 		}
 		for ( i=0; i < m_j; i++) {
@@ -8187,13 +8187,13 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 		// B = B - beta (Bv) v' (with B = B_j:m, j+1:n)
 
 		//Bjmjn = get ( B, range(j,m), range(j+1, n));
-		//set ( B, range(j,m), range(j+1,n) , sub( Bjmjn, outerprod( mul(Bjmjn, householder.v), householder.v, householder.beta) ) );		
-		var i,k;	
+		//set ( B, range(j,m), range(j+1,n) , sub( Bjmjn, outerprod( mul(Bjmjn, householder.v), householder.v, householder.beta) ) );
+		var i,k;
 		var n_j_1 = n-j-1;
 		for ( i=j; i < m; i++) {
 			var Bi = i*n + j + 1;
 			var Bv = 0;
-			for ( k=0;k<n_j_1; k++) 
+			for ( k=0;k<n_j_1; k++)
 				Bv += B.val[Bi + k] *  v[k] ;
 			var betaBvk = beta * Bv;
 			for ( k=0; k < n_j_1 ; k++) {
@@ -8201,17 +8201,17 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 			}
 		}
 	};
-	
+
 	if ( computeV ) {
 		var updateV = function (j, v, beta) {
 			//smallV = get ( V, range(0,n), range(j+1, n));
-			//set ( V, range(0,n), range(j+1,n) , sub( smallV, outerprod( mul(smallV, householder.v), householder.v, householder.beta) ) );	
-			var i,k;	
+			//set ( V, range(0,n), range(j+1,n) , sub( smallV, outerprod( mul(smallV, householder.v), householder.v, householder.beta) ) );
+			var i,k;
 			var n_j_1 = n-j-1;
 			for ( i=0; i < n; i++) {
 				var Vi = i*n + j + 1;
 				var Vv = 0;
-				for ( k=0;k<n_j_1; k++) 
+				for ( k=0;k<n_j_1; k++)
 					Vv += V.val[Vi + k] *  v[k] ;
 				var betaVvk = beta * Vv;
 				for ( k=0; k < n_j_1 ; k++) {
@@ -8224,33 +8224,33 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 		var hv=new Array(n);// Householder vectors and betas
 		var hb=new Array(n);
 	}
-	
+
 	for (j=0; j < n ; j++) {
-				
+
 		if ( j < m-1)  {
 			householder = house( get ( B, range(j, m), j) );
-			
+
 			updateB1(j, householder.v, householder.beta);
-			
-			if ( computeU ) {				
+
+			if ( computeU ) {
 				hv[j] = vectorCopy(householder.v);
 				hb[j] = householder.beta;
 				//	updateU(j, householder.v, householder.beta);
 			}
 		}
-				
+
 		if ( j < n-2) {
 			householder = house ( B.row(j).subarray(j+1, n) ) ;
-			
+
 			updateB2(j, householder.v, householder.beta);
-			
+
 			if( computeV ) {
 				updateV(j, householder.v, householder.beta);
-			
-			}	
-		}		
+
+			}
+		}
 	}
-	if (computeU) {		
+	if (computeU) {
 		// Back accumulation of U (works with less than m columns)
 		// Un_1 = (I-beta v v')Un = Un - beta v (v' Un)
 
@@ -8260,18 +8260,18 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 				set(U,range(j,m),[], sub(smallU, mul(bv[j],mul(hv[j], mul(transpose(hv[j]) , smallU)))));
 			}
 		}*/
-		var updateU = function (j, v, beta) {			
+		var updateU = function (j, v, beta) {
 			var i,k;
 			var vtU = zeros(nU);
 			for ( i=j; i<m; i++) {
 				var Ui = i*nU;
 				var i_j = i-j;
-				for ( k=0;k<nU; k++) 
+				for ( k=0;k<nU; k++)
 					vtU[k] += v[i_j] * U.val[Ui + k];
 			}
 			for ( i=j; i < m; i++) {
 				var betavk = beta * v[i-j];
-				var Ui = i*nU;		
+				var Ui = i*nU;
 				for ( k=0; k < nU ; k++) {
 					U.val[Ui + k] -= betavk * vtU[k];
 				}
@@ -8284,12 +8284,12 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 	}
 
 	if ( computeU && computeV ) {
-		return { "U" : U, "V": V, "B": B};	 
+		return { "U" : U, "V": V, "B": B};
 	}
 	else if (computeV )
 		return { "V": V, "B": B};
 	else if (computeU)
-		return { "U" : U, "B": B};	 
+		return { "U" : U, "B": B};
 	else
 		return B;
 }
@@ -8298,10 +8298,10 @@ function bidiagonalize( A, computeU, thinU , computeV ) {
 function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 	// Apply GolubKahanSVDstep to B(i:i+m, j:j+n)
 	// Note: working on Utrans
-	if (type ( B ) != "matrix" ) 
+	if (type ( B ) != "matrix" )
 		return B;
 
-	if ( n < 2 ) 
+	if ( n < 2 )
 		return B;
 
 	const rn2 = (i+n-2)*B.n + j;
@@ -8312,16 +8312,16 @@ function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 		fm_1 = B.val[(i+n-3)*B.n + j + n-2];
 	else
 		fm_1 = 0;
-		
+
 	const dn = B.val[(i+n-1)*B.n + j + n-1];
-	
+
 	const d = ( dm*dm + fm_1*fm_1 - dn*dn - fm*fm ) / 2;
 	const t2 = dm*fm * dm*fm;
 	const mu = dn*dn+fm*fm - t2 / ( d + Math.sign(d) * Math.sqrt( d*d + t2) );
 
 	var k;
-	
-	//var B0 = getCols ( B, [0]); 
+
+	//var B0 = getCols ( B, [0]);
 	//var B1 = getCols ( B, [1]) ;
 	//var y = mul( B0, B0 ) - mu;
 	//var z =  mul( B0, B1 );
@@ -8333,11 +8333,11 @@ function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 		z += B.val[r0] * B.val[r0+1];
 		r0 += B.n;
 	}
-	
 
-	var G;	
+
+	var G;
 	var cs;
-	
+
 	var postmulgivens = function ( c, s, k1, k2) {
 		// apply a Givens rotation to a subset of rows of B : B(i:i+m, [k1,k2]) =  B(i:i+m, [k1,k2]) * G
 		var jj;
@@ -8345,12 +8345,12 @@ function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 		var t2;
 		var rj = i*B.n + j;
 		for ( jj=0; jj < m; jj++) {
-			t1 = B.val[rj + k1]; 
-			t2 = B.val[rj + k2]; 
-			B.val[rj + k1] = c * t1 - s * t2; 
+			t1 = B.val[rj + k1];
+			t2 = B.val[rj + k2];
+			B.val[rj + k1] = c * t1 - s * t2;
 			B.val[rj + k2] = s * t1 + c * t2;
 			rj += B.n;
-		}	
+		}
 	}
 	var premulgivens = function ( c, s, k1, k2) {
 	// apply a Givens rotation to a subset of cols of B : B([k1,k2],j:j+n) = G' * B([k1,k2],j:j+n)
@@ -8360,36 +8360,36 @@ function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 		var t1;
 		var t2;
 		for ( jj=0; jj < n; jj++) {
-			t1 = B.val[ri + jj]; 
-			t2 = B.val[rk + jj]; 
-			B.val[ri + jj] = c * t1 - s * t2; 
+			t1 = B.val[ri + jj];
+			t2 = B.val[rk + jj];
+			B.val[ri + jj] = c * t1 - s * t2;
 			B.val[rk + jj] = s * t1 + c * t2;
-		}	
+		}
 	}
-	
+
 	if ( computeUV) {
 		//var U = eye(m);
 		//var V = eye(n);
 		var csU = new Array(n-1);
-		var csV = new Array(n-1);		
+		var csV = new Array(n-1);
 	}
 
 	for ( k = 0; k < n-1 ; k++) {
 		cs = givens(y,z);
 		postmulgivens(cs[0],cs[1], k, k+1);
-		
+
 		if ( computeUV ) {
 			csV[k] = [cs[0], cs[1]];
 			//	postmulGivens(cs[0],cs[1], k, k+1, V);
 		}
-			
-			
+
+
 		y = B.val[(i+k)*B.n + j + k];
 		z = B.val[(i+k+1)*B.n + j + k];
-			
+
 		cs = givens(y,z);
 		premulgivens(cs[0],cs[1], k, k+1);
-	
+
 		if ( computeUV ) {
 			csU[k] = [cs[0], cs[1]];
 			//premulGivens(cs[0],cs[1], k, k+1, U);
@@ -8399,10 +8399,10 @@ function GolubKahanSVDstep ( B, i, j, m, n, computeUV ) {
 			y = B.val[(i+k)*B.n + j + k+1];
 			z = B.val[(i+k)*B.n + j + k+2];
 		}
-			
+
 	}
 
-	if ( computeUV) 
+	if ( computeUV)
 		return {csU: csU, csV: csV};
 }
 
@@ -8411,7 +8411,7 @@ function svd( A , computeUV ) {
 A=[ [-149,-50,-154],[537,180,546],[-27,-9,-25]]
 s=svd(A)
 should return [ 817.7597, 2.4750, 0.0030]
-*/	
+*/
 
 	if ( type(A) == "vector" || (type(A) == "matrix" && A.n == 1) ) {
 		return { "U" : matrixCopy(A), "S" : ones(1,1), "V" : ones(1,1), "s" : [1] };
@@ -8419,13 +8419,13 @@ should return [ 817.7597, 2.4750, 0.0030]
 	if ( A.m == 1) {
 		return { "U" : ones(1,1), "S" : ones(1,1), "V" : transpose(A), "s" : [1] };
 	}
-	
+
 
 	var i;
 	var m = A.length;
-	var n = A.n; 
-	
-	
+	var n = A.n;
+
+
 	var Atransposed = false;
 	if ( n > m ) {
 		Atransposed = true;
@@ -8433,19 +8433,19 @@ should return [ 817.7597, 2.4750, 0.0030]
 		n = m;
 		m = At.length;
 	}
-	
+
 	var computeU = false;
-	var computeV = false; 
+	var computeV = false;
 	var thinU = false;
 	if ( typeof( computeUV) != "undefined" && computeUV!==false)  {
-	
+
 		if ( computeUV === "full" ) {
-			computeU = true; 
+			computeU = true;
 			computeV = true;
 			thinU = false;
 		}
 		else if (computeUV === true || computeUV === "thin" ) {
-			computeU = true; 
+			computeU = true;
 			computeV = true;
 			thinU = true;
 		}
@@ -8457,7 +8457,7 @@ should return [ 817.7597, 2.4750, 0.0030]
 			if ( computeUV.indexOf("thin") >=0 )
 				thinU = true;
 		}
-		var UBV;		
+		var UBV;
 		if ( Atransposed ) {
 			var tmp = computeU;
 			computeU = computeV;
@@ -8472,8 +8472,8 @@ should return [ 817.7597, 2.4750, 0.0030]
 		}
 		else
 			var U = undefined;
-			
-		if( computeV ) {	
+
+		if( computeV ) {
 			var V = UBV.V;
 			var Vt = transposeMatrix(V);
 		}
@@ -8483,7 +8483,7 @@ should return [ 817.7597, 2.4750, 0.0030]
 		var B = UBV.B;
 	}
 	else {
-		if ( Atransposed ) 
+		if ( Atransposed )
 			var B = bidiagonalize( At, false, false, false );
 		else
 			var B = bidiagonalize( matrixCopy(A), false, false, false );
@@ -8493,76 +8493,76 @@ should return [ 817.7597, 2.4750, 0.0030]
 	var U22;
 	var V22;
 	var cs;
-	
+
 	var q;
 	var p;
 	var k;
 
 	const TOL = 1e-11;
-	
+
 	do {
-		
+
 		for ( i=0; i<n-1; i++) {
 			if ( Math.abs( B.val[i*B.n + i+1] ) < TOL * ( Math.abs(B.val[i*B.n + i]) + Math.abs(B.val[(i+1) * B.n + i+1]) ) ) {
 				B.val[i*B.n + i+1] = 0;
 			}
 		}
 
-		// find largest q such that B[n-p-q:n][n-p-q:n] is diagonal: 
+		// find largest q such that B[n-p-q:n][n-p-q:n] is diagonal:
 		if ( ( Math.abs( B.val[(n-1)*B.n + n-2] ) > TOL ) || (Math.abs(B.val[(n-2)*B.n + n-1]) > TOL ) ) {
 			q = 0;
 		}
 		else {
-			q = 1;		
+			q = 1;
 			while ( q < n-1 && Math.abs( B.val[(n-q-1)*B.n + n-q-2] ) < TOL && Math.abs( B.val[(n-q-2)*B.n + n-q-1] ) < TOL ) {
-				q++;	
+				q++;
 			}
-			if ( q >= n-1 ) 
-				q = n;			
+			if ( q >= n-1 )
+				q = n;
 		}
-				
+
 		// find smallest p such that B[p:q][p:q] has no zeros on superdiag
 		p=n-q-1;
 		while ( p > 0 && ! isZero ( B.val[(p-1)*B.n + p] ) )
 			p--;
-			
+
 		if ( q < n ) {
 			var DiagonalofB22isZero = -1;
 			for ( k=p; k< n-q-1 ; k++) {
 				if ( Math.abs(  B.val[k*B.n + k] ) < TOL ) {
 					DiagonalofB22isZero = k;
-					break; 
+					break;
 				}
 			}
 			if ( DiagonalofB22isZero >= 0 ) {
-				
-				if ( DiagonalofB22isZero < n-q-1 ) {		
+
+				if ( DiagonalofB22isZero < n-q-1 ) {
 					// Zero B(k,k+1) and entire row k...
-		      		for (j=DiagonalofB22isZero+1; j < n; j++) {	
+		      		for (j=DiagonalofB22isZero+1; j < n; j++) {
 
 						cs = givens(- B.val[j*B.n + j] , B.val[DiagonalofB22isZero * B.n + j] );
 						premulGivens(cs[0],cs[1], DiagonalofB22isZero, j, B);
-						if ( computeU ) 
-							premulGivens(cs[0],cs[1], DiagonalofB22isZero, j, U);								
+						if ( computeU )
+							premulGivens(cs[0],cs[1], DiagonalofB22isZero, j, U);
 					}
 				}
-				else {	
+				else {
 					// Zero B(k-1,k) and entire row k...
 		      		for (j=DiagonalofB22isZero - 1; j >= p; j--) {
-						 
+
 						cs = givens(B.val[j*B.n * j] , B.val[j*B.n + n-q-1] );
 						postmulGivens(cs[0],cs[1], j, n-q-1, B);
-						if ( computeV ) 
+						if ( computeV )
 							premulGivens(cs[0],cs[1], j, n-q-1, Vt);
 //							postmulGivens(cs[0],cs[1], j, n-q-1, V);
-		
+
 					}
 				}
-				
+
 			}
 			else {
-				//B22 = get ( B, range(p , n - q ) , range (p , n-q ) );	
-				
+				//B22 = get ( B, range(p , n - q ) , range (p , n-q ) );
+
 				if ( computeUV ) {
 					// UBV = GolubKahanSVDstep( B22, true ) ;
 					// set ( U, range(p,n-q), [], mul(UBV.U, get(U, range(p,n-q), []) ) );
@@ -8574,21 +8574,21 @@ should return [ 817.7597, 2.4750, 0.0030]
 							premulGivens(GKstep.csU[kk][0], GKstep.csU[kk][1], p+kk, p+kk+1, U);
 						if ( computeV )
 							premulGivens(GKstep.csV[kk][0], GKstep.csV[kk][1], p+kk, p+kk+1, Vt); // premul because Vtransposed
-					}												
+					}
 				}
 				else {
 					GolubKahanSVDstep( B, p, p, n-q-p, n-q-p ) ;
 				}
-				//set ( B , range(p , n - q ) , range (p , n-q ), B22  );			
-			}		
+				//set ( B , range(p , n - q ) , range (p , n-q ), B22  );
+			}
 		}
 	} while ( q < n ) ;
 
 	if (computeUV ) {
-	
+
 		if ( computeV)
 			V = transposeMatrix(Vt);
-	
+
 		// Correct sign of singular values:
 		var s = diag(B);
 		var signs = zeros(n);
@@ -8600,7 +8600,7 @@ should return [ 817.7597, 2.4750, 0.0030]
 			}
 		}
 
-		// Rearrange in decreasing order: 
+		// Rearrange in decreasing order:
 		var indexes = sort(s,true, true);
 		if(computeV)
 			V = get( V, [], indexes);
@@ -8611,27 +8611,27 @@ should return [ 817.7597, 2.4750, 0.0030]
 			}
 			U = get(U, indexes,[]) ;
 		}
-		
+
 		if ( thinU )
 			var S = diag(s) ;
 		else
 			var S = mat([diag(s), zeros(m-n,n)],true) ;
-		
+
 		var Ut = undefined;
 		if ( computeU )
 			Ut = transpose(U);
-			
+
 		if ( Atransposed ) {
 			if ( thinU )
-				return { "U" : V, "S" : S, "V" : Ut, "s" : s };			
+				return { "U" : V, "S" : S, "V" : Ut, "s" : s };
 			else
 				return { "U" : V, "S" : transpose(S), "V" : Ut, "s" : s };
-		}		
+		}
 		else {
 			return { "U" : Ut, "S" : S, "V" : V, "s" : s };
 		}
 	}
-	else 
+	else
 		return sort(abs(diag(B)), true);
 }
 
@@ -8642,43 +8642,43 @@ function rank( A ) {
 	for ( i=0;i < s.length;i++)
 		if ( s[i] > 1e-10 )
 			rank++;
-			
+
 	return rank;
 }
 
 function nullspace( A ) {
 	// Orthonormal basis for the null space of A
-	const s = svd( A, "V" ) ; 
+	const s = svd( A, "V" ) ;
 	const n = A.n;
 
 	var rank = 0;
-	const TOL = 1e-8; 
+	const TOL = 1e-8;
 	while ( rank < n && s.s[rank] > TOL )
 		rank++;
 
-	if ( rank < n ) 
+	if ( rank < n )
 		return get ( s.V, [], range(rank, n) );
 	else
 		return zeros(n);
-	
+
 }
 
 function orth( A ) {
 	// Orthonormal basis for the range of A
-	const s = svd( A, "thinU" ) ; 
+	const s = svd( A, "thinU" ) ;
 	const n = A.n;
 
 	var rank = 0;
-	const TOL = 1e-8; 
+	const TOL = 1e-8;
 	while ( rank < n && s.s[rank] > TOL )
 		rank++;
-	
+
 	return get ( s.U, [], range(0,rank) );
-	
+
 }
 
 /////////////////////////////
-//// Sparse matrix and vectors 
+//// Sparse matrix and vectors
 /////////////////////////////
 
 /**
@@ -8691,17 +8691,17 @@ function orth( A ) {
  * @struct
  */
 function spVector(n, values, indexes) {
-	
+
 	/** @const */ this.length = n;
 	/** @const */ this.size = [n,1];
 	/** @const */ this.type = "spvector";
-	
+
 	if ( arguments.length <= 2) {
 		if ( arguments.length == 1)
 			var nnz = n;		// too large but more efficient at some point...
 		else
 			var nnz = values;
-			
+
 		/** @type{Float64Array} */ this.val = new Float64Array(nnz);  // nz values
 		/** @type{Uint32Array} */ this.ind = new Uint32Array(nnz);   // ind[k] = index of val[k]
 	}
@@ -8710,8 +8710,8 @@ function spVector(n, values, indexes) {
 		/** @type{Float64Array} */ this.val = new Float64Array(values);  // nz values
 		/** @type{Uint32Array} */ this.ind = new Uint32Array(indexes);   // ind[k] = index of val[k]
 	}
-	
-	/** @const */ this.nnz = nnz;	
+
+	/** @const */ this.nnz = nnz;
 }
 /*
  * @param{number}
@@ -8738,7 +8738,7 @@ spVector.prototype.set = function ( i, value ) {
 	if ( k < 0 ) {
 		var ind = new Uint32Array(this.nnz + 1);
 		var val = new Float64Array(this.nnz + 1);
-		k = 0; 
+		k = 0;
 		while ( this.ind[k] < i ) { // copy values until i
 			ind[k] = this.ind[k];	// making sure this.ind remains sorted
 			val[k] = this.val.ind[k];
@@ -8750,16 +8750,16 @@ spVector.prototype.set = function ( i, value ) {
 		val.set(this.val.subarray(k), k+1);
 		this.nnz++;
 	}
-	else 
+	else
 		this.val[k] = value;
-		
+
 	return value;
 }
 /*
  * @return{spVector}
  */
 spVector.prototype.copy = function () {
-	return new spVector(this.n, this.val, this.ind);	
+	return new spVector(this.n, this.val, this.ind);
 }
 
 /**
@@ -8772,19 +8772,19 @@ spVector.prototype.copy = function () {
  * @struct
  */
 function spMatrix(m,n, values, cols, rows) {
-	
+
 	/** @const */ this.length = m;
 	/** @const */ this.m = m;
 	/** @const */ this.n = n;
 	/** @const */ this.size = [m,n];
 	/** @const */ this.type = "spmatrix";
-	
+
 	if ( arguments.length <= 3) {
 		if ( arguments.length == 2)
 			var nnz = m*n;		// too large but more efficient at some point...
 		else
 			var nnz = values;
-			
+
 		/** @type{boolean} */ this.rowmajor = true;
 		/** @type{Float64Array} */ this.val = new Float64Array(nnz);  // nnz values
 		/** @type{Uint32Array} */ this.cols = new Uint32Array(nnz); // cols[j] = starting index of col j in val and rows
@@ -8796,30 +8796,30 @@ function spMatrix(m,n, values, cols, rows) {
 			/** @type{boolean} */ this.rowmajor = false;
 			/** @type{Float64Array} */ this.val = new Float64Array(values);  // nz values
 			/** @type{Uint32Array} */ this.cols = new Uint32Array(cols); // cols[j] = starting index of col j in val and rows
-			/** @type{Uint32Array} */ this.rows = new Uint32Array(rows);   // rows[k] = row of val[k]		
+			/** @type{Uint32Array} */ this.rows = new Uint32Array(rows);   // rows[k] = row of val[k]
 		}
 		else {
 			/** @type{boolean} */ this.rowmajor = true;
 			/** @type{Float64Array} */ this.val = new Float64Array(values);  // nz values
-			/** @type{Uint32Array} */ this.cols = new Uint32Array(cols); // cols[k] = col of val[k]	
+			/** @type{Uint32Array} */ this.cols = new Uint32Array(cols); // cols[k] = col of val[k]
 			/** @type{Uint32Array} */ this.rows = new Uint32Array(rows);   // rows[i] = starting index of row i in val and cols
 		}
 	}
-	
+
 	/** @const */ this.nnz = nnz;
-	
+
 }
 /*
  * @return{spMatrix}
  */
 spMatrix.prototype.copy = function () {
-	return new spMatrix(this.m, this.n, this.val, this.cols, this.rows);	
+	return new spMatrix(this.m, this.n, this.val, this.cols, this.rows);
 }
 /*
  * @return{spMatrix}
  */
 spMatrix.prototype.toRowmajor = function () {
-	if ( this.rowmajor ) 
+	if ( this.rowmajor )
 		return this.copy();
 	else {
 		return sparseMatrixRowMajor( fullMatrix(this) );
@@ -8831,7 +8831,7 @@ spMatrix.prototype.toRowmajor = function () {
  */
 spMatrix.prototype.row = function ( i ) {
 	if ( this.rowmajor ) {
-		return new spVector(this.n, this.val.subarray(this.rows[i], this.rows[i+1]), this.cols.subarray(this.rows[i], this.rows[i+1]));	
+		return new spVector(this.n, this.val.subarray(this.rows[i], this.rows[i+1]), this.cols.subarray(this.rows[i], this.rows[i+1]));
 	/*
 		var s = this.rows[i];
 		var e = this.rows[i+1];
@@ -8851,7 +8851,7 @@ spMatrix.prototype.row = function ( i ) {
  */
 spMatrix.prototype.col = function ( j ) {
 	if ( ! this.rowmajor )
-		return new spVector(this.m, this.val.subarray(this.cols[j], this.cols[j+1]), this.rows.subarray(this.cols[j], this.cols[j+1]));	
+		return new spVector(this.m, this.val.subarray(this.cols[j], this.cols[j+1]), this.rows.subarray(this.cols[j], this.cols[j+1]));
 	else {
 		error ("Cannot extract sparse column from a sparse matrix in row major format.");
 		return undefined;
@@ -8860,7 +8860,7 @@ spMatrix.prototype.col = function ( j ) {
 
 /*
  * @param{number}
- * @param{number} 
+ * @param{number}
  * @return{number}
  */
 spMatrix.prototype.get = function ( i, j ) {
@@ -8870,7 +8870,7 @@ spMatrix.prototype.get = function ( i, j ) {
 		if ( k < 0 )
 			return 0;
 		else
-			return this.val[this.rows[i] + k];	
+			return this.val[this.rows[i] + k];
 	}
 	else {
 		var colind =  this.rows.subarray(this.cols[j], this.cols[j+1]);
@@ -8917,7 +8917,7 @@ function spgetRows(A, rowsrange) {
 
 /**
  * Return the full/dense version of the vector
- * @param{spVector} 
+ * @param{spVector}
  * @return{Float64Array}
  */
 function fullVector (x) {
@@ -8925,15 +8925,15 @@ function fullVector (x) {
 	const n = x.length;
 	const nnz = x.val.length;
 	var a = new Float64Array(n);
-	
-	for ( k=0; k < nnz; k++) 
+
+	for ( k=0; k < nnz; k++)
 		a[x.ind[k]] = x.val[k];
-	
+
 	return a;
 }
 /**
  * Return the full/dense version of the matrix
- * @param{spMatrix} 
+ * @param{spMatrix}
  * @return{Matrix}
  */
 function fullMatrix (S) {
@@ -8969,7 +8969,7 @@ function fullMatrix (S) {
 }
 function full( A ) {
 	switch(type(A)) {
-	case "spvector": 
+	case "spvector":
 		return fullVector(A);
 		break;
 	case "spmatrix":
@@ -8995,7 +8995,7 @@ function sparseVector( a ) {
 			val.push(a[i]);
 			ind.push(i);
 		}
-	}		
+	}
 	return new spVector(n,val,ind);
 }
 /**
@@ -9018,13 +9018,13 @@ function sparseMatrix( A ) {
 				val.push(A.val[k]);
 				rows.push(i);
 				cols[j+1]++;
-			}	
-			k += n;	
-		}		
-	}	
-	for ( j=1; j< n; j++) 
+			}
+			k += n;
+		}
+	}
+	for ( j=1; j< n; j++)
 		cols[j+1] += cols[j];
-	
+
 	return new spMatrix(m,n,val,cols,rows);
 }
 /**
@@ -9045,25 +9045,25 @@ function sparseMatrixRowMajor( A ) {
 			if (!isZero(A.val[k]) ) {
 				val.push(A.val[k]);
 				rows[i+1]++;
-				cols.push(j); 
-			}		
+				cols.push(j);
+			}
 			k++;
-		}		
-	}	
-	for ( i=1; i< m; i++) 
+		}
+	}
+	for ( i=1; i< m; i++)
 		rows[i+1] += rows[i];
-	
+
 	return new spMatrix(m,n,val,cols,rows);
 }
 
 function sparse( A , rowmajor ) {
-	if(typeof(rowmajor) == "undefined" ) 
+	if(typeof(rowmajor) == "undefined" )
 		var rowmajor = true;
-		
+
 	switch(type(A)) {
-	case "vector": 
+	case "vector":
 		return sparseVector(A);
-		break;	
+		break;
 	case "matrix":
 		if ( rowmajor )
 			return sparseMatrixRowMajor(A);
@@ -9085,13 +9085,13 @@ function sparse( A , rowmajor ) {
  * @return{spMatrix}
  */
 function speye(m,n) {
-	if ( typeof(n) == "undefined" ) 
+	if ( typeof(n) == "undefined" )
 		var n = m;
 	if ( m == 1 && n == 1)
 		return 1;
-	
+
 	var e = (m<n)?m:n;
-	
+
 	var val = ones(e);
 	var rows = range(e+1);
 	var cols = rows.slice(0,e);
@@ -9130,8 +9130,8 @@ function transposespMatrix (A) {
 	/*
 	const m = A.m;
 	const n = A.n;
-	
-	var At = zeros(n, m);	
+
+	var At = zeros(n, m);
 	for ( var j=0; j < n; j++) {
 		var s = A.cols[j];
 		var e = A.cols[j+1];
@@ -9148,7 +9148,7 @@ function transposespMatrix (A) {
 
 
 /** Concatenate sparse matrices/vectors
- * @param {Array} 
+ * @param {Array}
  * @param {boolean}
  * @return {spMatrix}
  */
@@ -9158,12 +9158,12 @@ function spmat( elems, rowwise ) {
 	for ( k=0; k < elems.length; k++) {
 		elemtypes[k] = type(elems[k]);
 	}
-		
+
 	if ( typeof(rowwise) == "undefined")
 		var rowwise = true;
-		
+
 	if ( elems.length == 0 ) {
-		return []; 
+		return [];
 	}
 
 	var m = 0;
@@ -9173,7 +9173,7 @@ function spmat( elems, rowwise ) {
 	var j;
 	if ( rowwise ) {
 		var res = new Array( ) ;
-		
+
 		for ( k= 0; k<elems.length; k++) {
 			switch( elemtypes[k] ) {
 
@@ -9183,15 +9183,15 @@ function spmat( elems, rowwise ) {
 				m += 1;
 				n = elems[k].length;
 				nnz += v.val.length;
-				break;			
-			
+				break;
+
 			case "spvector":
 				res.push(elems[k]);
 				n = elems[k].length;
 				m += 1;
 				nnz += elems[k].val.length;
 				break;
-				
+
 			case "spmatrix":
 				for ( var r=0; r < elems[k].m; r++)
 					res.push(elems[k].row(r));
@@ -9199,18 +9199,18 @@ function spmat( elems, rowwise ) {
 				n = elems[k].length;
 				m += 1;
 				nnz += elems[k].val.length;
-				
+
 				break;
-				
+
 			default:
 				return undefined;
 				break;
 			}
 		}
-		
+
 		var M = new spMatrix( m , n , nnz ) ;
 		var p = 0;
-		M.rows[0] = 0;		
+		M.rows[0] = 0;
 		for (k=0; k < res.length ; k++) {
 			if ( res[k].val.length > 1 ) {
 				M.val.set( new Float64Array(res[k].val), p);
@@ -9222,17 +9222,17 @@ function spmat( elems, rowwise ) {
 				M.val[p] = res[k].val[0];
 				M.cols[p] = res[k].ind[0];
 				M.rows[k+1] = M.rows[k] + 1;
-				p += 1;			
+				p += 1;
 			}
-				
+
 		}
 		return M;
 	}
 	else {
 		// not yet...
-		
+
 		error("spmat(..., false) for columnwise concatenation of sparse vectors not yet implemented");
-		
+
 		return res;
 	}
 }
@@ -9247,8 +9247,8 @@ function spmat( elems, rowwise ) {
 function mulScalarspVector (a, b) {
 	const nnz = b.val.length;
 	var c = b.copy();
-	for ( var k=0;k < nnz; k++) 
-		c.val[k] *= a;	
+	for ( var k=0;k < nnz; k++)
+		c.val[k] *= a;
 	return c;
 }
 /**
@@ -9259,8 +9259,8 @@ function mulScalarspVector (a, b) {
 function mulScalarspMatrix (a, B) {
 	const nnz = B.nnz;
 	var C = B.copy();
-	for ( var k=0;k < nnz; k++) 
-		C.val[k] *= a;	
+	for ( var k=0;k < nnz; k++)
+		C.val[k] *= a;
 	return C;
 }
 
@@ -9274,13 +9274,13 @@ function spdot (a, b) {
 	const nnzb = b.val.length;
 	var c = 0;
 	var ka = 0;
-	var kb = 0;	
+	var kb = 0;
 	while ( ka < nnza && kb < nnzb ){
-		var i = a.ind[ka]; 
+		var i = a.ind[ka];
 		while ( b.ind[kb] < i && kb < nnzb)
 			kb++;
 		if(b.ind[kb] == i)
-			c += a.val[ka] * b.val[kb];	
+			c += a.val[ka] * b.val[kb];
 		ka++;
 	}
 	return c;
@@ -9293,9 +9293,9 @@ function spdot (a, b) {
 function dotspVectorVector (a, b) {
 	const nnza = a.val.length;
 	var c = 0;
-	for ( var ka=0;ka < nnza; ka++) 
+	for ( var ka=0;ka < nnza; ka++)
 		c += a.val[ka] * b[a.ind[ka]];
-	
+
 	return c;
 }
 /**
@@ -9310,7 +9310,7 @@ function mulMatrixspVector (A, b) {
 	var c = zeros(m);
 	var ri = 0;
 	for ( var i=0;i < n; i++) {
-		for ( var k=0; k < nnz; k++) 
+		for ( var k=0; k < nnz; k++)
 			c[i] += A.val[ri + b.ind[k]] * b.val[k];
 		ri+=n;
 	}
@@ -9393,7 +9393,7 @@ function mulspMatrixspVector (A, b) {
 	}
 	else {
 		for ( var kb=0;kb < nnzb; kb++) {
-			var j = b.ind[kb];		
+			var j = b.ind[kb];
 			var bj = b.val[kb];
 			var s = A.cols[j];
 			var e = A.cols[j+1];
@@ -9417,7 +9417,7 @@ function mulspMatrixTransspVector (A, b) {
 	const nnzb = b.val.length;
 	if (A.rowmajor) {
 		for ( var kb=0;kb < nnzb; kb++) {
-			var j = b.ind[kb];		
+			var j = b.ind[kb];
 			var bj = b.val[kb];
 			var s = A.rows[j];
 			var e = A.rows[j+1];
@@ -9433,11 +9433,11 @@ function mulspMatrixTransspVector (A, b) {
 			var e = A.cols[i+1];
 
 			for ( var ka=s;ka < e; ka++) {
-				var j = A.rows[ka]; 
+				var j = A.rows[ka];
 				while ( b.ind[kb] < j && kb < nnzb)
 					kb++;
 				if(b.ind[kb] == i)
-					c[i] += A.val[ka] * b.val[kb];	
+					c[i] += A.val[ka] * b.val[kb];
 			}
 		}
 	}
@@ -9445,7 +9445,7 @@ function mulspMatrixTransspVector (A, b) {
 }
 /**
  * @param{spMatrix}
- * @param{spMatrix} 
+ * @param{spMatrix}
  * @return{Matrix}
  */
 function mulspMatrixspMatrix (A, B) {
@@ -9459,16 +9459,16 @@ function mulspMatrixspMatrix (A, B) {
 			for ( var ic = 0; ic < m; ic++) {
 				var sa = A.rows[ic];
 				var ea = A.rows[ic+1];
-	
+
 				for ( var ka = sa; ka < ea; ka++) {
 					var j = A.cols[ka];
 					var aj = A.val[ka];
-		
+
 					var s = B.rows[j];
 					var e = B.rows[j+1];
 
 					var rc = ic * n2 ;
-					for (var k= s; k < e; k++) {						
+					for (var k= s; k < e; k++) {
 						c.val[rc + B.cols[k] ] += aj * B.val[k] ;
 					}
 				}
@@ -9490,26 +9490,26 @@ function mulspMatrixspMatrix (A, B) {
 				var sa = A.cols[ja];
 				var ea = A.cols[ja+1];
 				var sb = B.rows[ja];
-				var eb = B.rows[ja+1];					
+				var eb = B.rows[ja+1];
 				for ( var ka = sa; ka < ea; ka++) {
 					var rc = A.rows[ka] * n2;
 					var aij = A.val[ka];
-					
+
 					for(var kb = sb; kb < eb; kb++) {
-						c.val[rc  + B.cols[kb]] += aij * B.val[kb];	
-					}										
-				} 
+						c.val[rc  + B.cols[kb]] += aij * B.val[kb];
+					}
+				}
 			}
 		}
 		else {
 			for ( var jc = 0; jc < n2; jc++) {
 				var sb = B.cols[jc];
 				var eb = B.cols[jc+1];
-	
+
 				for ( var kb = sb; kb < eb; kb++) {
 					var j = B.rows[kb];
 					var bj = B.val[kb];
-		
+
 					var s = A.cols[j];
 					var e = A.cols[j+1];
 
@@ -9524,7 +9524,7 @@ function mulspMatrixspMatrix (A, B) {
 }
 /**
  * @param{Matrix}
- * @param{spMatrix} 
+ * @param{spMatrix}
  * @return{Matrix}
  */
 function mulMatrixspMatrix (A, B) {
@@ -9532,18 +9532,18 @@ function mulMatrixspMatrix (A, B) {
 	const n = A.n;
 	const n2 = B.n;
 	var c = zeros(m, n2);
-	
+
 	if ( B.rowmajor ) {
 		for (var ja=0;ja < n; ja++) {
 			var sb = B.rows[ja];
-			var eb = B.rows[ja+1];					
+			var eb = B.rows[ja+1];
 			for ( var i = 0; i < m; i++) {
 				var rc = i * n2;
 				var aij = A.val[i * n + ja];
-				
+
 				for(var kb = sb; kb < eb; kb++) {
-					c.val[rc  + B.cols[kb]] += aij * B.val[kb];	
-				}										
+					c.val[rc  + B.cols[kb]] += aij * B.val[kb];
+				}
 			}
 		}
 	}
@@ -9551,11 +9551,11 @@ function mulMatrixspMatrix (A, B) {
 		for ( var jc = 0; jc < n2; jc++) {
 			var sb = B.cols[jc];
 			var eb = B.cols[jc+1];
-	
+
 			for ( var kb = sb; kb < eb; kb++) {
 				var j = B.rows[kb];
 				var bj = B.val[kb];
-		
+
 				for ( i= 0; i < m; i++) {
 					c.val[i * n2 + jc] += A.val[i*n + j] * bj;
 				}
@@ -9567,7 +9567,7 @@ function mulMatrixspMatrix (A, B) {
 
 /**
  * @param{spMatrix}
- * @param{Matrix} 
+ * @param{Matrix}
  * @return{Matrix}
  */
 function mulspMatrixMatrix (A, B) {
@@ -9586,7 +9586,7 @@ function mulspMatrixMatrix (A, B) {
 				var rc = i*n2;
 				for ( j=0; j < n2; j++) {
 					c.val[rc + j] += ai * B.val[rb + j];
-				}				
+				}
 			}
 		}
 	}
@@ -9597,7 +9597,7 @@ function mulspMatrixMatrix (A, B) {
 
 			for ( var k= s; k < e; k++) {
 				var i = A.rows[k];
-				for ( var jc = 0; jc < n2; jc++) 
+				for ( var jc = 0; jc < n2; jc++)
 					c.val[i*n2 + jc ] += A.val[k] * B.val[j*n2 + jc];
 			}
 		}
@@ -9615,17 +9615,17 @@ function entrywisemulspVectors (a, b) {
 	const nnzb = b.val.length;
 	var val = new Array();
 	var ind = new Array();
-	
+
 	var ka = 0;
-	var kb = 0;	
+	var kb = 0;
 	while ( ka < nnza && kb < nnzb ){
-		var i = a.ind[ka]; 
+		var i = a.ind[ka];
 		while ( b.ind[kb] < i && kb < nnzb)
 			kb++;
 		if(b.ind[kb] == i) {
 			var aibi = a.val[ka] * b.val[kb];
 			if ( !isZero(aibi) ) {
-				val.push(aibi);	
+				val.push(aibi);
 				ind.push(i);
 			}
 		}
@@ -9640,7 +9640,7 @@ function entrywisemulspVectors (a, b) {
  */
 function entrywisemulspVectorVector (a, b) {
 	// fast operation but might not yield optimal nnz:
-	var c = a.copy();	
+	var c = a.copy();
 	const nnz = a.val.length;
 	for ( var k = 0; k< nnz; k++) {
 		c.val[k] *= b[a.ind[k]];
@@ -9660,18 +9660,18 @@ function entrywisemulspMatrices (A, B) {
 			var rows = new Uint32Array(A.m+1);
 			var ka;
 			var kb;
-			var i;	
+			var i;
 			for ( i=0; i < A.m; i++) {
 				ka = A.rows[i];
 				kb = B.rows[i];
 				var ea = A.rows[i+1];
 				var eb = B.rows[i+1];
 				while ( ka < ea & kb < eb ){
-					var j = A.cols[ka]; 
+					var j = A.cols[ka];
 					while ( B.cols[kb] < j && kb < eb)
 						kb++;
 					if(B.cols[kb] == j) {
-						val.push(A.val[ka] * B.val[kb]);	
+						val.push(A.val[ka] * B.val[kb]);
 						cols.push(j);
 						rows[i+1]++;
 					}
@@ -9680,7 +9680,7 @@ function entrywisemulspMatrices (A, B) {
 			}
 			for(i=1; i < A.m; i++)
 				rows[i+1] += rows[i];
-				
+
 			return new spMatrix(A.m, A.n, val, cols, rows);
 		}
 		else {
@@ -9696,7 +9696,7 @@ function entrywisemulspMatrices (A, B) {
 			var cols = new Uint32Array(A.n+1);
 			var rows = new Array();
 			var ka;
-			var kb;	
+			var kb;
 			var j;
 			for ( j=0; j < A.n; j++) {
 				ka = A.cols[j];
@@ -9704,20 +9704,20 @@ function entrywisemulspMatrices (A, B) {
 				var ea = A.cols[j+1];
 				var eb = B.cols[j+1];
 				while ( ka < ea & kb < eb ){
-					var i = A.rows[ka]; 
+					var i = A.rows[ka];
 					while ( B.rows[kb] < i && kb < eb)
 						kb++;
 					if(B.rows[kb] == i) {
-						val.push(A.val[ka] * B.val[kb]);	
+						val.push(A.val[ka] * B.val[kb]);
 						rows.push(i);
 						cols[j+1]++;
 					}
 					ka++;
 				}
 			}
-			for ( j=1; j< A.n; j++) 
+			for ( j=1; j< A.n; j++)
 				cols[j+1] += cols[j];
-	
+
 			return new spMatrix(A.m, A.n, val, cols, rows);
 		}
 	}
@@ -9728,7 +9728,7 @@ function entrywisemulspMatrices (A, B) {
  * @return{spMatrix}
  */
 function entrywisemulspMatrixMatrix (A, B) {
-	var c = A.copy();	
+	var c = A.copy();
 	const nnz = A.val.length;
 	const n = A.n;
 	const m = A.m;
@@ -9764,11 +9764,11 @@ function addScalarspVector (a, b) {
 	const n = b.length;
 	var c = zeros(n);
 	var k;
-	for ( k=0;k < n; k++) 
+	for ( k=0;k < n; k++)
 		c[k] = a;
-	for ( k=0;k < nnzb; k++) 
+	for ( k=0;k < nnzb; k++)
 		c[b.ind[k]] += b.val[k];
-			
+
 	return c;
 }
 /**
@@ -9780,9 +9780,9 @@ function addVectorspVector (a, b) {
 	const nnzb = b.val.length;
 	const n = b.length;
 	var c = new Float64Array(a);
-	for (var k=0;k < nnzb; k++) 
+	for (var k=0;k < nnzb; k++)
 		c[b.ind[k]] += b.val[k];
-			
+
 	return c;
 }
 /**
@@ -9795,11 +9795,11 @@ function addspVectors (a, b) {
 	const nnzb = b.val.length;
 	var c = zeros(a.length);
 	var k;
-	for ( k=0;k < nnza; k++) 
+	for ( k=0;k < nnza; k++)
 		c[a.ind[k]] = a.val[k];
-	for ( k=0;k < nnzb; k++) 
+	for ( k=0;k < nnzb; k++)
 		c[b.ind[k]] += b.val[k];
-			
+
 	return sparseVector(c);
 }
 
@@ -9813,8 +9813,8 @@ function addScalarspMatrix (a, B) {
 	const m = B.m;
 	const n = B.n;
 	const mn = m*n;
-	
-	var C = zeros(m,n); 
+
+	var C = zeros(m,n);
 	var i;
 	for (i = 0; i < mn; i++)
 		C.val[i] = a;
@@ -9848,9 +9848,9 @@ function addMatrixspMatrix (A, B) {
 	const m = B.m;
 	const n = B.n;
 	const mn = m*n;
-	
+
 	var C = matrixCopy(A);
-	var i;	
+	var i;
 	if ( B.rowmajor ) {
 		var ri = 0;
 		for (i = 0; i < m; i++) {
@@ -9881,9 +9881,9 @@ function addspMatrices (A, B) {
 	const nnzb = B.val.length;
 	const m = A.m;
 	const n = A.n;
-	
-	var C = fullMatrix(A); 
-	var i;	
+
+	var C = fullMatrix(A);
+	var i;
 	if ( B.rowmajor ) {
 		var ri = 0;
 		for (i = 0; i < m; i++) {
@@ -9911,9 +9911,9 @@ function addspMatrices (A, B) {
  * @param {Float64Array}
  */
 function spsaxpy ( a, x, y) {
-	const nnz = x.val.length;	
-	for (var k=0;k < nnz; k++) 
-		y[x.ind[k]] += a * x.val[k];			
+	const nnz = x.val.length;
+	for (var k=0;k < nnz; k++)
+		y[x.ind[k]] += a * x.val[k];
 }
 
 /**
@@ -9926,11 +9926,11 @@ function subScalarspVector (a, b) {
 	const n = b.length;
 	var c = zeros(n);
 	var k;
-	for ( k=0;k < n; k++) 
+	for ( k=0;k < n; k++)
 		c[k] = a;
-	for ( k=0;k < nnzb; k++) 
+	for ( k=0;k < nnzb; k++)
 		c[b.ind[k]] -= b.val[k];
-			
+
 	return c;
 }
 /**
@@ -9942,9 +9942,9 @@ function subVectorspVector (a, b) {
 	const nnzb = b.val.length;
 	const n = b.length;
 	var c = new Float64Array(a);
-	for (var k=0;k < nnzb; k++) 
+	for (var k=0;k < nnzb; k++)
 		c[b.ind[k]] -= b.val[k];
-			
+
 	return c;
 }
 /**
@@ -9965,11 +9965,11 @@ function subspVectors (a, b) {
 	const nnzb = b.val.length;
 	var c = zeros(a.length);
 	var k;
-	for ( k=0;k < nnza; k++) 
+	for ( k=0;k < nnza; k++)
 		c[a.ind[k]] = a.val[k];
-	for ( k=0;k < nnzb; k++) 
+	for ( k=0;k < nnzb; k++)
 		c[b.ind[k]] -= b.val[k];
-			
+
 	return sparseVector(c);
 }
 
@@ -9983,8 +9983,8 @@ function subScalarspMatrix (a, B) {
 	const m = B.m;
 	const n = B.n;
 	const mn = m*n;
-	
-	var C = zeros(m,n); 
+
+	var C = zeros(m,n);
 	var i;
 	for (i = 0; i < mn; i++)
 		C.val[i] = a;
@@ -10026,9 +10026,9 @@ function subMatrixspMatrix (A, B) {
 	const m = B.m;
 	const n = B.n;
 	const mn = m*n;
-	
+
 	var C = matrixCopy(A);
-	var i;	
+	var i;
 	if ( B.rowmajor ) {
 		var ri = 0;
 		for (i = 0; i < m; i++) {
@@ -10059,9 +10059,9 @@ function subspMatrices (A, B) {
 	const nnzb = B.val.length;
 	const m = A.m;
 	const n = A.n;
-	
-	var C = fullMatrix(A); 
-	var i;	
+
+	var C = fullMatrix(A);
+	var i;
 	if ( B.rowmajor ) {
 		var ri = 0;
 		for (i = 0; i < m; i++) {
@@ -10094,9 +10094,9 @@ function applyspVector( f, x ) {
 	var res = new Float64Array(n);
 	var i;
 	const f0 = f(0);
-	for ( i=0; i< n; i++) 
+	for ( i=0; i< n; i++)
 		res[i] = f0;
-	for ( i=0; i< nnz; i++) 
+	for ( i=0; i< nnz; i++)
 		res[x.ind[i]] = f(x.val[i]);
 	return res;
 }
@@ -10111,7 +10111,7 @@ function applyspMatrix( f, X ) {
 	const n = X.n;
 	const mn = m*n;
 	const f0 = f(0);
-	var C = zeros(m,n); 
+	var C = zeros(m,n);
 	var i;
 	if ( !isZero(f0) ) {
 		for (i = 0; i < mn; i++)
@@ -10171,11 +10171,11 @@ function sumspMatrixRows( A ) {
  * @param{spMatrix}
  * @return{Float64Array}
  */
-function sumspMatrixCols( A ) {	
+function sumspMatrixCols( A ) {
 	var res = zeros(A.m);
 	if ( A.rowmajor ) {
 		for ( var i=0; i<A.m; i++)
-			res[i] = sumspVector(A.row(i));			
+			res[i] = sumspVector(A.row(i));
 	}
 	else {
 		for ( var k=0; k < A.val.length; k++)
@@ -10189,11 +10189,11 @@ function sumspMatrixCols( A ) {
  */
 function prodspMatrixRows( A ) {
 	if ( A.rowmajor ) {
-		var res = ones(A.n);	
+		var res = ones(A.n);
 		for ( var i=0; i < A.m; i++) {
 			var s = A.rows[i];
 			var e = A.rows[i+1];
-			for ( var j=0; j < A.n; j++) 
+			for ( var j=0; j < A.n; j++)
 				if ( A.cols.subarray(s,e).indexOf(j) < 0 )
 					res[j] = 0;
 			for ( var k=s; k < e; k++)
@@ -10214,7 +10214,7 @@ function prodspMatrixRows( A ) {
  * @param{spMatrix}
  * @return{Float64Array}
  */
-function prodspMatrixCols( A ) {	
+function prodspMatrixCols( A ) {
 	if ( A.rowmajor ) {
 		var res = zeros(A.m);
 		for ( var i=0; i<A.m; i++) {
@@ -10224,11 +10224,11 @@ function prodspMatrixCols( A ) {
 		}
 	}
 	else {
-		var res = ones(A.m);	
+		var res = ones(A.m);
 		for ( var j=0; j < A.n; j++) {
 			var s = A.cols[j];
 			var e = A.cols[j+1];
-			for ( var i=0; i < A.m; i++) 
+			for ( var i=0; i < A.m; i++)
 				if ( A.rows.subarray(s,e).indexOf(i) < 0 )
 					res[i] = 0;
 			for ( var k=s; k < e; k++)
@@ -10240,7 +10240,7 @@ function prodspMatrixCols( A ) {
 
 
 ///////////////////////////
-/// Sparse linear systems 
+/// Sparse linear systems
 ///////////////////////////
 /** Sparse Conjugate gradient method for solving the symmetric positie definite system Ax = b
  * @param{spMatrix}
@@ -10249,16 +10249,16 @@ function prodspMatrixCols( A ) {
  */
 function spsolvecg ( A, b) {
 
-	const n = A.n;	
+	const n = A.n;
 	const m = A.m;
 
-	var x = randn(n); 
+	var x = randn(n);
 	var r = subVectors(b, mulspMatrixVector(A, x));
 	var rhoc = dot(r,r);
 	const TOL = 1e-8;
 	var delta2 = TOL * norm(b);
 	delta2 *= delta2;
-	
+
 	// first iteration:
 	var p = vectorCopy(r);
 	var w = mulspMatrixVector(A,p);
@@ -10274,7 +10274,7 @@ function spsolvecg ( A, b) {
 		for ( var i=0; i < m; i++)
 			p[i] = r[i] + tau * p[i];
 	}
-	
+
 	while ( rhoc > delta2 && k < n ) {
 		updateP(rhoc/rho_, r);
 		w = mulspMatrixVector(A,p);
@@ -10307,24 +10307,24 @@ xh=spcgnr(sparse(A), b)
 t2 = toc()
 e = norm(A*xh - b)
 */
-	
-	const n = A.n;	
+
+	const n = A.n;
 	const m = A.m;
 
-	var x = randn(n); 
-	var r = subVectors(b, mulspMatrixVector(A, x));	
+	var x = randn(n);
+	var r = subVectors(b, mulspMatrixVector(A, x));
 	const TOL = 1e-8;
 	var delta2 = TOL * norm(b);
 	delta2 *= delta2;
-	
+
 	// first iteration:
 	var z = mulspMatrixTransVector(A, r);
-	var rhoc = dot(z,z);	
+	var rhoc = dot(z,z);
 	var p = vectorCopy(z);
 	var w = mulspMatrixVector(A,p);
 	var mu = rhoc / dot(w, w);
 	saxpy( mu, p, x);
-	saxpy( -mu, w, r);	
+	saxpy( -mu, w, r);
 	z = mulspMatrixTransVector(A, r);
 	var rho_ = rhoc;
 	rhoc = dot(z,z);
@@ -10335,7 +10335,7 @@ e = norm(A*xh - b)
 		for ( var i=0; i < m; i++)
 			p[i] = z[i] + tau * p[i];
 	}
-	
+
 	while ( rhoc > delta2 && k < n ) {
 		updateP(rhoc/rho_, z);
 		w = mulspMatrixVector(A,p);
@@ -10353,15 +10353,15 @@ e = norm(A*xh - b)
 
 /* glpk.js is now included (cat) in lalolib.js
 if ( self.hasOwnProperty("window") ) {
-	// in main window 
+	// in main window
 }
-else { 
+else {
 	// in worker
 	importScripts("glpk.js");
 	//importScripts("glpk.min.js");
 }*/
 
-// Install glpk as lp function: 
+// Install glpk as lp function:
 if ( typeof(lp) == "undefined" ) {
 	lp = glp;
 	linprog = glp;
@@ -10369,7 +10369,7 @@ if ( typeof(lp) == "undefined" ) {
 
 function glp (c, A, b, Aeq, beq, lb , ub, integer_variables, verbose) {
 /*
-	Call GLPK to solve 
+	Call GLPK to solve
 	min c' x s.t. Ax<= b, Aeq = beq, lb<= x <= ub, x[integer_variables] in Z
 */
 
@@ -10389,10 +10389,10 @@ xsol = glp(c, [],[],A, b,lb,[])
 */
 	var prob = glp_create_prob();
 	glp_set_obj_dir ( prob, GLP_MIN ) ;
-	
+
 	if ( typeof(Aeq) == "undefined" )
 		var Aeq = [];
-	
+
 	glp_add_cols(prob, c.length);
 	if ( A.length + Aeq.length > 0 )
 		glp_add_rows(prob, A.length + Aeq.length);
@@ -10402,7 +10402,7 @@ xsol = glp(c, [],[],A, b,lb,[])
 	var indexes ;
 	var values;
 	var n = c.length;
-	
+
 	if ( lb ) {
 		var lbdense = vectorCopy(lb);
 		for ( i=0; i < lbdense.length; i++){
@@ -10410,7 +10410,7 @@ xsol = glp(c, [],[],A, b,lb,[])
 				lbdense[i] = NaN;
 		}
 	}
-	else 
+	else
 		var lbdense = [];
 
 	if ( ub ) {
@@ -10420,51 +10420,51 @@ xsol = glp(c, [],[],A, b,lb,[])
 				lbdense[i] = NaN;
 		}
 	}
-	else 
+	else
 		var ubdense = [];
-	
+
 	for ( i=0; i < c.length; i++) {
 		// variable bounds
 		var lbi = NaN;
-		var ubi = NaN; 
-		if ( lbdense.length > 0)	
+		var ubi = NaN;
+		if ( lbdense.length > 0)
 			lbi = lbdense[i];
 		if ( ubdense.length > 0 )
 			ubi = ubdense[i] ;
-			
-		if ( !isNaN(lbi)  && !isNaN(ubi)) 
+
+		if ( !isNaN(lbi)  && !isNaN(ubi))
 			glp_set_col_bnds( prob, i+1, GLP_DB, lbi , ubi );
 		else if ( !isNaN(lbi) )
 			glp_set_col_bnds( prob, i+1, GLP_LO, lbi );
 		else if ( !isNaN(ubi) )
 			glp_set_col_bnds( prob, i+1, GLP_UP, 0, ubi );
-		else 
+		else
 			glp_set_col_bnds( prob, i+1, GLP_FR );
-			
+
 		// cost
 		glp_set_obj_coef ( prob, i+1, c[i]  );
-		
-	}	
-	
+
+	}
+
 	// Integer variables
 	if ( integer_variables ) {
-		for ( i=0; i< integer_variables.length ; i++) 
+		for ( i=0; i< integer_variables.length ; i++)
 			glp_set_col_kind(prob, integer_variables[i]+1, GLP_IV );
 	}
-	
+
 	// inequalities
 	if ( A.length == 1 && typeof(b) == "number")
 		b = [b];
 	for ( i=0; i<A.length; i++) {
-		
-		// RHS		
+
+		// RHS
 		glp_set_row_bnds(prob, i+1, GLP_UP, 0, b[i] );	// pass lb=0 otherwise ub undefined!!
-		
+
 		// LHS
-		indexes = new Array(); 	
-		values = new Array(); 	
+		indexes = new Array();
+		values = new Array();
 		indexes.push(0);	// to make it start at 1
-		values.push(0); 	
+		values.push(0);
 		for ( j = 0; j < n; j++ ) {
 			if ( !isZero(A.val[i*n+j] )) {
 				indexes.push(j+1);
@@ -10472,22 +10472,22 @@ xsol = glp(c, [],[],A, b,lb,[])
 			}
 		}
 		glp_set_mat_row( prob, i+1, indexes.length -1, indexes, values) ;
-		
+
 	}
 
-	// equality constraints	
+	// equality constraints
 	if ( Aeq.length == 1 && typeof(beq) == "number")
 		beq = [beq];
 	for ( i=0; i<Aeq.length; i++) {
-		
-		// RHS		
+
+		// RHS
 		glp_set_row_bnds(prob, A.length+i+1, GLP_FX, beq[i] );
-				
+
 		// LHS
-		indexes = new Array(); 
-		values = new Array(); 		
+		indexes = new Array();
+		values = new Array();
 		indexes.push(0);	// to make it start at 1
-		values.push(0); 	
+		values.push(0);
 		for ( j = 0; j < n; j++ ) {
 			if (  !isZero(Aeq.val[i*n+j] )) {
 				indexes.push(j+1);
@@ -10505,14 +10505,14 @@ xsol = glp(c, [],[],A, b,lb,[])
 		var iocp = new IOCP({presolve: GLP_ON});
 		glp_scale_prob(prob, GLP_SF_AUTO);
 		rc = glp_intopt(prob, iocp);
-		
+
 		// get solution
 		if ( rc == 0 ) {
 			var sol = zeros(n);
 			for ( i=0; i<n; i++) {
 				sol[i] = glp_mip_col_val( prob, i+1);
 			}
-			
+
 			if ( verbose) {
 				var obj = glp_mip_obj_val(prob);
 				console.log("Status : " + glp_mip_status(prob) );
@@ -10529,7 +10529,7 @@ xsol = glp(c, [],[],A, b,lb,[])
 		// Solve with Simplex
 		glp_scale_prob(prob, GLP_SF_AUTO);
 		rc = glp_simplex(prob, smcp);
-		
+
 		// get solution
 		if ( rc == 0 ) {
 			var sol = zeros(n);
@@ -10549,7 +10549,7 @@ xsol = glp(c, [],[],A, b,lb,[])
 			return "RC=" + rc + " ; Status : "  + glp_get_status(prob) + "(OPT=" + GLP_OPT + ",FEAS=" + GLP_FEAS + ",INFEAS=" + GLP_INFEAS + ",NOFEAS=" + GLP_NOFEAS + ",UNBND=" + GLP_UNBND + ",UNDEF=" + GLP_UNDEF + ")" ;
 		}
 	}
-	
+
 }
 
 ///////////////////////////////:
@@ -10558,12 +10558,12 @@ xsol = glp(c, [],[],A, b,lb,[])
 function minl1 ( A, b) {
 	/*
 		Solves min ||x||_1 s.t. Ax = b
-		
-		as 
-		
+
+		as
+
 			min sum a_i s.t. -a <= x <= a and Ax = b
-			
-		example: 
+
+		example:
 A = randn(10,20)
 r = zeros(20)
 r[0:3] = randn(3)
@@ -10571,10 +10571,10 @@ x=minl1(A,A*r)
 
 	*/
 	const n = A.n;
-	
+
 	var Aineq = zeros ( 2*n, 2*n ) ;
 	var i;
-	
+
 	//set ( Aineq, range(0,n),range(0,n) , I) ;
 	//set ( Aineq, range(0,n),range(n,2*n) , I_) ;
 	//set ( Aineq, range(n,2*n),range(0,n) , I_) ;
@@ -10586,18 +10586,18 @@ x=minl1(A,A*r)
 		Aineq.val[(n+i)*Aineq.n + n+i] = -1;
 	}
 	var bineq = zeros ( 2*n);
-	
+
 	var Aeq = zeros(A.length, 2*n);
 	set ( Aeq , [], range( 0,n), A );
-	
+
 	var cost = zeros(2*n);
 	set ( cost, range(n,2*n),  ones(n) );
-		
+
 	var lb = zeros(2*n);	// better to constraint a>=0
-	set ( lb, range(n), mulScalarVector(-Infinity , ones( n )) ) ;	
-//console.log( cost, Aineq, bineq, Aeq, b, lb);	
+	set ( lb, range(n), mulScalarVector(-Infinity , ones( n )) ) ;
+//console.log( cost, Aineq, bineq, Aeq, b, lb);
 //	var lpsol = lp( cost, Aineq, bineq, Aeq, b, lb, [], 0 , 1e-6 );
-	var lpsol = glp( cost, Aineq, bineq, Aeq, b, lb);	
+	var lpsol = glp( cost, Aineq, bineq, Aeq, b, lb);
 
 	return get(lpsol, range(n) );
 }
@@ -10607,24 +10607,24 @@ x=minl1(A,A*r)
 function minl0 ( A, b, M) {
 	/*
 		Solves min ||x||_0 s.t. Ax = b  -M <= x <= M
-		
+
 		as a mixed integer linear program
-		
+
 			min sum a_i s.t. -M a <= x <= M a , Ax = b and a_i in {0,1}
-			
-		example: 
+
+		example:
 A = randn(10,20)
 r = zeros(20)
 r[0:3] = randn(3)
 x=minl0(A,A*r)
 
 	*/
-	
-	if ( typeof(M) == "undefined" ) 
+
+	if ( typeof(M) == "undefined" )
 		var M = 10;
-		
+
 	var n = A.n;
-	
+
 	var Aineq = zeros ( 2*n, 2*n ) ;
 	//set ( Aineq, range(0,n),range(0,n) , I) ;
 	//set ( Aineq, range(0,n),range(n,2*n) , mul(M, I_) ) ;
@@ -10639,19 +10639,19 @@ x=minl0(A,A*r)
 
 	}
 	var bineq = zeros ( 2*n);
-	
+
 	var Aeq = zeros(A.length, 2*n);
 	set ( Aeq , [], range( 0,n), A );
-	
+
 	var cost = zeros(2*n);
 	set ( cost, range(n,2*n),  ones(n) );
-		
+
 	var lb = zeros(2*n);	// better to constraint a>=0
-	set ( lb, range(n), mulScalarVector(-M , ones( n )) ) ;	
+	set ( lb, range(n), mulScalarVector(-M , ones( n )) ) ;
 
 	var ub =  ones(2*n) ;
 	set(ub, range(n), mulScalarVector(M, ones(n) ) );
-	
+
 	var lpsol = glp( cost, Aineq, bineq, Aeq, b, lb, ub, range(n,2*n) );	// glptweak??
 
 	// set to 0 the x corresponding to 0 binary variables:
@@ -10662,7 +10662,7 @@ x=minl0(A,A*r)
 
 
 ///////////////////////////////////////////
-/// Quadratic Programming 
+/// Quadratic Programming
 ////////////////
 quadprog = qp;
 
@@ -10671,24 +10671,24 @@ function qp(Q,c,A,b,Aeq,beq,lb,ub,x0, epsilon) {
 	/*
 		min 0.5 x' * Q * x  c' * x
 		s.t. Ax <= b   and   lu <= x <= ub
-		
+
 		NOTE: all variables should be bounded or constrained,
 		otherwise the LP might be unbounded even if the QP is well-posed
 	*/
 	if (typeof(epsilon) === 'undefined')
 		var epsilon = 1e-3;
-		
+
 	var normdiff;
 	var normgrad;
 	var grad;
 	var y;
 	var gamma;
 	var direction;
-	
+
 	var x;
-	if ( typeof(x0) === 'undefined' ) {		
-		//console.log ("providing an initial x0 might be better for qp.");		
-		x = glp(zeros(c.length),A, b, Aeq, beq, lb, ub, [], false) ;  
+	if ( typeof(x0) === 'undefined' ) {
+		//console.log ("providing an initial x0 might be better for qp.");
+		x = glp(zeros(c.length),A, b, Aeq, beq, lb, ub, [], false) ;
 		if ( typeof(x) == "string")
 			return "infeasible";
 	}
@@ -10704,32 +10704,32 @@ function qp(Q,c,A,b,Aeq,beq,lb,ub,x0, epsilon) {
 		normgrad = norm(grad);
 
 		// Find direction of desecnt : direction = argmin_y   y'*grad s.t. same constraints as QP
-		y = glp(grad, A, b, Aeq, beq, lb, ub, [], false) ; 
-/*		if ( typeof(y) == "string") 
+		y = glp(grad, A, b, Aeq, beq, lb, ub, [], false) ;
+/*		if ( typeof(y) == "string")
 			return x; // error return current solution;
 	*/
 
 		// Step size: gamma = -(y - x)' [ Qx + c] / (y-x)'Q(y-x) = numerator / denominator
 		direction = sub (y, x);
-		
+
 		numerator = - mul(direction, grad);
-		
-		denominator = mul(direction, mul(Q, direction) ); 
+
+		denominator = mul(direction, mul(Q, direction) );
 
 		if ( Math.abs(denominator) > 1e-8 && denominator > 0)
-			gamma = numerator / denominator; 
-		else 
+			gamma = numerator / denominator;
+		else
 			gamma = 0;
-			
-		if ( gamma > 1 ) 
+
+		if ( gamma > 1 )
 			gamma = 1;
 
 		// Update x <- x + gamma * direction
 		if ( gamma > 0 ) {
-			x = add(x, mul(gamma, direction) );		
+			x = add(x, mul(gamma, direction) );
 			normdiff = gamma * norm(direction) ;
 		}
-		else 
+		else
 			normdiff = 0;
 
 		iter++;
@@ -10758,16 +10758,16 @@ norm(x - xh)
 */
 	var x;
 	var n = 1; // dimension of x
-	
+
 	if ( arguments.length == 3 ) {
 		if ( typeof(x0) == "number" ) {
 			if( x0 > 0 && Math.floor(x0) == x0 ) {
 				n = x0;
-				x = sub(mul(20,rand(n)), 10); 
+				x = sub(mul(20,rand(n)), 10);
 			}
 			else {
 				n = 1;
-				x = x0; 
+				x = x0;
 			}
 		}
 		else {
@@ -10775,14 +10775,14 @@ norm(x - xh)
 			x = x0;
 		}
 	}
-	else {		
+	else {
 		n = 1;
-		x = 20 * Math.random() - 10; 
+		x = 20 * Math.random() - 10;
 	}
-	
+
 	if ( n == 1 )
 		return secant(f, grad, x);
-	else if ( n > 500 ) 
+	else if ( n > 500 )
 		return steepestdescent(f, grad, x);
 	else
 		return bfgs(f, grad, x);
@@ -10792,8 +10792,8 @@ function secant( f, grad, x0 ) {
 	// for a unidimensional function f
 	// find a root to f'(x) = 0 with the secant method
 	const TOLx = 1e-6;
-	
-	var x = x0; 
+
+	var x = x0;
 	var g = grad(x);
 	var dx = -0.01*g;
 	x += dx;
@@ -10813,7 +10813,7 @@ function secant( f, grad, x0 ) {
 
 function steepestdescent(f, grad, x0) {
 	// assume x is a vector
-	
+
 	const TOLobj = 1e-8;
 	const TOLx = 1e-6;
 	const TOLgrad = 1e-4;
@@ -10825,18 +10825,18 @@ function steepestdescent(f, grad, x0) {
 	var normg = norm(g);
 	var iter = 0;
 	do {
-		
+
 		// line search
-		var linesearch = armijo(f, x, obj, g, normg);		
-		
+		var linesearch = armijo(f, x, obj, g, normg);
+
 		// take the step
 		xprev = vectorCopy(x);
-		prevobj = obj;		
+		prevobj = obj;
 		x = linesearch.x;
 		obj = linesearch.obj;
 		g = grad(x);
 		normg = norm(g);
-		
+
 		iter++;
 		//console.log(linesearch.lambda, x, obj, g);
 	} while ( normg > TOLgrad && prevobj - obj > TOLobj && norm(subVectors(x, xprev) ) > TOLx ) ;
@@ -10846,7 +10846,7 @@ function steepestdescent(f, grad, x0) {
 
 function bfgs( f, grad, x0 ) {
 	// assume x is a vector
-	
+
 	const n = x0.length;
 	const TOLobj = 1e-8;
 	const TOLx = 1e-6;
@@ -10865,34 +10865,34 @@ function bfgs( f, grad, x0 ) {
 		g = grad(x);
 		normg = norm(g);
 		direction = minusVector( mulMatrixVector(H, g ) );
-		
+
 		// line search
-		var linesearch = armijodir (f, x, obj, g, direction ); 
+		var linesearch = armijodir (f, x, obj, g, direction );
 
 		// take the step
 		xprev = vectorCopy(x);
-		prevobj = obj;		
+		prevobj = obj;
 		x = linesearch.x;
 		obj = linesearch.obj;
 
 		// update Hessian inverse approximation
 		delta = subVectors(x,xprev);
 		gamma = subVectors(grad(x) , g);
-		
+
 		Hgamma = mulMatrixVector(H, gamma);
-		
+
 		var deltagamma = dot(delta,gamma);
 		var delta_ = mulScalarVector(1/deltagamma, delta);
 
 		var deltagammaH = outerprodVectors(delta_, Hgamma);
-		
+
 		dH = subMatrices(outerprodVectors(delta_, delta, 1+ dot(gamma, Hgamma)/deltagamma) , addMatrices(deltagammaH, transposeMatrix(deltagammaH) ) );
-		//--		
-		
-		H = add(H, dH); 	
-		
+		//--
+
+		H = add(H, dH);
+
 		iter++;
-			
+
 	} while ( normg > TOLgrad && prevobj - obj > TOLobj && norm(subVectors(x, xprev) ) > TOLx ) ;
 	console.log(" OBJ: " + obj + ", norm(grad): " + normg, "prevobj - obj", prevobj - obj, "iters: ", iter );
 	return x;
@@ -10911,18 +10911,18 @@ function bfgs( f, grad, x0 ) {
  * @param {number}
  * @param {number}
  * @param {number}
- * @return {number}  
- */ 
+ * @return {number}
+ */
 function mincubic(p0, p1, x1, px1, x2, px2, lb, ub) {
 
 	const x1square = x1*x1;
 	const x2square = x2*x2;
-	
+
 	var A = new Matrix(2,2, [x1square, x1*x1square, x2square, x2*x2square]);
 	var b = new Float64Array([px1 - p0 - p1*x1, px2 - p0 - p1*x2]);
     var c = solve(A,b);
     var x = (-c[0] + Math.sqrt(c[0]*c[0] - 3 *c[1] * p1))/(3*c[1]);
-  
+
     return Math.min(ub, Math.max(lb, x));
 }
 /**
@@ -10935,9 +10935,9 @@ function mincubic(p0, p1, x1, px1, x2, px2, lb, ub) {
  * @param {number}
  * @param {number}
  * @param {number}
- * @return {number}  
+ * @return {number}
  */
-function minquadratic(p0, p1, px1, x1, lb, ub) {	
+function minquadratic(p0, p1, px1, x1, lb, ub) {
     var x = - p1/(2 * x1 * (px1 - p0 - p1) );
     return Math.min(ub, Math.max(lb, x));
 }
@@ -10951,7 +10951,7 @@ function minquadratic(p0, p1, px1, x1, lb, ub) {
  * @param {number}
  * @param {{Float64Array|number}}
  * @param {number}
- * @return {{Float64Array|number}}  
+ * @return {{Float64Array|number}}
  */
 function armijo (f, xc, fc, g, normg ) {
 	// Armijo's rule line search in the direction of gradient g
@@ -10959,10 +10959,10 @@ function armijo (f, xc, fc, g, normg ) {
 	const blow = 0.1;
 	const bhigh = 0.5;
 	const normg2 = normg * normg;
-	
-	var lambda = Math.min(1,100/(1+normg)); 
+
+	var lambda = Math.min(1,100/(1+normg));
 	var fgoal = fc - alpha * lambda * normg2;
-	
+
     var lambda1 = lambda;
     var xt = subVectors(xc, mulScalarVector(lambda, g) );
     var ft_1 = fc;
@@ -10975,21 +10975,21 @@ function armijo (f, xc, fc, g, normg ) {
 	var ft_1 = ft;
 	var lambda2 = lambda1;
 	lambda1 = lambda;
-		
+
     iter++;
     // next iterations
 	while(ft > fgoal && iter <= 10) {
-		            
+
 		lambda = mincubic(fc, -normg2, lambda1, ft, lambda2, ft_1, blow*lambda1, bhigh*lambda1);
 		lambda2 = lambda1;
 		lambda1 = lambda;
-		
+
 		xt = subVectors(xc, mulScalarVector(lambda, g) );
 		ft_1 = ft;
 		ft = f(xt);
-		
+
 		fgoal = fc - alpha * lambda * normg2;
-                
+
 		iter++;
 	}
 	return {"lambda": lambda, "x": xt, "obj": ft};
@@ -11000,10 +11000,10 @@ function armijodir (f, xc, fc, g, d ) {
 	const blow = 0.1;
 	const bhigh = 0.5;
 	const p1 = dot( g, d);
-	
-	var lambda = Math.min(1,100/(1+norm(g))); 
+
+	var lambda = Math.min(1,100/(1+norm(g)));
 	var fgoal = fc + alpha * lambda * p1;
-	
+
     var lambda1 = lambda;
     var xt = addVectors(xc, mulScalarVector(lambda, d) );
     var ft_1 = fc;
@@ -11016,21 +11016,21 @@ function armijodir (f, xc, fc, g, d ) {
 	var ft_1 = ft;
 	var lambda2 = lambda1;
 	lambda1 = lambda;
-		
+
     iter++;
     // next iterations
 	while(ft > fgoal && iter <= 10) {
-		            
+
 		lambda=mincubic(fc, p1, lambda1, ft, lambda2, ft_1, blow*lambda1, bhigh*lambda1 );
 		lambda2 = lambda1;
 		lambda1 = lambda;
-		
+
 		xt = addVectors(xc, mulScalarVector(lambda, d) );
 		ft_1 = ft;
 		ft = f(xt);
-		
+
 		fgoal = fc + alpha * lambda * p1;
-                
+
 		iter++;
 	}
 	return {"lambda": lambda, "x": xt, "obj": ft};
@@ -11044,16 +11044,16 @@ function armijodir (f, xc, fc, g, d ) {
 //	var A = matrixCopy(Aeq);
 //	var b = vectorCopy(beq);
 //	var x = vectorCopy(x0);
-//	
+//
 //	// beta =  list of basic variable indexes
 //	var m = A.m;
 //	var n = A.n;
-//	
+//
 //	var optimal = false;
 //	var unbounded = false;
-//	var eta = new Array; 
-//	var piv = new Array; 
-//	var i,j;	
+//	var eta = new Array;
+//	var piv = new Array;
+//	var i,j;
 //	while ( !optimal && !unbounded ) {
 //		var s = argmin(c);
 //		if ( c[s] >= 0 ) {
@@ -11069,23 +11069,23 @@ function armijodir (f, xc, fc, g, d ) {
 //			}
 //		}
 //		piv.push(s);
-//		eta.push( new Float64Array(m) ); 
-//		
+//		eta.push( new Float64Array(m) );
+//
 //		eta = entrywisediv(getCols (A, [s] ) , - A.val[r*n + s] ;
 //		eta[r] = 1/A.val[r*n+s];
-//		
-//		b = saxpy(b[s], eta, b); 
-//		
+//
+//		b = saxpy(b[s], eta, b);
+//
 //		var Ar = getRows(A, [r]);
 //		for ( i=0; i < m; i++) {
 //			for( j=0; j < n; j++) {
-//				A.val[i*n+j] += Ar[j] * eta[i]; 				
+//				A.val[i*n+j] += Ar[j] * eta[i];
 //			}
 //		}
-//		
-//		c = saxpy ( c); 
+//
+//		c = saxpy ( c);
 //	}
-//	
+//
 //}
 /*! glpk.js - v4.49.0
 * https://github.com/hgourvest/glpk.js
@@ -11697,9 +11697,9 @@ sa)){b.o>=mc&&x("piv1 = "+fa+"; piv2 = "+sa+"");if(1!=z||!S){1!=z&&(z=0);S=5;con
  * @param{number}
  * @param{number}
  * @return{number}
- */  
+ */
 function nchoosek(n,k) {
-	if ( k > n || k < 0 || n < 0) 
+	if ( k > n || k < 0 || n < 0)
 		return 0;
 
 	var i;
@@ -11707,7 +11707,7 @@ function nchoosek(n,k) {
 	for ( i=n-k+1; i <= n; i++)
 		res *= i;
 	for (i=2; i <= k; i++)
-		res /= i;		
+		res /= i;
 	return res;
 }
 
@@ -11716,15 +11716,15 @@ function nchoosek(n,k) {
 //////////////////////////////////////////////
 function mvnrnd(mu, Sigma, N) {
 	if ( arguments.length < 3 )
-		var N = 1; 
-		
+		var N = 1;
+
 	var X = randn(N,mu.length);
-	
+
 	if ( issymmetric(Sigma) )
 		var L = chol(Sigma);
-	else 
+	else
 		var L = Sigma; // L directly provided instead of Sigma
-	
+
 	return add(mul(ones(N),transpose(mu)), mul(X, transpose(L) ));
 }
 
@@ -11732,13 +11732,13 @@ function mvnrnd(mu, Sigma, N) {
 // Generic class for Distributions
 /////////////////////////////////////////////
 function Distribution (distrib, arg1, arg2 ) {
-	
+
 	if ( arguments.length < 1 ) {
 		error("Error in new Distribution(name): name is undefined.");
 		return undefined;
 	}
-	
-	if (typeof(distrib) == "string") 
+
+	if (typeof(distrib) == "string")
 		distrib = eval(distrib);
 
 	this.type = "Distribution:" + distrib.name;
@@ -11746,28 +11746,28 @@ function Distribution (distrib, arg1, arg2 ) {
 	this.distribution = distrib.name;
 
 	// Functions that depend on the distrib:
-	this.construct = distrib.prototype.construct; 
+	this.construct = distrib.prototype.construct;
 
-	this.estimate = distrib.prototype.estimate; 
-	this.sample = distrib.prototype.sample; 
+	this.estimate = distrib.prototype.estimate;
+	this.sample = distrib.prototype.sample;
 	this.pdf = distrib.prototype.pdf;
 	if( distrib.prototype.pmf )
-		this.pmf = distrib.prototype.pmf;  
-	
+		this.pmf = distrib.prototype.pmf;
+
 	if( distrib.prototype.logpdf )
-		this.logpdf = distrib.prototype.logpdf;  
+		this.logpdf = distrib.prototype.logpdf;
 	else
 		this.logpdf = function ( x ) { return log(this.pdf(x)); };
-		
-//	this.cdf = distrib.prototype.cdf; 
-	
+
+//	this.cdf = distrib.prototype.cdf;
+
 	// Initialization depending on distrib
 	this.construct(arg1, arg2);
 }
 
 Distribution.prototype.construct = function ( params ) {
 	// Read params and create the required fields for a specific algorithm
-	
+
 }
 
 Distribution.prototype.pdf = function ( x ) {
@@ -11786,7 +11786,7 @@ Distribution.prototype.estimate = function ( X ) {
 
 Distribution.prototype.info = function () {
 	// Print information about the distribution
-	
+
 	var str = "{<br>";
 	var i;
 	var Functions = new Array();
@@ -11803,12 +11803,12 @@ Distribution.prototype.info = function () {
 			case "matrix":
 				str += i + ": matrix of size " + this[i].m + "-by-" + this[i].n + "<br>";
 				break;
-			case "function": 
+			case "function":
 				Functions.push( i );
 				break;
 			default:
 				str += i + ": " + typeof(this[i]) + "<br>";
-				break;			
+				break;
 		}
 	}
 	str += "<i>Functions: " + Functions.join(", ") + "</i><br>";
@@ -11818,7 +11818,7 @@ Distribution.prototype.info = function () {
 
 
 ///////////////////////////////
-///  Uniform 
+///  Uniform
 ///////////////////////////////
 function Uniform ( params ) {
 	var that = new Distribution ( Uniform, params ) ;
@@ -11834,31 +11834,31 @@ Uniform.prototype.construct = function ( a, b ) {
 		this.a = -1;
 		this.b = 1;
 		this.dimension = 1;
-	
+
 		this.px = 0.5;
 		this.mean = 0;
 		this.variance = 1/3;
-		this.std = Math.sqrt(this.variance);	
+		this.std = Math.sqrt(this.variance);
 	}
 	else {
 		if ( typeof(b) == "undefined" ) {
-			this.isDiscrete = true; 
-			if ( typeof(a) == "number") 
+			this.isDiscrete = true;
+			if ( typeof(a) == "number")
 				this.values = range(a);
-			else 
-				this.values = a; 
-			this.dimension = 1;	
+			else
+				this.values = a;
+			this.dimension = 1;
 			this.mean = ( min(this.values) + max(this.values) ) / 2;
 			this.variance = (this.values.length * this.values.length - 1 ) / 12;
 			this.std = Math.sqrt(this.variance);
 		}
 		else {
-			this.isDiscrete = false; 
+			this.isDiscrete = false;
 			this.a = a;
 			this.b = b;
 			this.dimension = size(a,1);
-		
-			this.px = 1 / prod(sub(b,a)); 
+
+			this.px = 1 / prod(sub(b,a));
 			this.mean = mul(0.5, add(a, b));
 			var b_a = sub(b,a);
 			this.variance = entrywisediv( entrywisemul(b_a,b_a), 12);
@@ -11870,7 +11870,7 @@ Uniform.prototype.construct = function ( a, b ) {
 Uniform.prototype.pdf = function ( x ) {
 	// return value of PDF at x
 	const tx = type(x);
-	var p = undefined;	
+	var p = undefined;
 	if (this.isDiscrete) {
 		var pdfscalar = function ( s, values ) {
 			return ( values.indexOf(s) < 0 ) ? 0 : (1/values.length) ;
@@ -11881,8 +11881,8 @@ Uniform.prototype.pdf = function ( x ) {
 		}
 		else if ( tx == "vector" ) {
 			p = zeros(x.length);
-			for ( var i=0; i < x.length; i++) 
-				p[i] = pdfscalar(x[i], this.values);		
+			for ( var i=0; i < x.length; i++)
+				p[i] = pdfscalar(x[i], this.values);
 		}
 		else if ( tx == "matrix" ) {
 			p = zeros(x.m, x.n);
@@ -11894,7 +11894,7 @@ Uniform.prototype.pdf = function ( x ) {
 		var pdfscalar = function ( s , l, u, px) {
 			return ( s >= l && s <= u ) ? px : 0;
 		};
-		
+
 		if ( tx == "number" ) {
 			if ( this.dimension == 1 )
 				p = pdfscalar(x, this.a, this.b, this.px);
@@ -11939,11 +11939,11 @@ Uniform.prototype.sample = function ( N ) {
 	// Return N samples
 	if ( typeof(N) == "undefined" )
 		var N = 1;
-		
+
 	if ( this.isDiscrete ) {
-		var s = zeros(N); 
+		var s = zeros(N);
 		for(var i=0; i < N; i++) {
-			var r = Math.random(); 
+			var r = Math.random();
 			var k = 1;
 			var n = this.values.length;
 			while ( r > k / n )
@@ -11957,9 +11957,9 @@ Uniform.prototype.sample = function ( N ) {
 	}
 	else {
 		if ( this.dimension == 1 )
-			return add(entrywisemul(this.b-this.a, rand(N)), this.a); 
+			return add(entrywisemul(this.b-this.a, rand(N)), this.a);
 		else {
-			return add(entrywisemul(outerprod(ones(N), sub(this.b,this.a)), rand(N, this.dimension)), outerprod(ones(N),this.a) ); 
+			return add(entrywisemul(outerprod(ones(N), sub(this.b,this.a)), rand(N, this.dimension)), outerprod(ones(N),this.a) );
 		}
 	}
 }
@@ -11967,37 +11967,37 @@ Uniform.prototype.sample = function ( N ) {
 Uniform.prototype.estimate = function ( X ) {
 	// Estimate dsitribution from the N-by-d matrix X
 	const tX = type(X);
-	
+
 	// Detect if X contains discrete or continuous values
 	if ( tX == "matrix" )
 		var x = X.val;
 	else
 		var x = X;
-		
+
 	var i = 0;
 	while ( i < x.length && Math.round(x[i]) == x[i] )
 		i++;
-	if ( i < x.length ) 
+	if ( i < x.length )
 		this.isDiscrete = false;
 	else
 		this.isDiscrete = true;
-		
+
 	// Estimate
 	if ( this.isDiscrete) {
 		for ( i = 0; i < x.length; i++ ) {
 			var xi = Math.round(x[i]);
-			if ( this.values.indexOf(xi) < 0 ) 
-				this.values.push(xi);		
+			if ( this.values.indexOf(xi) < 0 )
+				this.values.push(xi);
 		}
-		this.dimension = 1;	
+		this.dimension = 1;
 		this.mean = ( min(this.values) + max(this.values) ) / 2;
 		this.variance = (this.values.length * this.values.length - 1 ) / 12;
 		this.std = Math.sqrt(this.variance);
 	}
 	else {
 		if ( tX == "matrix" ) {
-			this.a = min(X,1).val; 
-			this.b = max(X).val; 
+			this.a = min(X,1).val;
+			this.b = max(X).val;
 			this.dimension = this.a.length;
 		}
 		else {
@@ -12009,14 +12009,14 @@ Uniform.prototype.estimate = function ( X ) {
 		var b_a = sub(this.b,this.a);
 		this.variance = entrywisediv( entrywisemul(b_a,b_a), 12);
 		this.std = sqrt(this.variance);
-		this.px = 1 / prod(sub(this.b,this.a)); 		
-	}	
+		this.px = 1 / prod(sub(this.b,this.a));
+	}
 	return this;
 }
 
 
 ///////////////////////////////
-///  Gaussian 
+///  Gaussian
 /// (with independent components in multiple dimension)
 ///////////////////////////////
 function Gaussian ( params ) {
@@ -12027,14 +12027,14 @@ function Gaussian ( params ) {
 
 Gaussian.prototype.construct = function ( mean, variance ) {
 	// Read params and create the required fields for a specific algorithm
-	if ( typeof(mean) == "undefined" ) 
+	if ( typeof(mean) == "undefined" )
 		var mu = 1;
-		
-	else if ( type(mean) == "matrix") 
+
+	else if ( type(mean) == "matrix")
 		var mu = mean.val;
 	else
 		var mu = mean;
-		
+
 	var dim = size(mu,1) ;
 
 	if ( typeof(variance) == "undefined") {
@@ -12060,9 +12060,9 @@ Gaussian.prototype.pdf = function ( x ) {
 		else {
 			var diff = sub(x, this.mean);
 			return entrywisediv ( exp( entrywisediv(entrywisemul( diff, diff), -2* this.variance) ), this.std * Math.sqrt(2*Math.PI) ) ;
-		} 
+		}
 	}
-	else {  
+	else {
 		if ( type(x) == "vector") {
 			if (x.length != this.dimension ) {
 				error ( "Error in Gaussian.pdf(x): x.length = " + x.length + " != " + this.dimension + " = Gaussian.dimension.");
@@ -12078,12 +12078,12 @@ Gaussian.prototype.pdf = function ( x ) {
 				return undefined;
 			}
 
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			var denominator = Math.pow(2*Math.PI, 0.5*this.dimension) * Math.sqrt(prodVector(this.variance)) ;
 			for ( var i=0; i < x.m; i++) {
 				var diff = subVectors(x.row(i), this.mean );
 				var u = -0.5 * dot( diff, divVectors(diff, this.variance) );
-				p[i] = Math.exp(u) / denominator;		
+				p[i] = Math.exp(u) / denominator;
 			}
 			return p;
 		}
@@ -12095,7 +12095,7 @@ Gaussian.prototype.sample = function ( N ) {
 	if ( typeof(N) == "undefined")
 		var N = 1;
 
-	if ( N == 1 ) 
+	if ( N == 1 )
 		var X = add(entrywisemul(this.std, randn(this.dimension)), this.mean);
 	else {
 		var N1 = ones(N);
@@ -12121,7 +12121,7 @@ Gaussian.prototype.estimate = function ( X ) {
 	return this;
 }
 ///////////////////////////////
-///  Gaussian 
+///  Gaussian
 /// (with independent components in multiple dimension)
 ///////////////////////////////
 function mvGaussian ( params ) {
@@ -12132,14 +12132,14 @@ function mvGaussian ( params ) {
 
 mvGaussian.prototype.construct = function ( mean, covariance ) {
 	// Read params and create the required fields for a specific algorithm
-	if ( typeof(mean) == "undefined" ) 
+	if ( typeof(mean) == "undefined" )
 		var mu = 1;
-		
-	else if ( type(mean) == "matrix") 
+
+	else if ( type(mean) == "matrix")
 		var mu = mean.val;
 	else
 		var mu = mean;
-		
+
 	var dim = size(mu,1) ;
 
 	if ( typeof(covariance) == "undefined") {
@@ -12152,11 +12152,11 @@ mvGaussian.prototype.construct = function ( mean, covariance ) {
 	this.mean = mu;
 	this.variance = covariance;
 	this.dimension = dim;
-	
+
 	this.L = chol(this.variance);
 	if ( typeof(this.L) == "undefined" )
 		error("Error in new Distribution (mvGaussian, mu, Sigma): Sigma is not positive definite");
-	
+
 	this.det = det(this.variance);
 }
 
@@ -12172,7 +12172,7 @@ mvGaussian.prototype.pdf = function ( x ) {
 			return entrywisediv ( exp( entrywisediv(entrywisemul( diff, diff), -2* this.variance) ), Math.sqrt(2*this.variance*Math.PI) ) ;
 		}
 	}
-	else {  
+	else {
 		if ( type(x) == "vector") {
 			if (x.length != this.dimension ) {
 				error ( "Error in mvGaussian.pdf(x): x.length = " + x.length + " != " + this.dimension + " = mvGaussian.dimension.");
@@ -12188,12 +12188,12 @@ mvGaussian.prototype.pdf = function ( x ) {
 				return undefined;
 			}
 
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			var denominator = Math.sqrt( Math.pow(2*Math.PI, this.dimension) * this.det ) ;
 			for ( var i=0; i < x.m; i++) {
 				var diff = subVectors(x.row(i), this.mean );
 				var u = -0.5 * dot( diff, cholsolve(this.L, diff) );
-				p[i] = Math.exp(u) / denominator;		
+				p[i] = Math.exp(u) / denominator;
 			}
 			return p;
 		}
@@ -12204,10 +12204,10 @@ mvGaussian.prototype.sample = function ( N ) {
 	// Return N samples
 	if ( typeof(N) == "undefined")
 		var N = 1;
-		
+
 	var X = add(mul(randn(N,this.dimension), transpose(this.L)), outerprod(ones(N),this.mean));
-	
-	if ( N == 1) 
+
+	if ( N == 1)
 		return X.val;
 	else
 		return X;
@@ -12217,12 +12217,12 @@ mvGaussian.prototype.estimate = function ( X ) {
 	// Estimate dsitribution from the N-by-d matrix X
 	if ( type ( X ) == "matrix" ) {
 		this.mean = mean(X,1).val;
-		this.variance = cov(X); 
+		this.variance = cov(X);
 		this.dimension = X.n;
 		this.L = chol(this.variance);
 		if ( typeof(this.L) == "undefined" )
 			error("Error in mvGaussian.estimate(X): covariance estimate is not positive definite");
-	
+
 		this.det = det(this.variance);
 		return this;
 	}
@@ -12234,7 +12234,7 @@ mvGaussian.prototype.estimate = function ( X ) {
 
 
 ///////////////////////////////
-///  Bernoulli 
+///  Bernoulli
 ///////////////////////////////
 function Bernoulli ( params ) {
 	var that = new Distribution ( Bernoulli, params ) ;
@@ -12244,30 +12244,30 @@ function Bernoulli ( params ) {
 
 Bernoulli.prototype.construct = function ( mean ) {
 	// Read params and create the required fields for a specific algorithm
-	if ( typeof(mean) == "undefined" ) 
+	if ( typeof(mean) == "undefined" )
 		var mean = 0.5;
 
-	var dim = size(mean,1); 
+	var dim = size(mean,1);
 
 	this.mean = mean;
 	this.variance = entrywisemul(mean, sub(1, mean)) ;
 	this.std = sqrt(this.variance);
-	this.dimension = dim;	
+	this.dimension = dim;
 }
 
 Bernoulli.prototype.pdf = Bernoulli.prototype.pmf = function ( x ) {
 	// return value of PDF at x
 	const tx = type(x);
-	
+
 	var pdfscalar = function ( s, mu ) {
-		if ( s == 1 ) 
+		if ( s == 1 )
 			return mu;
 		else if ( s == 0)
 			return (1-mu);
 		else
 			return 0;
 	};
-	
+
 	if ( this.dimension == 1 ) {
 		if ( tx == "number" ) {
 			return pdfscalar(x, this.mean);
@@ -12295,7 +12295,7 @@ Bernoulli.prototype.pdf = Bernoulli.prototype.pmf = function ( x ) {
 			for (var k = 1; k < this.dimension; k++)
 				p *= pdfscalar(x[k], this.mean[k]);
 			break;
-			
+
 		case "spvector":
 			var p = 1;
 			for (var j=0; j < x.ind[0] ; j++)
@@ -12307,15 +12307,15 @@ Bernoulli.prototype.pdf = Bernoulli.prototype.pmf = function ( x ) {
 			}
 			p *= this.mean[x.ind[k]];
 			for (var j=x.ind[k]+1; j < this.dimension ; j++)
-				p *= (1-this.mean[j]);			
+				p *= (1-this.mean[j]);
 			break;
-			
+
 		case "matrix":
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			for (var i=0; i < x.m; i++) {
 				p[i] = pdfscalar(x.val[i*x.n], this.mean[0]);
 				for (var k = 1; k < x.n; k++)
-					p[i] *= pdfscalar(x.val[i*x.n + k], this.mean[k]);			
+					p[i] *= pdfscalar(x.val[i*x.n + k], this.mean[k]);
 			}
 			break;
 		case "spmatrix":
@@ -12331,31 +12331,31 @@ Bernoulli.prototype.pdf = Bernoulli.prototype.pmf = function ( x ) {
 				}
 				p[i] *= this.mean[xr.ind[k]];
 				for (var j=xr.ind[k]+1; j < this.dimension ; j++)
-					p[i] *= (1-this.mean[j]);	
-			}				
+					p[i] *= (1-this.mean[j]);
+			}
 			break;
 		default:
 			var p = undefined;
-			break;			
+			break;
 		}
 		return p;
 	}
-	
+
 }
 
 Bernoulli.prototype.logpdf = Bernoulli.prototype.logpmf = function ( x ) {
 	// return value of logPDF at x
 	const tx = type(x);
-	
+
 	var logpdfscalar = function ( s, mu ) {
-		if ( s == 1 ) 
+		if ( s == 1 )
 			return Math.log(mu);
 		else if ( s == 0)
 			return Math.log(1-mu);
 		else
 			return -Infinity;
 	};
-	
+
 	if ( this.dimension == 1 ) {
 		if ( tx == "number" ) {
 			return logpdfscalar(x, this.mean);
@@ -12383,7 +12383,7 @@ Bernoulli.prototype.logpdf = Bernoulli.prototype.logpmf = function ( x ) {
 			for (var k = 0; k < this.dimension; k++)
 				p += logpdfscalar(x[k], this.mean[k]);
 			break;
-			
+
 		case "spvector":
 			var p = 0;
 			for (var j=0; j < x.ind[0] ; j++)
@@ -12395,18 +12395,18 @@ Bernoulli.prototype.logpdf = Bernoulli.prototype.logpmf = function ( x ) {
 			}
 			p += Math.log(this.mean[x.ind[k]]);
 			for (var j=x.ind[k]+1; j < this.dimension ; j++)
-				p += Math.log(1-this.mean[j]);			
+				p += Math.log(1-this.mean[j]);
 			break;
-			
+
 		case "matrix":
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			for (var i=0; i < x.m; i++) {
 				for (var k = 0; k < x.n; k++)
-					p[i] += logpdfscalar(x.val[i*x.n + k], this.mean[k]);			
+					p[i] += logpdfscalar(x.val[i*x.n + k], this.mean[k]);
 			}
 			break;
 		case "spmatrix":
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			for (var i=0; i < x.m; i++) {
 				var xr = x.row(i);	// could be faster without this...
 				for (var j=0; j < xr.ind[0] ; j++)
@@ -12418,16 +12418,16 @@ Bernoulli.prototype.logpdf = Bernoulli.prototype.logpmf = function ( x ) {
 				}
 				p[i] += Math.log(this.mean[xr.ind[k]]);
 				for (var j=xr.ind[k]+1; j < this.dimension ; j++)
-					p[i] += Math.log(1-this.mean[j]);						
+					p[i] += Math.log(1-this.mean[j]);
 			}
 			break;
 		default:
 			var p = undefined;
-			break;			
+			break;
 		}
 		return p;
 	}
-	
+
 }
 
 Bernoulli.prototype.sample = function ( N ) {
@@ -12436,7 +12436,7 @@ Bernoulli.prototype.sample = function ( N ) {
 		return isLower(rand(this.dimension) , this.mean);
 	}
 	else {
-		return isLower(rand(N, this.dimension) , outerprod(ones(N), this.mean) );		
+		return isLower(rand(N, this.dimension) , outerprod(ones(N), this.mean) );
 	}
 }
 
@@ -12467,7 +12467,7 @@ Bernoulli.prototype.estimate = function ( X ) {
 
 
 ///////////////////////////////
-///  Poisson 
+///  Poisson
 ///////////////////////////////
 function Poisson ( params ) {
 	var that = new Distribution ( Poisson, params ) ;
@@ -12477,23 +12477,23 @@ function Poisson ( params ) {
 
 Poisson.prototype.construct = function ( mean ) {
 	// Read params and create the required fields for a specific algorithm
-	if ( typeof(mean) == "undefined" ) 
+	if ( typeof(mean) == "undefined" )
 		var mean = 5;
 
-	var dim = size(mean,1); 
+	var dim = size(mean,1);
 
 	this.mean = mean;
 	this.variance = this.mean;
 	this.std = sqrt(this.variance);
-	this.dimension = dim;	
+	this.dimension = dim;
 }
 
 Poisson.prototype.pdf = Poisson.prototype.pmf = function ( x ) {
 	// return value of PDF at x
 	const tx = type(x);
-	
+
 	var pdfscalar = function ( s, lambda ) {
-		if ( s < 0 || Math.round(s) != s ) 
+		if ( s < 0 || Math.round(s) != s )
 			return 0;
 		else if ( s == 0)
 			return 1;
@@ -12504,7 +12504,7 @@ Poisson.prototype.pdf = Poisson.prototype.pmf = function ( x ) {
 			return Math.exp(-lambda) * u;
 		}
 	};
-	
+
 	if ( this.dimension == 1 ) {
 		if ( tx == "number" ) {
 			return pdfscalar(x, this.mean);
@@ -12530,20 +12530,20 @@ Poisson.prototype.pdf = Poisson.prototype.pmf = function ( x ) {
 			var p = pdfscalar(x[0], this.mean[0]);
 			for (var k =0; k < this.dimension; k++)
 				p *= pdfscalar(x[k], this.mean[k]);
-			
+
 			return p;
 		}
 		else if ( tx == "matrix") {
-			var p = zeros(x.m); 
+			var p = zeros(x.m);
 			for (var i=0; i < x.m; i++) {
 				p[i] = pdfscalar(x.val[i*x.n], this.mean[0]);
 				for (var k =0; k < x.n; k++)
-					p[i] *= pdfscalar(x.val[i*x.n + k], this.mean[k]);			
+					p[i] *= pdfscalar(x.val[i*x.n + k], this.mean[k]);
 			}
-			return p;			
+			return p;
 		}
 	}
-	
+
 }
 
 Poisson.prototype.sample = function ( N ) {
@@ -12558,7 +12558,7 @@ Poisson.prototype.sample = function ( N ) {
 		}
 		return n;
 	};
-	
+
 	if ( typeof(N) == "undefined" || N == 1 ) {
 		if ( this.dimension == 1 )
 			return samplescalar(this.mean);
@@ -12572,7 +12572,7 @@ Poisson.prototype.sample = function ( N ) {
 	else {
 		if ( this.dimension == 1 ) {
 			var S = zeros(N);
-			for ( var i=0; i < N; i++) 
+			for ( var i=0; i < N; i++)
 				S[i] =  samplescalar(this.mean);
 			return S;
 		}
@@ -12582,7 +12582,7 @@ Poisson.prototype.sample = function ( N ) {
 				for ( k=0; k < this.dimension; k++)
 					S[i*this.dimension + k] = samplescalar(this.mean[k]);
 			}
-			return S;			
+			return S;
 		}
 	}
 }
@@ -12596,7 +12596,7 @@ Poisson.prototype.estimate = function ( X ) {
 		this.std = sqrt(this.variance);
 		this.dimension = X.n;
 	}
-	else { // X is a vector samples 
+	else { // X is a vector samples
 		this.dimension = 1;
 		this.mean = mean(X) ;
 		this.variance = this.mean;
@@ -12613,7 +12613,7 @@ const Complex_I = new Complex(0, 1);
  */
 function Complex(a, b, polar) {
 	/** @const */ this.type = "Complex";
-	
+
 	if ( typeof(a) == "undefined") {
 		this.re = 0.0;
 		this.im = 0.0;
@@ -12641,18 +12641,18 @@ Complex.prototype.info = function () {
 /**
  * @param {Complex}
  * @param {Complex}
- * @return {Complex} 
+ * @return {Complex}
  */
 function addComplex(a,b) {
 	var z = new Complex(a);
-	z.re += b.re; 
+	z.re += b.re;
 	z.im += b.im;
 	return z;
 }
 /**
  * @param {Complex}
  * @param {number}
- * @return {Complex} 
+ * @return {Complex}
  */
 function addComplexReal(a,b) {
 	var z = new Complex(a);
@@ -12662,7 +12662,7 @@ function addComplexReal(a,b) {
 /**
  * @param {Complex}
  * @param {Complex}
- * @return {Complex} 
+ * @return {Complex}
  */
 function subComplex(a,b) {
 	var z = new Complex(a);
@@ -12672,7 +12672,7 @@ function subComplex(a,b) {
 }
 /**
  * @param {Complex}
- * @return {Complex} 
+ * @return {Complex}
  */
 function minusComplex(a) {
 	return new Complex(-a.re, -a.im);
@@ -12697,29 +12697,29 @@ function conj(z) {
 		for (var i=0; i < z.length; i++)
 			r.im[i] = -r.im[i];
 		return r;
-	}	
+	}
 	else if (z instanceof ComplexMatrix) {
 		var r = new ComplexMatrix(z);
 		for (var i=0; i < z.length; i++)
 			r.im[i] = -r.im[i];
 		return r;
-	}		
-	else 
+	}
+	else
 		return new Complex(z);	// for a real
 }
 
 function modulus(z) {
-	if ( z instanceof Complex ) 
+	if ( z instanceof Complex )
 		return Math.sqrt(z.re*z.re + z.im*z.im);
 	else if (z instanceof ComplexVector)
-		return sqrt(addVectors( entrywisemulVector(z.re, z.re), entrywisemulVector(z.im, z.im) )); 
+		return sqrt(addVectors( entrywisemulVector(z.re, z.re), entrywisemulVector(z.im, z.im) ));
 	else if (z instanceof ComplexVector)
-		return new Matrix(z.m, z.n, sqrt(addVectors( entrywisemulVector(z.re, z.re), entrywisemulVector(z.im, z.im) ) , true)); 
+		return new Matrix(z.m, z.n, sqrt(addVectors( entrywisemulVector(z.re, z.re), entrywisemulVector(z.im, z.im) ) , true));
 }
 var absComplex = modulus;
 
 function expComplex(z) {
-	return new Complex(Math.exp(z.re), z.im, true); 	
+	return new Complex(Math.exp(z.re), z.im, true);
 }
 
 
@@ -12730,9 +12730,9 @@ function expComplex(z) {
  */
 function ComplexVector(a, b, dontcopy) {
 	/** @const */ this.type = "ComplexVector";
-	
+
 	if ( arguments.length == 0 ) {
-		// dummy call, probably in renewObject 
+		// dummy call, probably in renewObject
 		// while loading data from a file
 	}
 	else if ( a instanceof ComplexVector) {
@@ -12743,7 +12743,7 @@ function ComplexVector(a, b, dontcopy) {
 	else if (typeof(a) == "number") {
 		/** @const */ this.length = a;
 		this.re = new Float64Array(a);
-		this.im = new Float64Array(a);		
+		this.im = new Float64Array(a);
 	}
 	else if ( a instanceof Float64Array && b instanceof Float64Array ) {
 		/** @const */ this.length = a.length;
@@ -12767,16 +12767,16 @@ function ComplexVector(a, b, dontcopy) {
  */
 function ComplexMatrix(a, b, values, valuesimag) {
 	/** @const */ this.type = "ComplexMatrix";
-		
+
 	if ( arguments.length == 0 ) {
-		// dummy call, probably in renewObject 
+		// dummy call, probably in renewObject
 		// while loading data from a file
 	}
 	else if ( a instanceof ComplexMatrix) {
 		/** @const */ this.length = a.length;
 		/** @const */ this.m = a.m;
 		/** @const */ this.n = a.n;
-		/** @const */ this.size = [a.m, a.n]; 
+		/** @const */ this.size = [a.m, a.n];
 		this.re = vectorCopy(a.re);
 		this.im = vectorCopy(a.im);
 	}
@@ -12784,7 +12784,7 @@ function ComplexMatrix(a, b, values, valuesimag) {
 		/** @const */ this.length = a;
 		/** @const */ this.m = a;
 		/** @const */ this.n = b;
-		/** @const */ this.size = [a, b]; 
+		/** @const */ this.size = [a, b];
 		if ( typeof(values) == "undefined") {
 			this.re = new Float64Array(a*b);
 			this.im = new Float64Array(a*b);
@@ -12802,11 +12802,11 @@ function ComplexMatrix(a, b, values, valuesimag) {
 		/** @const */ this.length = a.length;
 		/** @const */ this.m = a.m;
 		/** @const */ this.n = a.n;
-		/** @const */ this.size = [a.m, a.n]; 
+		/** @const */ this.size = [a.m, a.n];
 		this.re = vectorCopy(a.val);
 		this.im = vectorCopy(b.val);
 	}
-	else 
+	else
 		error("Bad arguments to new ComplexMatrix()");
 }
 
@@ -12854,40 +12854,40 @@ ComplexVector.prototype.getSubVector = function (rowsrange) {
 }
 ComplexVector.prototype.setVectorScalar = function (rowsrange, B) {
 	var i;
-	for (i = 0; i< rowsrange.length; i++) 
+	for (i = 0; i< rowsrange.length; i++)
 		A.set ( rowsrange[i], B);
 }
 ComplexVector.prototype.setVectorVector = function (rowsrange, B) {
 	var i;
-	for (i = 0; i< rowsrange.length; i++) 
+	for (i = 0; i< rowsrange.length; i++)
 		A.set(rowsrange[i], B[i]);
 }
 
 
 
 function real(z) {
-	if (z instanceof Complex) 
+	if (z instanceof Complex)
 		return z.re;
 	else if (z instanceof ComplexVector)
 		return vectorCopy(z.re);
 	else if (z instanceof ComplexMatrix)
 		return new Matrix(z.m, z.n, z.re);
 	else
-		return copy(z);		
+		return copy(z);
 }
 function imag(z) {
-	if (z instanceof Complex) 
+	if (z instanceof Complex)
 		return z.im;
 	else if (z instanceof ComplexVector)
 		return vectorCopy(z.im);
 	else if (z instanceof ComplexMatrix)
 		return new Matrix(z.m, z.n, z.im);
 	else
-		return 0;		
+		return 0;
 }
 
 /**
- * @param {MatrixComplex} 
+ * @param {MatrixComplex}
  */
 function transposeComplexMatrix ( A ) {
 	// Hermitian transpose = conjugate transpose
@@ -12914,7 +12914,7 @@ function transposeComplexMatrix ( A ) {
 	}
 }
 /**
- * @param {MatrixComplex} 
+ * @param {MatrixComplex}
  */
 ComplexMatrix.prototype.transpose = function ( ) {
 	// simple Transpose without conjugate
@@ -12945,7 +12945,7 @@ ComplexMatrix.prototype.transpose = function ( ) {
 /**
  * @param {ComplexVector}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function addComplexVectors(a, b) {
 	var z = new ComplexVector(a);
@@ -12959,7 +12959,7 @@ function addComplexVectors(a, b) {
 /**
  * @param {ComplexVector}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function subComplexVectors(a, b) {
 	var z = new ComplexVector(a);
@@ -12974,7 +12974,7 @@ function subComplexVectors(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function addComplexMatrices(a, b) {
 	var z = new ComplexMatrix(a);
@@ -12989,7 +12989,7 @@ function addComplexMatrices(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function subComplexMatrices(a, b) {
 	var z = new ComplexMatrix(a);
@@ -13003,7 +13003,7 @@ function subComplexMatrices(a, b) {
 /**
  * @param {ComplexVector}
  * @param {Float64Array}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function addComplexVectorVector(a, b) {
 	var z = new ComplexVector(a);
@@ -13016,20 +13016,20 @@ function addComplexVectorVector(a, b) {
 /**
  * @param {ComplexVector}
  * @param {Float64Array}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function subComplexVectorVector(a, b) {
 	var z = new ComplexVector(a);
 	const n = a.length;
 	for ( var i=0; i< n; i++) {
-		z.re[i] -= b[i];		
+		z.re[i] -= b[i];
 	}
 	return z;
 }
 /**
  * @param {ComplexMatrix}
  * @param {Matrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function addComplexMatrixMatrix(a, b) {
 	var z = new ComplexMatrix(a);
@@ -13042,7 +13042,7 @@ function addComplexMatrixMatrix(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {Matrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function subComplexMatrixMatrix(a, b) {
 	var z = new ComplexMatrix(a);
@@ -13056,7 +13056,7 @@ function subComplexMatrixMatrix(a, b) {
 /**
  * @param {number}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function addScalarComplexVector(a, b) {
 	var z = new ComplexVector(b);
@@ -13069,7 +13069,7 @@ function addScalarComplexVector(a, b) {
 /**
  * @param {number}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function subScalarComplexVector(a, b) {
 	var z = minusComplexVector(b);
@@ -13083,7 +13083,7 @@ function subScalarComplexVector(a, b) {
 /**
  * @param {number}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function addScalarComplexMatrix(a, b) {
 	var z = new ComplexMatrix(b);
@@ -13099,7 +13099,7 @@ function addScalarComplexMatrix(a, b) {
 /**
  * @param {ComplexVector}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function entrywisemulComplexVectors(a, b) {
 	const n = a.length;
@@ -13113,24 +13113,24 @@ function entrywisemulComplexVectors(a, b) {
 /**
  * @param {ComplexVector}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function entrywisedivComplexVectors(a, b) {
 	const n = a.length;
 	var z = new ComplexVector(n);
 	for ( var i=0; i< n; i++) {
 		var bre = b.re[i];
-		var bim = b.im[i]; 
+		var bim = b.im[i];
 		var denom = bre*bre + bim*bim;
 		z.re[i] = (a.re[i]*bre + a.im[i]*bim) / denom;
-		z.im[i] = (a.im[i]*bre - a.re[i]*bim) / denom;		
+		z.im[i] = (a.im[i]*bre - a.re[i]*bim) / denom;
 	}
 	return z;
 }
 /**
  * @param {ComplexMatrix}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function entrywisemulComplexMatrices(a, b) {
 	const n = a.m * a.n;
@@ -13144,17 +13144,17 @@ function entrywisemulComplexMatrices(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function entrywisedivComplexMatrices(a, b) {
 	const n = a.m * a.n;
 	var z = new ComplexMatrix(a.m, a.n);
 	for ( var i=0; i< n; i++) {
 		var bre = b.re[i];
-		var bim = b.im[i]; 
+		var bim = b.im[i];
 		var denom = bre*bre + bim*bim;
 		z.re[i] = (a.re[i]*bre + a.im[i]*bim) / denom;
-		z.im[i] = (a.im[i]*bre - a.re[i]*bim) / denom;		
+		z.im[i] = (a.im[i]*bre - a.re[i]*bim) / denom;
 	}
 	return z;
 }
@@ -13162,7 +13162,7 @@ function entrywisedivComplexMatrices(a, b) {
 /**
  * @param {ComplexVector}
  * @param {Float64Array}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function entrywisemulComplexVectorVector(a, b) {
 	const n = a.length;
@@ -13176,7 +13176,7 @@ function entrywisemulComplexVectorVector(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {Matrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function entrywisemulComplexMatrixMatrix(a, b) {
 	const n = a.m * a.n;
@@ -13190,7 +13190,7 @@ function entrywisemulComplexMatrixMatrix(a, b) {
 
 /**
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function minusComplexVector(a) {
 	const n = a.length;
@@ -13203,7 +13203,7 @@ function minusComplexVector(a) {
 }
 /**
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function minusComplexMatrix(a) {
 	var z = new ComplexMatrix(a.m, a.n);
@@ -13216,7 +13216,7 @@ function minusComplexMatrix(a) {
 }
 /**
  * @param {ComplexVector}
- * @return {number} 
+ * @return {number}
  */
 function sumComplexVector(a) {
 	var z = new Complex();
@@ -13229,7 +13229,7 @@ function sumComplexVector(a) {
 }
 /**
  * @param {ComplexMatrix}
- * @return {number} 
+ * @return {number}
  */
 function sumComplexMatrix(a) {
 	var z = new Complex();
@@ -13242,19 +13242,19 @@ function sumComplexMatrix(a) {
 }
 /**
  * @param {ComplexVector}
- * @return {number} 
+ * @return {number}
  */
 function norm1ComplexVector(a) {
 	var r = 0.0;
 	const n = a.length;
 	for ( var i=0; i< n; i++) {
-		r += Math.sqrt(a.re[i] * a.re[i] + a.im[i]*a.im[i]);		
+		r += Math.sqrt(a.re[i] * a.re[i] + a.im[i]*a.im[i]);
 	}
 	return r;
 }
 /**
  * @param {ComplexVector}
- * @return {number} 
+ * @return {number}
  */
 function norm2ComplexVector(a) {
 	var r = 0.0;
@@ -13266,7 +13266,7 @@ function norm2ComplexVector(a) {
 }
 /**
  * @param {ComplexMatrix}
- * @return {number} 
+ * @return {number}
  */
 function normFroComplexMatrix(a) {
 	var r = 0.0;
@@ -13279,11 +13279,11 @@ function normFroComplexMatrix(a) {
 /**
  * @param {ComplexVector}
  * @param {ComplexVector}
- * @return {Complex} 
+ * @return {Complex}
  */
 function dotComplexVectors(a, b) {
 	// = b^H a = conj(b)^T a
-	var z = new Complex(); 
+	var z = new Complex();
 	const n = a.length;
 	for ( var i=0; i< n; i++) {
 		z.re += a.re[i] * b.re[i] + a.im[i] * b.im[i];
@@ -13294,11 +13294,11 @@ function dotComplexVectors(a, b) {
 /**
  * @param {ComplexVector}
  * @param {Float64Array}
- * @return {Complex} 
+ * @return {Complex}
  */
 function dotComplexVectorVector(a, b) {
 	// = b^T a
-	var z = new Complex(); 
+	var z = new Complex();
 	const n = a.length;
 	for ( var i=0; i< n; i++) {
 		z.re += a.re[i] * b[i];
@@ -13309,7 +13309,7 @@ function dotComplexVectorVector(a, b) {
 /**
  * @param {number}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function mulScalarComplexVector(a, b) {
 	var re = mulScalarVector(a, b.re);
@@ -13319,13 +13319,13 @@ function mulScalarComplexVector(a, b) {
 /**
  * @param {Complex}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function mulComplexComplexVector(a, b) {
 	const n = b.length;
 	var z = new ComplexVector(n);
 	var are = a.re;
-	var aim = a.im; 
+	var aim = a.im;
 	for ( var i=0; i< n; i++) {
 		z.re[i] = are * b.re[i] - aim * b.im[i];
 		z.im[i] = aim * b.re[i] + are * b.im[i];
@@ -13335,13 +13335,13 @@ function mulComplexComplexVector(a, b) {
 /**
  * @param {Complex}
  * @param {Float64Array}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function mulComplexVector(a, b) {
 	const n = b.length;
 	var z = new ComplexVector(n);
 	var are = a.re;
-	var aim = a.im; 
+	var aim = a.im;
 	for ( var i=0; i< n; i++) {
 		z.re[i] = are * b[i];
 		z.im[i] = aim * b[i];
@@ -13351,7 +13351,7 @@ function mulComplexVector(a, b) {
 /**
  * @param {number}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function mulScalarComplexMatrix(a, b) {
 	var re = mulScalarVector(a, b.re);
@@ -13361,13 +13361,13 @@ function mulScalarComplexMatrix(a, b) {
 /**
  * @param {Complex}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function mulComplexComplexMatrix(a, b) {
 	const n = b.m*b.n;
 	var z = new ComplexMatrix(b.m,b.n);
 	var are = a.re;
-	var aim = a.im; 
+	var aim = a.im;
 	for ( var i=0; i< n; i++) {
 		z.re[i] = are * b.re[i] - aim * b.im[i];
 		z.im[i] = aim * b.re[i] + are * b.im[i];
@@ -13377,13 +13377,13 @@ function mulComplexComplexMatrix(a, b) {
 /**
  * @param {Complex}
  * @param {Matrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function mulComplexMatrix(a, b) {
 	const n = b.m * b.n;
 	var z = new ComplexMatrix(b.m, b.n);
 	var are = a.re;
-	var aim = a.im; 
+	var aim = a.im;
 	for ( var i=0; i< n; i++) {
 		z.re[i] = are * b.val[i];
 		z.im[i] = aim * b.val[i];
@@ -13393,12 +13393,12 @@ function mulComplexMatrix(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {Float64Array}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function mulComplexMatrixVector(a, b) {
 	const m = a.m;
 	const n = a.n;
-	var z = new ComplexVector(m); 
+	var z = new ComplexVector(m);
 	var ai = 0;
 	for ( var i=0; i< m; i++) {
 		for ( j=0; j < n ; j++) {
@@ -13412,12 +13412,12 @@ function mulComplexMatrixVector(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function mulComplexMatrixComplexVector(a, b) {
 	const m = a.m;
 	const n = a.n;
-	var z = new ComplexVector(m); 
+	var z = new ComplexVector(m);
 	var ai = 0;
 	for ( var i=0; i< m; i++) {
 		for ( j=0; j < n ; j++) {
@@ -13432,24 +13432,24 @@ function mulComplexMatrixComplexVector(a, b) {
 /**
  * @param {ComplexMatrix}
  * @param {ComplexMatrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function mulComplexMatrices(A, B) {
 	const m = A.length;
 	const n = B.n;
 	const n2 = B.length;
-	
-	var Are = A.re; 
+
+	var Are = A.re;
 	var Aim = A.im;
 	var Bre = B.re;
 	var Bim = B.im;
-	
+
 	var Cre = new Float64Array(m*n);
-	var Cim = new Float64Array(m*n);	
+	var Cim = new Float64Array(m*n);
 	var aik;
 	var Aik = 0;
 	var Ci = 0;
-	for (var i=0;i < m ; i++) {		
+	for (var i=0;i < m ; i++) {
 		var bj = 0;
 		for (var k=0; k < n2; k++ ) {
 			aikre = Are[Aik];
@@ -13458,8 +13458,8 @@ function mulComplexMatrices(A, B) {
 				Cre[Ci + j] += aikre * Bre[bj] - aikim * Bim[bj];
 				Cim[Ci + j] += aikre * Bim[bj] + aikim * Bre[bj];
 				bj++;
-			}	
-			Aik++;					
+			}
+			Aik++;
 		}
 		Ci += n;
 	}
@@ -13468,23 +13468,23 @@ function mulComplexMatrices(A, B) {
 /**
  * @param {ComplexMatrix}
  * @param {Matrix}
- * @return {ComplexMatrix} 
+ * @return {ComplexMatrix}
  */
 function mulComplexMatrixMatrix(A, B) {
 	const m = A.m;
 	const n = B.n;
 	const n2 = B.m;
-	
-	var Are = A.re; 
+
+	var Are = A.re;
 	var Aim = A.im;
 	var Bre = B.val;
-	
+
 	var Cre = new Float64Array(m*n);
-	var Cim = new Float64Array(m*n);	
+	var Cim = new Float64Array(m*n);
 	var aik;
 	var Aik = 0;
 	var Ci = 0;
-	for (var i=0;i < m ; i++) {		
+	for (var i=0;i < m ; i++) {
 		var bj = 0;
 		for (var k=0; k < n2; k++ ) {
 			aikre = Are[Aik];
@@ -13493,8 +13493,8 @@ function mulComplexMatrixMatrix(A, B) {
 				Cre[Ci + j] += aikre * Bre[bj];
 				Cim[Ci + j] += aikim * Bre[bj];
 				bj++;
-			}	
-			Aik++;					
+			}
+			Aik++;
 		}
 		Ci += n;
 	}
@@ -13505,21 +13505,21 @@ function mulComplexMatrixMatrix(A, B) {
 
 /**
  * @param {Float64Array|ComplexVector}
- * @return {ComplexVector} 
+ * @return {ComplexVector}
  */
 function fft(x) {
 	const n = x.length;
 	const s = Math.log2(n);
 	const m = n/2;
-	
+
 	if ( s % 1 != 0 ) {
 		error("fft(x) only implemented for x.length = 2^m. Use dft(x) instead.");
 		return undefined;
 	}
 
 	var X = new ComplexVector(x,zeros(n));
-		
-	// bit reversal:	
+
+	// bit reversal:
 	var j = 0;
 	for (var i = 0; i < n-1 ; i++) {
 		if (i < j) {
@@ -13531,7 +13531,7 @@ function fft(x) {
 			X.im[i] = X.im[j];
 			X.im[j] = Xi;
 		}
-		
+
 		var k = m;
 		while (k <= j) {
 			j -= k;
@@ -13539,7 +13539,7 @@ function fft(x) {
 		}
 		j += k;
 	}
-	
+
 	// FFT:
 	var l2 = 1;
 	var c = new Complex(-1,0);
@@ -13558,7 +13558,7 @@ function fft(x) {
 
 		        X.re[i1] = X.re[i] - t1re;
 		        X.im[i1] = X.im[i] - t1im;
-		        	        
+
 		        X.re[i] += t1re;
 		        X.im[i] += t1im;
 	        }
@@ -13573,22 +13573,22 @@ function fft(x) {
 }
 /**
  * @param {ComplexVector}
- * @return {ComplexVector|Float64Array} 
+ * @return {ComplexVector|Float64Array}
  */
 function ifft(x) {
 	const n = x.length;
 	const s = Math.log2(n);
 	const m = n/2;
-	
+
 	if ( s % 1 != 0 ) {
 		error("ifft(x) only implemented for x.length = 2^m. Use idft(x) instead.");
 		return undefined;
 	}
-	
-	
+
+
 	var X = new ComplexVector(x,zeros(n));
-		
-	// bit reversal:	
+
+	// bit reversal:
 	var j = 0;
 	for (var i = 0; i < n-1 ; i++) {
 		if (i < j) {
@@ -13600,7 +13600,7 @@ function ifft(x) {
 			X.im[i] = X.im[j];
 			X.im[j] = Xi;
 		}
-		
+
 		var k = m;
 		while (k <= j) {
 			j -= k;
@@ -13608,7 +13608,7 @@ function ifft(x) {
 		}
 		j += k;
 	}
-	
+
 	// iFFT:
 	var l2 = 1;
 	var c = new Complex(-1,0);
@@ -13627,7 +13627,7 @@ function ifft(x) {
 
 		        X.re[i1] = X.re[i] - t1re;
 		        X.im[i1] = X.im[i] - t1im;
-		        	        
+
 		        X.re[i] += t1re;
 		        X.im[i] += t1im;
 	        }
@@ -13635,7 +13635,7 @@ function ifft(x) {
 			u = mulComplex(u, c);
 		}
 
-		c.im = Math.sqrt((1.0 - c.re) / 2.0);		
+		c.im = Math.sqrt((1.0 - c.re) / 2.0);
 		c.re = Math.sqrt((1.0 + c.re) / 2.0);
 	}
 	var isComplex = false;
@@ -13654,11 +13654,11 @@ function ifft(x) {
 function dft(x) {
 	// DFT of a real signal
 	if ( typeof(x) == "number")
-		return new Complex(x, 0); 
-	
+		return new Complex(x, 0);
+
 	const n = x.length;
-	if ( n == 1) 
-		return new Complex(x[0], 0); 
+	if ( n == 1)
+		return new Complex(x[0], 0);
 	else if ( Math.log2(n) % 1 == 0 )
 		return fft(x);
 	else {
@@ -13670,7 +13670,7 @@ function dft(x) {
 				// theta = -2 pi i * t / n;
 				X.re[i] += x[t] * Math.cos(theta);
 				X.im[i] += x[t] * Math.sin(theta);
-				theta += thet; 
+				theta += thet;
 			}
 			thet -= 2*Math.PI / n;
 		}
@@ -13678,7 +13678,7 @@ function dft(x) {
 	}
 }
 function idft(X) {
-	// Only recovers real part 
+	// Only recovers real part
 	/*
 importScripts("src/experimental/complex.js")
 t = 0:512
@@ -13686,20 +13686,20 @@ x = sin(t)
 X = dft(x)
 plot(modulus(X))
 s = idft(X)
-plot(s)	
+plot(s)
 	*/
 	if ( !(X instanceof ComplexVector) ) {
 		if ( X instanceof Complex)
-			return X.re;	
+			return X.re;
 		else if (typeof(X) == "number")
 			return X;
 		else if ( X instanceof Float64Array)
-			return idft(new ComplexVector(X, zeros(X.length), true)); 
+			return idft(new ComplexVector(X, zeros(X.length), true));
 		else
 			return undefined;
 	}
 	const n = X.length;
-	if ( n == 1) 
+	if ( n == 1)
 		return X.re[0];
 	else if ( Math.log2(n) % 1 == 0 )
 		return ifft(X);
@@ -13714,7 +13714,7 @@ plot(s)
 				// theta = 2 pi i * t / n;
 				re += X.re[i] * Math.cos(theta) - X.im[i] * Math.sin(theta);
 				// im += X[i].im * Math.sin(theta) + X[i].re * Math.cos(theta); // not used for real signals
-				theta += thet; 
+				theta += thet;
 			}
 			x[t] = re / n;
 			thet += 2*Math.PI / n;
@@ -13727,24 +13727,24 @@ function spectrum(x) {
 	if ( x instanceof Float64Array ) {
 		return absComplex(dft(x));
 	}
-	else 
+	else
 		return undefined;
 }
 /*
-	Library for plotting functions 
-	
-	You need to include 
-	
-		 <canvas id="plotcanvas" width="600" height="300" style="border: 1px solid black;">>   </canvas> 
-		 
-	
-	Usage:
-	
-		setScalePlot ( minX, maxX, Nsamples, scaleY)	// scaleY is a factor of scaleX
-		
-		plot( f [, color_index ] ) 
+	Library for plotting functions
 
-	To clear the plot: 
+	You need to include
+
+		 <canvas id="plotcanvas" width="600" height="300" style="border: 1px solid black;">>   </canvas>
+
+
+	Usage:
+
+		setScalePlot ( minX, maxX, Nsamples, scaleY)	// scaleY is a factor of scaleX
+
+		plot( f [, color_index ] )
+
+	To clear the plot:
 		clearPlot();
 */
 
@@ -13755,21 +13755,21 @@ function spectrum(x) {
 	Chrome : turn off hardware acceleration to get mousemove events!
 */
 
-/* Array.fill : 
+/* Array.fill :
 if (!Array.prototype.fill) {
   Array.prototype.fill = function(value) {
   	if (this == null) {
       throw new TypeError("this is null or not defined");
     }
-    if ( typeof( value ) == "object") 
+    if ( typeof( value ) == "object")
     	throw new TypeError("Array.fill:: the value is not valid => only simple values allowed");
-    
-    
+
+
     var O = Object(this);
     for ( var i= 0; i < this.length; i++) {
     	O[i] = eval(value);
     }
-    return O;	
+    return O;
   }
 
 }
@@ -13782,15 +13782,15 @@ if (!Array.prototype.fill) {
 // functions take lengths in % of width and height
 /////////////////////////////
 function Diagram(canvasId) {
-	if(typeof(canvasId) === 'undefined' ) 
+	if(typeof(canvasId) === 'undefined' )
 		canvasId = "diagram";
 
-	this.canvasId = canvasId; 
-		
+	this.canvasId = canvasId;
+
 	this.shapes = new Array();
 	this.selectedShape = -1; // for mousemove
 	this.selectedShapes = new Array();	// for user
-	
+
 	this.mousexprev = -1;
 	this.mouseyprev = -1;
 
@@ -13810,10 +13810,10 @@ Diagram.prototype.rect = function (x,y,w, h, color, txt, txtcolor, opacity ) {
 		var txt = "";
 	if(typeof(color) === 'undefined')
 		var color = 1;
-	
-	
+
+
 	this.shapes.push( ["rect",  x, y, w, h, color, txt, txtcolor, opacity  ] ) ;
-	
+
 	this.redraw();
 }
 Diagram.prototype.circle = function (x,y,w, h, color, txt, txtcolor, opacity ) {
@@ -13825,10 +13825,10 @@ Diagram.prototype.circle = function (x,y,w, h, color, txt, txtcolor, opacity ) {
 		var txt = "";
 	if(typeof(color) === 'undefined')
 		var color = 1;
-	
-	
+
+
 	this.shapes.push( ["circle",  x, y, w, h, color, txt, txtcolor, opacity  ] ) ;
-	
+
 	this.redraw();
 }
 Diagram.prototype.image = function (x,y,w, h, imagename , txt, txtcolor, opacity) {
@@ -13838,24 +13838,24 @@ Diagram.prototype.image = function (x,y,w, h, imagename , txt, txtcolor, opacity
 		var txtcolor = 0;
 	if(typeof(txt) === 'undefined')
 		var txt = "";
-	
+
 	var t = this;
 	var imageIndex = this.shapes.length;
 	var image = new Image() ;
-	image.src = imagename;	
-	image.onload = function() {		
+	image.src = imagename;
+	image.onload = function() {
 		t.shapes[imageIndex][9] = true;
-		t.redraw(); 
+		t.redraw();
 	}
- 
-	this.shapes.push( ["image", x,y,w,h,image, txt, txtcolor, opacity, false ] ); 
+
+	this.shapes.push( ["image", x,y,w,h,image, txt, txtcolor, opacity, false ] );
 }
 
 Diagram.prototype.redraw = function () {
 	var canvas = document.getElementById(this.canvasId);
 	var ctx = canvas.getContext("2d");
 	ctx.clearRect(0,0,canvas.width, canvas.height);
-	
+
 	var n;
 	var shape;
 	var x;
@@ -13867,7 +13867,7 @@ Diagram.prototype.redraw = function () {
 	var txtcolor;
 	var opacity;
 	var res;
-	
+
 	// Draw shapes
 	for ( n = 0; n < this.shapes.length; n++) {
 		shape = this.shapes[n][0];
@@ -13879,12 +13879,12 @@ Diagram.prototype.redraw = function () {
 		txt = this.shapes[n][6];
 		txtcolor = this.shapes[n][7];
 		opacity = this.shapes[n][8];
-		
+
 		if ( shape == "rect" ) {
 
 			setcolortransparent(ctx, color, opacity);
-		
-			
+
+
 			var cornerSize = 15;
 			ctx.beginPath();
 			ctx.moveTo ( x * canvas.width , y * canvas.height + cornerSize);
@@ -13899,88 +13899,88 @@ Diagram.prototype.redraw = function () {
 
 			ctx.closePath();
 			ctx.fill();
-			
+
 			//ctx.fillRect( x * canvas.width, y * canvas.height, w * canvas.width, h * canvas.height ) ;
-	
-			
+
+
 			// deal with selection
 			if ( n == this.selectedShape  || this.selectedShapes.indexOf( n ) >= 0 ) {
 				setcolortransparent(ctx, 5, 0.3);
 				ctx.fillRect( (x-0.005) * canvas.width, (y-0.005) * canvas.height, (w+0.01) * canvas.width, (h+0.01) * canvas.height ) ;
 			}
-	
+
 		}
 		else if ( shape == "circle" ) {
 			setcolortransparent(ctx, color, opacity);
-		
+
 			ctx.beginPath();
 			ctx.moveTo ( (x+w/2) * canvas.width , y * canvas.height);
 			ctx.quadraticCurveTo( (x+w) * canvas.width, y * canvas.height, (x+w) * canvas.width, (y+h/2) * canvas.height );
 			ctx.quadraticCurveTo( (x+w) * canvas.width, (y+h) * canvas.height, (x+w/2) * canvas.width, (y+h) * canvas.height );
 			ctx.quadraticCurveTo( x * canvas.width, (y+h) * canvas.height, x * canvas.width, (y+h/2) * canvas.height );
 			ctx.quadraticCurveTo( x * canvas.width, y * canvas.height, (x+w/2) * canvas.width, y * canvas.height );
-			
+
 			ctx.fill();
-			
+
 			// deal with selection
 			if ( n == this.selectedShape  || this.selectedShapes.indexOf( n ) >= 0 ) {
 				setcolortransparent(ctx, 5, 0.3);
 				ctx.fillRect( (x-0.005) * canvas.width, (y-0.005) * canvas.height, (w+0.01) * canvas.width, (h+0.01) * canvas.height ) ;
 			}
-			
+
 		}
 				else if ( shape == "point" ) {
 			setcolortransparent(ctx, color, opacity);
-		
+
 			ctx.beginPath();
 			ctx.arc(x * canvas.width , y * canvas.height , w * canvas.width, 0, 2 * Math.PI , true);
 			ctx.closePath();
-				
+
 			ctx.fill();
-			
+
 			// deal with selection
 			if ( n == this.selectedShape  || this.selectedShapes.indexOf( n ) >= 0 ) {
 				setcolortransparent(ctx, 5, 0.3);
 				ctx.fillRect( (x-0.005) * canvas.width, (y-0.005) * canvas.height, (w+0.01) * canvas.width, (h+0.01) * canvas.height ) ;
 			}
-			
+
 		}
 		else if ( shape == "label" ) {
 			setcolortransparent(ctx, color, opacity);
 			var lbl = document.getElementById(this.shapes[n][9]);
 			lbl.style.left = x * canvas.width;
 			lbl.style.top = y * canvas.height;
-			lbl.style.visibility = "visible"; 
-			
+			lbl.style.visibility = "visible";
+
 		}
 		else if ( shape == "arrow" ) {
 			setcolortransparent(ctx, color, opacity);
-					
+
 			var arrowSize = 15;
-			
+
 			ctx.save();
 			ctx.translate(x * canvas.width , y * canvas.height);
 			ctx.rotate(Math.PI * (this.shapes[n][9] / 180) );
-			
+
 			ctx.beginPath();
 			ctx.moveTo ( 0,0);
 			ctx.lineTo ( (w) * canvas.width,0);
 			ctx.lineTo ( (w) * canvas.width, 0 - arrowSize*0.3);
 			ctx.lineTo ( (w) * canvas.width + arrowSize, ( h/2) * canvas.height);
-			ctx.lineTo ( (w) * canvas.width, (h) * canvas.height + arrowSize*0.3);			
+			ctx.lineTo ( (w) * canvas.width, (h) * canvas.height + arrowSize*0.3);
 			ctx.lineTo ( (w) * canvas.width , (h) * canvas.height);
 			ctx.lineTo ( 0 , (h) * canvas.height);
-			
+
 			ctx.closePath();
 			ctx.fill();
-			
+
 			ctx.restore();
-			
+
 		}
 		else if ( shape == "image" ) {
 			if ( this.shapes[n][9] ) {
 				// iamge is ready
-				ctx.drawImage(this.shapes[n][5], x*canvas.width, y*canvas.height, w * canvas.width, h * canvas.height);			
+				ctx.drawImage(this.shapes[n][5], x*canvas.width, y*canvas.height, w * canvas.width, h * canvas.height);
 				// deal with selection
 				if ( n == this.selectedShape || this.selectedShapes.indexOf( n ) >= 0 ) {
 					setcolortransparent(ctx, 3, 0.3);
@@ -13988,26 +13988,26 @@ Diagram.prototype.redraw = function () {
 				}
 			}
 		}
-		 
-		if( txt != "" ) { 
+
+		if( txt != "" ) {
 			var words = txt.split("*");
 			ctx.textAlign = "center";	// center of text appear at x position
 			var txtsize = Math.floor(50 * w) ;
 			ctx.font = txtsize + "pt sans-serif";
 			setcolor(ctx, txtcolor);
-		
+
 			if ( words.length == 1 ) {
 				ctx.fillText( txt, (x + w/2) * canvas.width , (y + h/2) * canvas.height ) ;
 			}
-			else { 
+			else {
 				for (var i = 0; i< words.length; i++) {
 					ctx.fillText( words[i], (x + w/2) * canvas.width , (y + h/2 ) * canvas.height - (words.length/2 - i - 0.5)* (1.5 * txtsize)) ;
 				}
 			}
 		}
-		
+
 	}
-	
+
 }
 
 Diagram.prototype.mouseselect = function (event) {
@@ -14015,25 +14015,25 @@ Diagram.prototype.mouseselect = function (event) {
 	var rect = canvas.getBoundingClientRect();
 	var x = event.clientX - rect.left;	// mouse coordinates relative to plot
 	var y = event.clientY - rect.top;
-	
+
 	if ( Math.abs(x - this.mousexprev) >= 1 || Math.abs(y - this.mouseyprev) >= 1 ) {
 		this.mousexprev = x;
 		this.mouseyprev = y;
-		
+
 		// Find shape... starting from last one added which is on top of others...
 		var i = this.shapes.length - 1;
 		while ( i >= 0 && this.isInShape(x,y,this.shapes[i] ) == false )
 			i--;
-	
+
 		if ( i >= 0 ) {
-			if ( i != this.selectedShape ) {	
-				// new hit on shape i 
+			if ( i != this.selectedShape ) {
+				// new hit on shape i
 				this.selectedShape = i;
 				this.redraw();
-		
+
 				this.onSelect();
 			}
-		}	
+		}
 		else if ( this.selectedShape >= 0 ) {
 			this.onDeselect();
 			this.selectedShape = -1;
@@ -14047,19 +14047,19 @@ Diagram.prototype.isInShape = function (x, y, shape) {
 	if(shape[0] == "rect") {
 		if ( x > shape[1] * canvas.width && x < ( shape[1] + shape[3] ) * canvas.width && y > shape[2] * canvas.height && y < (shape[2]+shape[4]) * canvas.height)
 			return true;
-		else 
+		else
 			return false;
 	}
 	else if ( shape[0] == "circle" ) {
 		if ( x > shape[1] * canvas.width && x < ( shape[1] + shape[3] ) * canvas.width && y > shape[2] * canvas.height && y < (shape[2]+shape[4]) * canvas.height)
 			return true;
-		else 
+		else
 			return false;
 	}
 	else if ( shape[0] == "arrow" ) {
 		return false;
 	}
-	else 
+	else
 		return false;
 }
 
@@ -14074,14 +14074,14 @@ Diagram.prototype.onDeselect = function () {
 Diagram.prototype.select = function ( n ) {
 	if ( typeof(n) == "number" ) {
 		if ( this.selectedShapes.indexOf( n ) < 0 )  {
-			this.selectedShapes.push ( n );	
+			this.selectedShapes.push ( n );
 			this.redraw();
 		}
 	}
 	else {
 		for ( var i=0; i < n.length; i++ ) {
 			if ( this.selectedShapes.indexOf( n[i] ) < 0 )  {
-				this.selectedShapes.push ( n[i] );					
+				this.selectedShapes.push ( n[i] );
 			}
 		}
 		this.redraw();
@@ -14091,7 +14091,7 @@ Diagram.prototype.deselect = function ( n ) {
 	if ( typeof(n) == "number" ) {
 		var idx = this.selectedShapes.indexOf( n );
 		if ( idx >= 0 ) {
-			this.selectedShapes.splice ( idx , 1 );	
+			this.selectedShapes.splice ( idx , 1 );
 			this.redraw();
 		}
 	}
@@ -14100,7 +14100,7 @@ Diagram.prototype.deselect = function ( n ) {
 		for ( var i=0; i < n.length; i++ ) {
 			idx = this.selectedShapes.indexOf( n[i] );
 			if ( idx >= 0 ) {
-				this.selectedShapes.splice ( idx , 1 );	
+				this.selectedShapes.splice ( idx , 1 );
 			}
 		}
 		this.redraw();
@@ -14115,30 +14115,30 @@ Diagram.prototype.deselectall = function ( ) {
 	while (this.selectedShapes.length > 0)
 		this.selectedShapes.pop();
 	this.redraw();
-	
+
 }
 
 ////////////////////////////
 // Define Object class "Plot" to be assigned to a canvas
 /////////////////////////////
 function Plot(canvasId) {
-	if(typeof(canvasId) === 'undefined' ) 
+	if(typeof(canvasId) === 'undefined' )
 		canvasId = "plotcanvas";
 
-	this.canvasId = canvasId; 
-		
+	this.canvasId = canvasId;
+
 	this.minX = 0;
 	this.maxX = 10;
 	this.Nsamples = 1000;
 	this.scaleX = 1;
 	this.scaleY = 1;
 	this.minY = 0;
-	this.maxY = 1.5;	
-	 
+	this.maxY = 1.5;
+
 	this.fcts = new Array();
 	this.lines= new Array();
 	this.areas= new Array();
-	this.points= new Array(); 	
+	this.points= new Array();
 	this.paths= new Array();
 
 	this.legend = "topright";
@@ -14147,10 +14147,10 @@ function Plot(canvasId) {
 	this.buffer = document.createElement('canvas');
 	this.buffer.width  = canvas.width;
 	this.buffer.height = canvas.height;
-	
+
 	this.viewX = 0;
 	this.viewY = 0;
-	
+
 	////// Cross browser support ////
 	//var ctx = document.getElementById(this.canvasId).getContext("2d");
 	var ctx = this.buffer.getContext("2d");
@@ -14167,46 +14167,46 @@ Plot.prototype.addPoint = function(x,y,color_idx,radius, opacity) {
 		radius = 5;
 	if(typeof(opacity) === 'undefined')
 		opacity = 1.1;
-		
+
 	this.points.push([x,y,color_idx,radius,opacity] );
 }
 
 Plot.prototype.plotAxis = function() {
 	//var canvas = document.getElementById(this.canvasId);
-	var canvas = this.buffer; 
+	var canvas = this.buffer;
   if (canvas.getContext) {
 	var ctx = canvas.getContext("2d");
 	ctx.fillStyle="white";
 	ctx.fillRect (0,0 , canvas.width, canvas.height);
-	ctx.strokeStyle = "black";			
-	
+	ctx.strokeStyle = "black";
+
 	if (this.minY < 0 && this.maxY > 0) {
-		// X-axis		
+		// X-axis
 		var y0 = canvas.height - (-this.minY * this.scaleY);
 		ctx.beginPath();
 		ctx.moveTo(0, y0);
 		ctx.lineTo(canvas.width, y0 );
 		ctx.closePath();
 		ctx.stroke();
-		
-		// ticks		 
+
+		// ticks
 		var tickspace = Math.ceil( (this.maxX - this.minX) / 10);
 		for (var x = -tickspace; x>this.minX; x -= tickspace ) {
 			var xx = (x - this.minX) * this.scaleX ;
 			ctx.beginPath();
 			ctx.moveTo(xx,y0 - 5 );
 			ctx.lineTo(xx, y0 + 5 );
-			ctx.stroke();		
+			ctx.stroke();
 		}
-		for (var x = tickspace; x < this.maxX ; x+=tickspace ) {		
+		for (var x = tickspace; x < this.maxX ; x+=tickspace ) {
 			var xx = (x - this.minX) * this.scaleX ;
 			ctx.beginPath();
 			ctx.moveTo(xx,y0 - 5 );
 			ctx.lineTo(xx, y0 + 5 );
-			ctx.stroke();		
+			ctx.stroke();
 		}
 	}
-	
+
 	if (this.minX < 0 && this.maxX > 0) {
 		// Y-axis
 		var x0 = -this.minX * this.scaleX;
@@ -14215,30 +14215,30 @@ Plot.prototype.plotAxis = function() {
 		ctx.lineTo(x0 ,canvas.height);
 		ctx.closePath();
 		ctx.stroke();
-		
-		// ticks		 
+
+		// ticks
 		var tickspace = Math.ceil( (this.maxY - this.minY) / 10);
 		for (var y = -tickspace; y>this.minY; y -= tickspace ) {
 			var yy = (y - this.minY) * this.scaleY ;
 			ctx.beginPath();
 			ctx.moveTo(x0 -5 ,canvas.height-yy );
 			ctx.lineTo(x0 + 5, canvas.height-yy );
-			ctx.stroke();		
+			ctx.stroke();
 		}
 		for (var y = tickspace; y<this.maxY; y += tickspace ) {
 			var yy = (y - this.minY) * this.scaleY ;
 			ctx.beginPath();
 			ctx.moveTo(x0 -5 , canvas.height-yy );
 			ctx.lineTo(x0 + 5, canvas.height- yy );
-			ctx.stroke();	
-		}		
+			ctx.stroke();
+		}
 	}
   }
 }
 
 
 Plot.prototype.replot = function (  ) {
-	
+
 	var x1;
 	var x2;
 	var y1;
@@ -14247,7 +14247,7 @@ Plot.prototype.replot = function (  ) {
 	var radius;
 	var x;
 	var y;
-	
+
 	var f;
 	var legend;
 	var color_idx;
@@ -14256,26 +14256,26 @@ Plot.prototype.replot = function (  ) {
 	var nlegend = 0;
 	var res;
 
-	var canvas = this.buffer;  
+	var canvas = this.buffer;
 //	var canvas=document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
+
 		this.plotAxis();
-		
+
 		// use shadow but not on axis
 		ctx.shadowColor = '#999';
       	ctx.shadowBlur = 3;
       	ctx.shadowOffsetX = 3;
       	ctx.shadowOffsetY = 3;
-      
-		
+
+
 		const minX = this.minX;
-		const minY = this.minY;		
+		const minY = this.minY;
 		const scaleX = this.scaleX;
 		const scaleY = this.scaleY;
 		const height = canvas.height;
-		
+
 		var xplot = function (x) {
 			return (x-minX ) * scaleX ;
 		}
@@ -14284,7 +14284,7 @@ Plot.prototype.replot = function (  ) {
 		}
 
 
-	
+
 		// Plot areas
 		for (var n=0; n < this.areas.length; n++)	{
 			res = this.areas[n];
@@ -14294,7 +14294,7 @@ Plot.prototype.replot = function (  ) {
 			y2 = res[3];
 			color_idx = res[4];
 			opacity = res[5];
-		
+
 			if(color_idx == -1) {
 				color_idx = n+1;
 			}
@@ -14312,15 +14312,15 @@ Plot.prototype.replot = function (  ) {
 		var cp = Infinity;
 		for (var n=0; n < this.lines.length; n++)	{
 			res = this.lines[n];
-			
+
 			if ( ( res[0] >= this.minX && res[0] <= this.maxX && res[1] >= this.minY && res[1] <= this.maxY ) //start in plot
 				|| (( res[2] >= this.minX && res[2] <= this.maxX && res[3] >= this.minY && res[3] <= this.maxY ))  // end in plot
 				|| ( res[0] < this.minX && res[2] > this.maxX && ((res[1] >= this.minY && res[1] <= this.maxY) || (res[3] >= this.minY && res[3] <= this.maxY))  )	// overflow on x axis but y inside plot
-				|| ( res[2] < this.minX && 0 > this.maxX && ((res[1] >= this.minY && res[1] <= this.maxY) || (res[3] >= this.minY && res[3] <= this.maxY))  )	
-				|| ( res[1] < this.minY && res[3] > this.maxY && ((res[0] >= this.minX && res[0] <= this.maxY) || (res[2] >= this.minX && res[2] <= this.maxX))  )// y-axis	
-				|| ( res[3] < this.minY && res[1] > this.maxY && ((res[0] >= this.minX && res[0] <= this.maxX) || (res[2] >= this.minX && res[2] <= this.maxX))  )			
+				|| ( res[2] < this.minX && 0 > this.maxX && ((res[1] >= this.minY && res[1] <= this.maxY) || (res[3] >= this.minY && res[3] <= this.maxY))  )
+				|| ( res[1] < this.minY && res[3] > this.maxY && ((res[0] >= this.minX && res[0] <= this.maxY) || (res[2] >= this.minX && res[2] <= this.maxX))  )// y-axis
+				|| ( res[3] < this.minY && res[1] > this.maxY && ((res[0] >= this.minX && res[0] <= this.maxX) || (res[2] >= this.minX && res[2] <= this.maxX))  )
 				) {
-			
+
 				x1 = xplot(res[0]);
 				y1 = yplot(res[1]);
 				x2 = xplot(res[2]);
@@ -14329,64 +14329,64 @@ Plot.prototype.replot = function (  ) {
 				if ( Math.abs(x2-x1)>1 || Math.abs(y2-y1) > 1 )  {
 					color_idx = res[4];
 					dashed = res[5];
-	
+
 					if(color_idx == -1) {
 						color_idx = n+1;
 					}
-					
+
 					if ( color_idx != cp )
 						setcolor(ctx, color_idx);
-		
+
 					if (dashed) {
 						ctx.setLineDash([5]);
 						ctx.lineWidth="1";
 					}
-					
-					ctx.beginPath();		
+
+					ctx.beginPath();
 					ctx.moveTo(x1 , y1);
 					ctx.lineTo(x2 ,y2);
 					ctx.stroke();
-					
+
 					if (dashed) {
 						ctx.setLineDash([1, 0]);
 						ctx.lineWidth="3";
 					}
-					
+
 					cp = color_idx;
 				}
 			}
-		}	
+		}
 		ctx.lineWidth="1";
-		
-		// Plot points 
+
+		// Plot points
 		var xp = Infinity;
 		var yp = Infinity;
 		var cp = Infinity;
 		var op = -1;
 		for (var n=0; n < this.points.length; n++)	{
 			res = this.points[n];
-			
+
 			if ( res[0] >= this.minX && res[0] <= this.maxX && res[1] >= this.minY && res[1] <= this.maxY) {
-				
+
 				x = xplot(res[0]);
 				y = yplot(res[1]);
 				if ( Math.abs(x-xp)>1 || Math.abs(y-yp) > 1  ) {
 					color_idx = res[2];
 					radius = res[3];
 					opacity = res[4];
-	
+
 					if ( op != opacity || cp != color_idx) {
-						if ( opacity > 1.0 ) 
+						if ( opacity > 1.0 )
 							setcolor(ctx, color_idx);
-						else 	
+						else
 							setcolortransparent(ctx, color_idx, opacity);
 					}
-					
+
 					ctx.beginPath();
 					ctx.arc( x , y , radius, 0, 2 * Math.PI , true);
 					ctx.closePath();
 					ctx.fill();
-				
+
 					xp = x;
 					yp = y;
 					cp = color_idx;
@@ -14394,7 +14394,7 @@ Plot.prototype.replot = function (  ) {
 				}
 			}
 		}
-	
+
 		// Plot paths (sets of point-lines with all the same style, e.g.,  for lalolab functions)
 		for (var n=0; n < this.paths.length; n++) {
 			res = this.paths[n];
@@ -14403,11 +14403,11 @@ Plot.prototype.replot = function (  ) {
 			opacity = res[3];
 			dashed = res[4];
 			var marker = (opacity > 0 );
-			if ( opacity > 1.0 ) 
+			if ( opacity > 1.0 )
 				setcolor(ctx, color_idx);
-			else 	
+			else
 				setcolortransparent(ctx, color_idx, opacity);
-		
+
 			if (dashed) {
 				ctx.setLineDash([5]);
 				ctx.lineWidth="1";
@@ -14420,27 +14420,27 @@ Plot.prototype.replot = function (  ) {
 			x = xplot(res[0][0][0]);
 			y = yplot(res[0][0][1]);
 
-			ctx.arc( x , y , radius, 0, 2 * Math.PI , true);	
-			ctx.moveTo(x,y);				
+			ctx.arc( x , y , radius, 0, 2 * Math.PI , true);
+			ctx.moveTo(x,y);
 
 			for ( var i=1; i < res[0].length; i++) {
 				x = xplot(res[0][i][0]);
 				y = yplot(res[0][i][1]);
-		
+
 				if ( x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height ) {
 					if( marker )
-						ctx.arc( x , y , radius, 0, 2 * Math.PI , true);	
-					ctx.lineTo(x,y);				
+						ctx.arc( x , y , radius, 0, 2 * Math.PI , true);
+					ctx.lineTo(x,y);
 				}
 			}
 			//ctx.closePath();
 			ctx.stroke();
 			//ctx.fill();
-			
+
 			ctx.setLineDash([1, 0]);
 			ctx.lineWidth="1";
 		}
-		
+
 			// Plot functions
 		for(var n=0; n < this.fcts.length; n++)	{
 
@@ -14450,12 +14450,12 @@ Plot.prototype.replot = function (  ) {
 			color_idx = res[2];
 			dashed = res[3];
 			fillareaTo = res[4];
-		
-	
+
+
 			if(color_idx == -1) {
 				color_idx = n+1;
 			}
-		
+
 			setcolor(ctx, color_idx);
 
 			if (dashed) {
@@ -14465,9 +14465,9 @@ Plot.prototype.replot = function (  ) {
 			else{
 				ctx.lineWidth="3";
 			}
-	
 
-		
+
+
 			if ( fillareaTo !== false ) {
 				ctx.beginPath();
 				ctx.moveTo(canvas.width, canvas.height - (fillareaTo  - this.minY)* this.scaleY);
@@ -14475,46 +14475,46 @@ Plot.prototype.replot = function (  ) {
 				//ctx.moveTo(0,canvas.height/2);
 			}
 			else {
-				ctx.moveTo(0,canvas.height/2);		
+				ctx.moveTo(0,canvas.height/2);
 				ctx.beginPath();
 			}
 
 			for(var x=this.minX; x < this.maxX; x += (this.maxX-this.minX) / this.Nsamples ) {
 				var y = f(x);
 				var yp = canvas.height - ( y - this.minY) * this.scaleY ;
-				if (yp >= 0 && yp <= canvas.height) 
+				if (yp >= 0 && yp <= canvas.height)
 					ctx.lineTo(xplot(x) , yp );
 				else
 					ctx.moveTo(xplot(x) , yp);
-	
+
 			}
 			ctx.stroke();
 			if ( fillareaTo !== false ) {
 				ctx.closePath();
-				setcolortransparent(ctx, color_idx, 0.5); 
+				setcolortransparent(ctx, color_idx, 0.5);
 				ctx.fill();
 			}
 			ctx.setLineDash([1, 0]);
 			ctx.lineWidth="1";
-		
-			// Add legend: 
+
+			// Add legend:
 			if ( this.legend != "" && legend != "") {
-				setcolor(ctx, color_idx); 
-				if ( this.legend == "topright") 
+				setcolor(ctx, color_idx);
+				if ( this.legend == "topright")
 					ctx.strokeText(legend, canvas.width - 100, 20*(nlegend+1));
-				else if ( this.legend == "topleft") 
+				else if ( this.legend == "topleft")
 					ctx.strokeText(legend, 10, 20*(nlegend+1));
-				else if ( this.legend == "bottomright") 
+				else if ( this.legend == "bottomright")
 					ctx.strokeText(legend, canvas.width - 100, canvas.height - 20*(nlegend+1));
-				else if ( this.legend == "bottomleft") 
+				else if ( this.legend == "bottomleft")
 					ctx.strokeText(legend,10, canvas.height - 20*(nlegend+1));
-			
+
 				nlegend++;
 			}
 
 		}
 	}
-	
+
 	// Copy buffer to viewport
 	var viewcanvas = document.getElementById(this.canvasId);
 	var ctx = viewcanvas.getContext("2d");
@@ -14525,16 +14525,16 @@ Plot.prototype.replot = function (  ) {
 Plot.prototype.plot = function ( f, legend, color_idx, dashed , fillareaTo ) {
 	if (typeof(fillareaTo) === 'undefined')
 		fillareaTo = false;
- 
+
 	if (typeof(dashed) === 'undefined')
-		dashed = false; 
+		dashed = false;
 	if (typeof(color_idx) === 'undefined')
-		color_idx = -1; 
+		color_idx = -1;
 	if (typeof(legend) === 'undefined') {
 		if (dashed)
 			legend = "";
 		else
-			legend = f.name; 
+			legend = f.name;
 	}
 	this.fcts.push([f, legend, color_idx,dashed, fillareaTo]);
 	this.replot();
@@ -14543,25 +14543,25 @@ Plot.prototype.plot = function ( f, legend, color_idx, dashed , fillareaTo ) {
 
 Plot.prototype.plot_line = function ( x1,y1,x2,y2, color_idx, dashed  ) {
 	if (typeof(dashed) === 'undefined')
-		dashed = false; 
+		dashed = false;
 	if (typeof(color_idx) === 'undefined')
-		color_idx = -1; 
+		color_idx = -1;
 	this.lines.push([x1,y1,x2,y2, color_idx,dashed]);
 	//this.replot();
 }
 Plot.prototype.plot_area = function ( x1,y1,x2,y2, color_idx, opacity  ) {
 	if (typeof(opacity) === 'undefined')
-		opacity = 1.0; 
+		opacity = 1.0;
 	if (typeof(color_idx) === 'undefined')
-		color_idx = -1; 
+		color_idx = -1;
 	this.areas.push([x1,y1,x2,y2, color_idx,opacity]);
 	this.replot();
 }
 Plot.prototype.plot_path = function ( x,y, color_idx, radius, opacity, dashed  ) {
 	if (typeof(dashed) === 'undefined')
-		var dashed = false; 
+		var dashed = false;
 	if (typeof(color_idx) === 'undefined')
-		var color_idx = -1; 
+		var color_idx = -1;
 	if (typeof(opacity) === 'undefined')
 		var opacity = 1;
 	if (typeof(radius) === 'undefined')
@@ -14574,18 +14574,18 @@ Plot.prototype.clear = function () {
  var canvas = document.getElementById(this.canvasId);
   if (canvas.getContext) {
 	var ctx = canvas.getContext("2d");
-	
+
 	this.plotAxis();
-	
+
 	// Empty list of functions to plot:
 	while(this.fcts.length > 0) {
     	this.fcts.pop();
 	}
-	
+
 	while(this.lines.length > 0) {
     	this.lines.pop();
 	}
-	
+
 	while(this.areas.length > 0) {
     	this.areas.pop();
 	}
@@ -14599,20 +14599,20 @@ Plot.prototype.setScalePlot = function  ( minX, maxX, Nsamples, scaleY) {
 	this.minX = minX;
 	this.maxX = maxX;
 	this.Nsamples = Nsamples;
-	
+
 	var canvas = document.getElementById(this.canvasId);
-	this.scaleX = canvas.width / (maxX - minX) ; 
+	this.scaleX = canvas.width / (maxX - minX) ;
 	this.scaleY = this.scaleX * scaleY;
-		
+
 	this.maxY = (canvas.height/2) / this.scaleY ;
-	this.minY = -this.maxY;// centered view 
-	
+	this.minY = -this.maxY;// centered view
+
 	//this.clear();
-	
+
 	this.originalminX = this.minX;
 	this.originalmaxX = this.maxX;
 	this.originalminY = this.minY;
-	this.originalmaxY = this.maxY;	
+	this.originalmaxY = this.maxY;
 }
 
 Plot.prototype.view = function  ( minX, maxX, minY, maxY) {
@@ -14620,11 +14620,11 @@ Plot.prototype.view = function  ( minX, maxX, minY, maxY) {
 	this.maxX = maxX;
 	this.minY = minY;
 	this.maxY = maxY;
-	
+
 	var canvas = this.buffer;
-	this.scaleX = canvas.width / (maxX - minX) ; 
+	this.scaleX = canvas.width / (maxX - minX) ;
 	this.scaleY = canvas.height / (maxY - minY) ;
-	this.replot(); 	
+	this.replot();
 }
 
 Plot.prototype.translate = function  ( dx, dy ) {
@@ -14632,10 +14632,10 @@ Plot.prototype.translate = function  ( dx, dy ) {
 	var newX = this.viewX - dx;
 	var newY = this.viewY - dy;
 	if ( newX >= 0 && newX < this.buffer.width - canvas.width && newY >= 0 && newY < this.buffer.height - canvas.height ) {
-	
+
 		this.viewX = newX;
 		this.viewY = newY;
-	
+
 		var ctx = canvas.getContext("2d");
 		ctx.clearRect (0, 0 , canvas.width, canvas.height);
 		ctx.drawImage(this.buffer, this.viewX, this.viewY, canvas.width,canvas.height,0,0, canvas.width,canvas.height);
@@ -14644,31 +14644,31 @@ Plot.prototype.translate = function  ( dx, dy ) {
 Plot.prototype.zoom = function  ( zx, zy, x, y) {
 	var viewcanvas = document.getElementById(this.canvasId);
 	var canvas = this.buffer;
-	
+
 	if ( zy > 0 )
-		canvas.height *= zy; 
+		canvas.height *= zy;
 	else
-		canvas.height = viewcanvas.height; 
+		canvas.height = viewcanvas.height;
 	if ( zx > 0 )
 		canvas.width *= zx;
 	else
-		canvas.width = viewcanvas.width; 
-		
-	// do not zoom out further than original 
+		canvas.width = viewcanvas.width;
+
+	// do not zoom out further than original
 	if ( canvas.width < viewcanvas.width )
-		canvas.width = viewcanvas.width; 
+		canvas.width = viewcanvas.width;
 	if( canvas.height < viewcanvas.height )
 		canvas.height = viewcanvas.height;
 
 	// do not zoo in too much
 	if ( canvas.width > 10000)
-		canvas.width = 10000; 
+		canvas.width = 10000;
 	if( canvas.height > 10000 )
 		canvas.height > 10000;
-	
+
 	var sx = this.scaleX;
 	var sy = this.scaleY;
-	this.scaleX = canvas.width / (this.maxX - this.minX) ; 
+	this.scaleX = canvas.width / (this.maxX - this.minX) ;
 	this.scaleY = canvas.height / (this.maxY - this.minY) ;
 
 	// zoom center is (x,y)
@@ -14676,38 +14676,38 @@ Plot.prototype.zoom = function  ( zx, zy, x, y) {
 		var x = viewcanvas.width/2;
 		var y = viewcanvas.height/2;// by default viewport center is fixed during zoom
 	}
-	
+
 	this.viewX = ((this.viewX + x) * this.scaleX / sx) - x;
-	this.viewY = ((this.viewY + y) * this.scaleY / sy) - y;	
+	this.viewY = ((this.viewY + y) * this.scaleY / sy) - y;
 	if ( this.viewX < 0 )
 		this.viewX = 0;
 	if (this.viewY < 0 )
-		this.viewY = 0; 
-	if ( this.viewX > canvas.width - viewcanvas.width ) 
+		this.viewY = 0;
+	if ( this.viewX > canvas.width - viewcanvas.width )
 		this.viewX =  canvas.width - viewcanvas.width ;
-	if ( this.viewY > canvas.height - viewcanvas.height ) 
+	if ( this.viewY > canvas.height - viewcanvas.height )
 		this.viewY =  canvas.height - viewcanvas.height ;
 
 	if( sx != this.scaleX || sy != this.scaleY )
-		this.replot(); 
+		this.replot();
 }
 Plot.prototype.resetzoom = function  ( ) {
 	var viewcanvas = document.getElementById(this.canvasId);
 	var canvas = this.buffer;
 	this.viewX = 0;
 	this.viewY = 0;
-	canvas.height = viewcanvas.height; 
-	canvas.width = viewcanvas.width; 
-	this.scaleX = viewcanvas.width / (this.maxX - this.minX) ; 
+	canvas.height = viewcanvas.height;
+	canvas.width = viewcanvas.width;
+	this.scaleX = viewcanvas.width / (this.maxX - this.minX) ;
 	this.scaleY = viewcanvas.height / (this.maxY - this.minY) ;
-	this.replot(); 	
+	this.replot();
 }
 
 Plot.prototype.pick_point = function(e) {
 	if(e.button == 0) {
-		e.preventDefault();	
+		e.preventDefault();
 		var canvas = document.getElementById(this.canvasId);
-	
+
 		var rect = canvas.getBoundingClientRect();
 
 		var xmouse = e.clientX - rect.left;	// mouse coordinates relative to plot
@@ -14715,10 +14715,10 @@ Plot.prototype.pick_point = function(e) {
 
 		var x = xmouse / this.scaleX + this.minX;
 		var y = (canvas.height  - ymouse ) / this.scaleY + this.minY;
-		
+
 		return [x,y];
 	}
-	else 
+	else
 		return false; // not correct button
 }
 
@@ -14726,35 +14726,35 @@ Plot.prototype.pick_point = function(e) {
 Plot.prototype.proximityX = function (x, x0, epsilon) {
 	if (typeof(epsilon) === 'undefined')
 		epsilon = (this.maxX - this.minX) / 20;
-		
+
 	return ( Math.abs(x - x0) < epsilon ) ;
 }
 
 
 Plot.prototype.plotmathjax = function(stringindex, x, y) {
-			
+
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
 
 		var label = document.getElementById("jaxstring"+stringindex);
 		label.style.top = canvas.height/2 - ( y * this.scaleY ) + canvas.offsetTop;
-		label.style.left = (x - this.minX) * this.scaleX + canvas.offsetLeft;	
-		label.style.visibility = "visible"; 
+		label.style.left = (x - this.minX) * this.scaleX + canvas.offsetLeft;
+		label.style.visibility = "visible";
 	}
 }
-	 
+
 Plot.prototype.jpeg = function() {
 	var canvas = document.getElementById(this.canvasId);
-	
+
 	var image = canvas.toDataURL("image/jpeg");
-	
+
 	document.location.href = image.replace("image/jpeg", "image/octet-stream");
 }
 
 
 Plot.prototype.zoomoriginal = function () {
-	this.view(this.originalminX,this.originalmaxX,this.originalminY,this.originalmaxY);	
+	this.view(this.originalminX,this.originalmaxX,this.originalminY,this.originalmaxY);
 }
 
 Plot.prototype.mousestartmove = function ( e ) {
@@ -14777,23 +14777,23 @@ Plot.prototype.mouseposition = function ( e ) {
 	var canvas = document.getElementById(this.canvasId);
 	var rect = canvas.getBoundingClientRect();
 
-	var xmouse = e.clientX - rect.left;	
+	var xmouse = e.clientX - rect.left;
 	var ymouse = e.clientY - rect.top;
 
 	if ( this.MOVING ) {
 		var dx = this.xprev - xmouse ;
 		var dy = ymouse - this.yprev;
-		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {			
+		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {
 			//this.view(this.minX+dx/this.scaleX,this.maxX+dx/this.scaleX, this.minY+dy/this.scaleY, this.maxY+dy/this.scaleY);
 			this.translate(dx, dy);
 		}
 		this.xprev = xmouse;
-		this.yprev = ymouse;		
+		this.yprev = ymouse;
 	}
-	else {		
+	else {
 		var x = xmouse / this.scaleX + this.minX;
-		var y = (canvas.height  - ymouse ) / this.scaleY + this.minY;	
-		return "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);	
+		var y = (canvas.height  - ymouse ) / this.scaleY + this.minY;
+		return "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);
 	}
 }
 
@@ -14803,31 +14803,31 @@ Plot.prototype.mouseposition = function ( e ) {
 // Define Object class "ColorPlot" for (x,y) plots with z giving the point color
 /////////////////////////////
 function ColorPlot(canvasId) {
-	if(typeof(canvasId) === 'undefined' ) 
+	if(typeof(canvasId) === 'undefined' )
 		canvasId = "plotcanvas";
 
-	this.canvasId = canvasId; 
-		
+	this.canvasId = canvasId;
+
 	this.minX = 0;
 	this.maxX = 10;
 	this.scaleX = 1;
 	this.scaleY = 1;
 	this.minY = 0;
-	this.maxY = 1.5;	
+	this.maxY = 1.5;
 	this.minZ = 0;
 	this.maxZ = 1;
-		 
+
 	this.x = new Array();
 	this.y= new Array();
 	this.z= new Array();
-	
+
 	this.cmap = this.colormap();
-	
+
 	var canvas = document.getElementById(this.canvasId);
 	this.buffer = document.createElement('canvas');
 	this.buffer.width  = canvas.width;
 	this.buffer.height = canvas.height;
-	
+
 	this.viewX = 0;
 	this.viewY = 0;
 
@@ -14835,7 +14835,7 @@ function ColorPlot(canvasId) {
 
 ColorPlot.prototype.colormap = function (cmapname) {
 	switch(cmapname) {
-	
+
 	default:
     var cmap = [
 		[0, 0, 143],
@@ -14913,40 +14913,40 @@ ColorPlot.prototype.addPoint = function(x,y,z) {
 }
 
 ColorPlot.prototype.plotAxis = function() {
-	var canvas = this.buffer;	
+	var canvas = this.buffer;
   if (canvas.getContext) {
 	var ctx = canvas.getContext("2d");
 	ctx.fillStyle="white";
 	ctx.fillRect (0,0 , canvas.width, canvas.height);
-	ctx.strokeStyle = "black";			
-	
+	ctx.strokeStyle = "black";
+
 	if (this.minY < 0 && this.maxY > 0) {
-		// X-axis		
+		// X-axis
 		var y0 = canvas.height - (-this.minY * this.scaleY);
 		ctx.beginPath();
 		ctx.moveTo(0, y0);
 		ctx.lineTo(canvas.width, y0 );
 		ctx.closePath();
 		ctx.stroke();
-		
-		// ticks		
+
+		// ticks
 		var tickspace = Math.ceil( (this.maxX - this.minX) / 10);
 		for (var x = -tickspace; x>this.minX; x -= tickspace ) {
 			var xx = (x - this.minX) * this.scaleX ;
 			ctx.beginPath();
 			ctx.moveTo(xx,y0 - 5 );
 			ctx.lineTo(xx, y0 + 5 );
-			ctx.stroke();		
+			ctx.stroke();
 		}
-		for (var x = tickspace; x < this.maxX ; x+=tickspace ) {		
+		for (var x = tickspace; x < this.maxX ; x+=tickspace ) {
 			var xx = (x - this.minX) * this.scaleX ;
 			ctx.beginPath();
 			ctx.moveTo(xx,y0 - 5 );
 			ctx.lineTo(xx, y0 + 5 );
-			ctx.stroke();		
+			ctx.stroke();
 		}
 	}
-	
+
 	if (this.minX < 0 && this.maxX > 0) {
 		// Y-axis
 		var x0 = -this.minX * this.scaleX;
@@ -14955,14 +14955,14 @@ ColorPlot.prototype.plotAxis = function() {
 		ctx.lineTo(x0 ,canvas.height);
 		ctx.closePath();
 		ctx.stroke();
-		
+
 		// ticks
 		for (var y = Math.ceil(this.minY); y < this.maxY; y++ ) {
 			var yy = canvas.height - (y -this.minY) * this.scaleY;
 			ctx.beginPath();
 			ctx.moveTo(x0-5,yy);
 			ctx.lineTo(x0+5,yy);
-			ctx.stroke();		
+			ctx.stroke();
 		}
 	}
   }
@@ -14975,21 +14975,21 @@ ColorPlot.prototype.replot = function (  ) {
 		var ctx = canvas.getContext("2d");
 
 		this.plotAxis();
-	  
+
 	  	// use shadow but not on axis
 		ctx.shadowColor = '#999';
       	ctx.shadowBlur = 3;
       	ctx.shadowOffsetX = 3;
       	ctx.shadowOffsetY = 3;
-      
-		// Plot points 
+
+		// Plot points
 		var xp = Infinity;
 		var yp = Infinity;
-		var zp = Infinity;		
+		var zp = Infinity;
 		for (var i=0; i < this.x.length; i++)	{
-	
+
 			if ( this.x[i] >= this.minX && this.x[i] <= this.maxX && this.y[i] >= this.minY && this.y[i] <= this.maxY) {
-				
+
 				x = (this.x[i]-this.minX ) * this.scaleX ;
 				y =  canvas.height - (this.y[i] - this.minY) * this.scaleY ;
 				z = Math.floor( (this.z[i] - this.minZ) * this.scaleZ);
@@ -15000,22 +15000,22 @@ ColorPlot.prototype.replot = function (  ) {
 				if ( Math.abs(x-xp)>1 || Math.abs(y-yp) > 1 || z != zp ) {
 
 					if ( z != zp )
-						ctx.fillStyle = "rgb(" + this.cmap[z][0] + "," + this.cmap[z][1] + "," + this.cmap[z][2]+ ")";			
+						ctx.fillStyle = "rgb(" + this.cmap[z][0] + "," + this.cmap[z][1] + "," + this.cmap[z][2]+ ")";
 
 					ctx.beginPath();
 					ctx.arc( x , y , 5, 0, 2 * Math.PI , true);
 					ctx.closePath();
-					ctx.fill();		
-			
-					zp = z;		
+					ctx.fill();
+
+					zp = z;
 					xp = x;
 					yp = y;
 				}
 			}
 		}
-	
+
 	}
-	
+
 	// Copy buffer to viewport
 	var viewcanvas = document.getElementById(this.canvasId);
 	var ctx = viewcanvas.getContext("2d");
@@ -15036,18 +15036,18 @@ ColorPlot.prototype.setScale = function  ( minX, maxX, minY, maxY, minZ, maxZ) {
 	this.maxY = maxY;
 	this.minZ = minZ;
 	this.maxZ = maxZ;
-	
+
 	var canvas = document.getElementById(this.canvasId);
-	this.scaleX = canvas.width / (maxX - minX) ; 
+	this.scaleX = canvas.width / (maxX - minX) ;
 	this.scaleY = canvas.height / (maxY - minY);
 	this.scaleZ = this.cmap.length / (maxZ - minZ) ;
-	
+
 	//this.clear();
-	
+
 	this.originalminX = this.minX;
 	this.originalmaxX = this.maxX;
 	this.originalminY = this.minY;
-	this.originalmaxY = this.maxY;	
+	this.originalmaxY = this.maxY;
 }
 
 ColorPlot.prototype.view = function  ( minX, maxX, minY, maxY) {
@@ -15055,11 +15055,11 @@ ColorPlot.prototype.view = function  ( minX, maxX, minY, maxY) {
 	this.maxX = maxX;
 	this.minY = minY;
 	this.maxY = maxY;
-	
+
 	var canvas = this.buffer;
-	this.scaleX = canvas.width / (maxX - minX) ; 
+	this.scaleX = canvas.width / (maxX - minX) ;
 	this.scaleY = canvas.height / (maxY - minY) ;
-	this.replot(); 	
+	this.replot();
 }
 
 ColorPlot.prototype.translate = function  ( dx, dy ) {
@@ -15067,10 +15067,10 @@ ColorPlot.prototype.translate = function  ( dx, dy ) {
 	var newX = this.viewX - dx;
 	var newY = this.viewY - dy;
 	if ( newX >= 0 && newX < this.buffer.width - canvas.width && newY >= 0 && newY < this.buffer.height - canvas.height ) {
-	
+
 		this.viewX = newX;
 		this.viewY = newY;
-	
+
 		var ctx = canvas.getContext("2d");
 		ctx.clearRect (0, 0 , canvas.width, canvas.height);
 		ctx.drawImage(this.buffer, this.viewX, this.viewY, canvas.width,canvas.height,0,0, canvas.width,canvas.height);
@@ -15079,31 +15079,31 @@ ColorPlot.prototype.translate = function  ( dx, dy ) {
 ColorPlot.prototype.zoom = function  ( zx, zy, x, y) {
 	var viewcanvas = document.getElementById(this.canvasId);
 	var canvas = this.buffer;
-	
+
 	if ( zy > 0 )
-		canvas.height *= zy; 
+		canvas.height *= zy;
 	else
-		canvas.height = viewcanvas.height; 
+		canvas.height = viewcanvas.height;
 	if ( zx > 0 )
 		canvas.width *= zx;
 	else
-		canvas.width = viewcanvas.width; 
-		
-	// do not zoom out further than original 
+		canvas.width = viewcanvas.width;
+
+	// do not zoom out further than original
 	if ( canvas.width < viewcanvas.width )
-		canvas.width = viewcanvas.width; 
+		canvas.width = viewcanvas.width;
 	if( canvas.height < viewcanvas.height )
 		canvas.height = viewcanvas.height;
 
 	// do not zoo in too much
 	if ( canvas.width > 10000)
-		canvas.width = 10000; 
+		canvas.width = 10000;
 	if( canvas.height > 10000 )
 		canvas.height > 10000;
-	
+
 	var sx = this.scaleX;
 	var sy = this.scaleY;
-	this.scaleX = canvas.width / (this.maxX - this.minX) ; 
+	this.scaleX = canvas.width / (this.maxX - this.minX) ;
 	this.scaleY = canvas.height / (this.maxY - this.minY) ;
 
 	// zoom center is (x,y)
@@ -15111,44 +15111,44 @@ ColorPlot.prototype.zoom = function  ( zx, zy, x, y) {
 		var x = viewcanvas.width/2;
 		var y = viewcanvas.height/2;// by default viewport center is fixed during zoom
 	}
-	
+
 	this.viewX = ((this.viewX + x) * this.scaleX / sx) - x;
-	this.viewY = ((this.viewY + y) * this.scaleY / sy) - y;	
+	this.viewY = ((this.viewY + y) * this.scaleY / sy) - y;
 	if ( this.viewX < 0 )
 		this.viewX = 0;
 	if (this.viewY < 0 )
-		this.viewY = 0; 
-	if ( this.viewX > canvas.width - viewcanvas.width ) 
+		this.viewY = 0;
+	if ( this.viewX > canvas.width - viewcanvas.width )
 		this.viewX =  canvas.width - viewcanvas.width ;
-	if ( this.viewY > canvas.height - viewcanvas.height ) 
+	if ( this.viewY > canvas.height - viewcanvas.height )
 		this.viewY =  canvas.height - viewcanvas.height ;
 
 	if( sx != this.scaleX || sy != this.scaleY )
-		this.replot(); 
+		this.replot();
 }
 ColorPlot.prototype.resetzoom = function  ( ) {
 	var viewcanvas = document.getElementById(this.canvasId);
 	var canvas = this.buffer;
 	this.viewX = 0;
 	this.viewY = 0;
-	canvas.height = viewcanvas.height; 
-	canvas.width = viewcanvas.width; 
-	this.scaleX = viewcanvas.width / (this.maxX - this.minX) ; 
+	canvas.height = viewcanvas.height;
+	canvas.width = viewcanvas.width;
+	this.scaleX = viewcanvas.width / (this.maxX - this.minX) ;
 	this.scaleY = viewcanvas.height / (this.maxY - this.minY) ;
-	this.replot(); 	
+	this.replot();
 }
 
 ColorPlot.prototype.jpeg = function() {
 	var canvas = document.getElementById(this.canvasId);
-	
+
 	var image = canvas.toDataURL("image/jpeg");
-	
+
 	document.location.href = image.replace("image/jpeg", "image/octet-stream");
 }
 
 
 ColorPlot.prototype.zoomoriginal = function () {
-	this.view(this.originalminX,this.originalmaxX,this.originalminY,this.originalmaxY);	
+	this.view(this.originalminX,this.originalmaxX,this.originalminY,this.originalmaxY);
 }
 
 ColorPlot.prototype.mousestartmove = function ( e ) {
@@ -15170,22 +15170,22 @@ ColorPlot.prototype.mouseposition = function ( e ) {
 	var canvas = document.getElementById(this.canvasId);
 	var rect = canvas.getBoundingClientRect();
 
-	var xmouse = e.clientX - rect.left;	
+	var xmouse = e.clientX - rect.left;
 	var ymouse = e.clientY - rect.top;
 
 	if ( this.MOVING ) {
 		var dx = this.xprev - xmouse ;
 		var dy = ymouse - this.yprev;
-		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {			
+		if ( Math.abs( dx ) > 1 || Math.abs( dy ) > 1 ) {
 			this.translate(dx,dy);
 		}
 		this.xprev = xmouse;
-		this.yprev = ymouse;		
+		this.yprev = ymouse;
 	}
-	else {		
+	else {
 		var x = xmouse / this.scaleX + this.minX;
-		var y = (canvas.height  - ymouse ) / this.scaleY + this.minY;	
-		return "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);	
+		var y = (canvas.height  - ymouse ) / this.scaleY + this.minY;
+		return "x = " + x.toFixed(3) + ", y = " + y.toFixed(3);
 	}
 }
 
@@ -15193,13 +15193,13 @@ ColorPlot.prototype.mouseposition = function ( e ) {
 /////////////////////////////////
 // Define Object class "Plot2D"
 function Plot2D(canvasId, tableId) {
-	
-	if(typeof(canvasId) === 'undefined' ) 
+
+	if(typeof(canvasId) === 'undefined' )
 		this.canvasId = "plotcanvas2D";
 	else
 		this.canvasId = canvasId;
-		
-	if(typeof(tableId) === 'undefined' ) 
+
+	if(typeof(tableId) === 'undefined' )
 		this.tableId = "";	// No data table by default
 	else
 		this.tableId = tableId;
@@ -15217,7 +15217,7 @@ function Plot2D(canvasId, tableId) {
 	this.Xapp = new Array();
 	this.Yapp = new Array();
 	this.m = 0;
-	
+
 	////// Cross browser support ////
 	var ctx = document.getElementById(this.canvasId).getContext("2d");
 	if ( !ctx.setLineDash ) {
@@ -15225,31 +15225,31 @@ function Plot2D(canvasId, tableId) {
 	}
 
 }
-	 
+
 
 
 Plot2D.prototype.clear = function () {
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
+
 		/* put this into setscale2D : */
-		this.scaleX1 = canvas.width / (this.maxX1 - this.minX1); 
+		this.scaleX1 = canvas.width / (this.maxX1 - this.minX1);
 		this.scaleX2 = canvas.height / (this.maxX2 - this.minX2);
-	
+
 		this.NsamplesX1 = canvas.width / 4;
-		this.NsamplesX2 = canvas.height / 4;		
-	
+		this.NsamplesX2 = canvas.height / 4;
+
 		/////
-		
+
 		ctx.fillStyle = "white";
 		ctx.fillRect (0,0 , canvas.width, canvas.height);
 
-		ctx.strokeStyle = "black";	
-		ctx.lineWidth = "1";		
-	
+		ctx.strokeStyle = "black";
+		ctx.lineWidth = "1";
+
 		if (this.minX2 < 0 && this.maxX2 > 0) {
-	
+
 			// X1-axis
 			ctx.beginPath();
 			ctx.moveTo(0,canvas.height + this.minX2  * this.scaleX2);
@@ -15257,7 +15257,7 @@ Plot2D.prototype.clear = function () {
 			ctx.closePath();
 			ctx.stroke();
 		}
-	
+
 		if (this.minX1 < 0 && this.maxX1 > 0) {
 			// X2-axis
 			ctx.beginPath();
@@ -15265,18 +15265,18 @@ Plot2D.prototype.clear = function () {
 			ctx.lineTo(( -this.minX1 ) * this.scaleX1 ,canvas.height);
 			ctx.closePath();
 			ctx.stroke();
-		
+
 		}
-	
+
 	}
-	
+
 	//this.clearData();
 }
 
 Plot2D.prototype.clearData = function () {
 	if( this.tableId  != "" )
 		document.getElementById(this.tableId).innerHTML = "<tr> <td> x1 </td><td> x2 </td><td> y </td></tr> ";
-		
+
 	while(this.Yapp.length > 0) {
 		this.Yapp.pop();
 		this.Xapp.pop();
@@ -15289,42 +15289,42 @@ Plot2D.prototype.levelcurve = function (f, level ) {
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
-		var started = false; 
+
+		var started = false;
 
 		ctx.fillStyle = "rgb(0,0,200)";
 		ctx.strokeStyle = "rgb(0,0,200)";
 		//ctx.lineWidth="3";
 		//ctx.beginPath();
-		
+
 		var Y = new Array();
 		var i = 0;
 		var j = 0;
-		
+
 		// Compute function values
 		for(var x1=this.minX1; x1 < this.maxX1; x1 += (this.maxX1-this.minX1) / this.NsamplesX1 ) {
-			Y[i] = new Array(); 
+			Y[i] = new Array();
 			for(var x2=this.minX2; x2 < this.maxX2; x2 += (this.maxX2-this.minX2) / this.NsamplesX2 ) {
 				var x = [x1, x2];
 				Y[i][j] =  f(x) ;
 				j++;
 			}
 			i++;
-		}			
+		}
 
 		// Draw level curve
 		var i = 0;
 		var j = 0;
 		for(var x1=this.minX1; x1 < this.maxX1; x1 += (this.maxX1-this.minX1) / this.NsamplesX1 ) {
 			for(var x2=this.minX2; x2 < this.maxX2; x2 += (this.maxX2-this.minX2) / this.NsamplesX2 ) {
-		
-				if ( ( j > 0 && Y[i][j] >= level && Y[i][j-1] <= level ) 
-					|| ( j > 0 && Y[i][j] <= level && Y[i][j-1] >= level )  
-					|| ( i > 0 && Y[i][j] <= level && Y[i-1][j] >= level )  
+
+				if ( ( j > 0 && Y[i][j] >= level && Y[i][j-1] <= level )
+					|| ( j > 0 && Y[i][j] <= level && Y[i][j-1] >= level )
+					|| ( i > 0 && Y[i][j] <= level && Y[i-1][j] >= level )
 					|| ( i > 0 && Y[i][j] >= level && Y[i-1][j] <= level )  )	{
-				
+
 					/*
-					if ( !started ){						
+					if ( !started ){
 						 ctx.moveTo(( x1-this.minX1 ) * this.scaleX1, canvas.height/2 - ( x2 * this.scaleX2 ));
 						 started = true;
 					}
@@ -15332,16 +15332,16 @@ Plot2D.prototype.levelcurve = function (f, level ) {
 						ctx.lineTo(( x1-this.minX1 ) * this.scaleX1 , canvas.height/2 - ( x2 * this.scaleX2 ));
 					*/
 					ctx.fillRect (( x1-this.minX1 ) * this.scaleX1 - 2, canvas.height - ( ( x2 - this.minX2) * this.scaleX2 ) - 2, 4, 4);
-					
+
 				}
 				j++;
 			}
-			
+
 			i++;
 		}
 //		ctx.closePath();
 		//ctx.stroke();
-	
+
 	}
 }
 
@@ -15351,18 +15351,18 @@ Plot2D.prototype.colormap = function(f) {
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
-		var started = false; 
+
+		var started = false;
 
 		var maxf = -Infinity;
 		var minf = +Infinity;
 		var Y = new Array();
 		var i = 0;
 		var j = 0;
-		
+
 		// Compute function values
 		for(var x1=this.minX1; x1 < this.maxX1; x1 += (this.maxX1-this.minX1) / this.NsamplesX1 ) {
-			Y[i] = new Array(); 
+			Y[i] = new Array();
 			for(var x2=this.minX2; x2 < this.maxX2; x2 += (this.maxX2-this.minX2) / this.NsamplesX2 ) {
 				var x = [x1, x2];
 				Y[i][j] =  f(x) ;
@@ -15375,10 +15375,10 @@ Plot2D.prototype.colormap = function(f) {
 				j++;
 			}
 			i++;
-		}			
-		
-		
-		var colorScale = 255 / (maxf - minf); 
+		}
+
+
+		var colorScale = 255 / (maxf - minf);
 
 		// Draw colormap
 		var i = 0;
@@ -15388,50 +15388,50 @@ Plot2D.prototype.colormap = function(f) {
 				if (Math.abs(Y[i][j] ) < 0.00001  ) {
 					ctx.fillStyle = "black";
 				}
-				
+
 				else if (Y[i][j] < 0 ) {
-					ctx.fillStyle = "rgba(0,0," + (255 - Math.floor((Y[i][j] - minf) * colorScale )) + ", 0.9)";					
+					ctx.fillStyle = "rgba(0,0," + (255 - Math.floor((Y[i][j] - minf) * colorScale )) + ", 0.9)";
 				}
 				else {
 					//ctx.fillStyle = "rgba(" + Math.floor((Y[i][j] - minf) * colorScale ) + ",0,255,0.5)";
 					ctx.fillStyle = "rgba(" + Math.floor((Y[i][j] - minf) * colorScale ) + ",0,0, 0.9)";
 				}
-				ctx.fillRect (( x1-this.minX1 ) * this.scaleX1 - 2, canvas.height - ( ( x2 - this.minX2) * this.scaleX2 )- 2, 4, 4);		
+				ctx.fillRect (( x1-this.minX1 ) * this.scaleX1 - 2, canvas.height - ( ( x2 - this.minX2) * this.scaleX2 )- 2, 4, 4);
 				//margin
 				if (Math.abs(Y[i][j] ) < 1 ) {
 					ctx.fillStyle = "rgba(200,200,200,0.5)";
-					ctx.fillRect (( x1-this.minX1 ) * this.scaleX1 - 2, canvas.height - ( ( x2 - this.minX2) * this.scaleX2 )- 2, 4, 4);	
-				}			
-				
+					ctx.fillRect (( x1-this.minX1 ) * this.scaleX1 - 2, canvas.height - ( ( x2 - this.minX2) * this.scaleX2 )- 2, 4, 4);
+				}
+
 				j++;
-			}			
+			}
 			i++;
 		}
-	
+
 	}
 }
 
 Plot2D.prototype.point = function (x1, x2, color_idx, opacity,  radius ) {
 
 	if (typeof(opacity) === 'undefined')
-		opacity = 1.1; 
+		opacity = 1.1;
 	if (typeof(radius) === 'undefined')
-		radius = 5; 
-	
+		radius = 5;
+
 
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
-		if (opacity < 1.0 ) 
+
+		if (opacity < 1.0 )
 			setcolortransparent(ctx, color_idx, opacity);
 		else
 			setcolor(ctx, color_idx);
-		
+
 		ctx.beginPath();
 		ctx.arc( ( x1-this.minX1 ) * this.scaleX1 , canvas.height - ( x2 - this.minX2) * this.scaleX2, radius, 0, 2 * Math.PI , true);
 		// arc( x, y, radius, agnlestart, angleend, sens)
-	
+
 		ctx.closePath();
 		ctx.fill();
 	}
@@ -15441,8 +15441,8 @@ Plot2D.prototype.point = function (x1, x2, color_idx, opacity,  radius ) {
 Plot2D.prototype.pointmouse = function  (event ) {
 
 	if(event.button == 0) {
-		event.preventDefault();	
-	
+		event.preventDefault();
+
 		var canvas = document.getElementById(this.canvasId);
 		if (canvas.getContext) {
 			var ctx = canvas.getContext("2d");
@@ -15451,25 +15451,25 @@ Plot2D.prototype.pointmouse = function  (event ) {
 			var x = event.clientX - rect.left;	// mouse coordinates relative to plot
 			var y = event.clientY - rect.top;
 			var color_idx = parseInt(document.getElementById("selectcolor").value);
-			
+
 			// Add to training set
-			var etiquette = color_idx; 
+			var etiquette = color_idx;
 			var x1 = x / this.scaleX1 + this.minX1;
 			var x2 =  (canvas.height  - y) / this.scaleX2 + this.minX2;
-			// plot point		
+			// plot point
 
-			this.point(x1,x2,color_idx );	
-		
-			this.Xapp[this.m] = new Array(); 
+			this.point(x1,x2,color_idx );
+
+			this.Xapp[this.m] = new Array();
 			this.Xapp[this.m][0] = x1;
-			this.Xapp[this.m][1] = x2; 
-			this.Yapp[this.m] = etiquette; 
+			this.Xapp[this.m][1] = x2;
+			this.Yapp[this.m] = etiquette;
 			this.m++;
-		
-		
+
+
 			if ( this.tableId != "" ) {
 				// add to table of points
-				var t = document.getElementById(this.tableId); 
+				var t = document.getElementById(this.tableId);
 				t.innerHTML += "<tr><td>"+ x1.toFixed(2) + "</td><td>" + x2.toFixed(2) + "</td><td>" + etiquette + "</td></tr>";
 			}
 		}
@@ -15479,7 +15479,7 @@ Plot2D.prototype.pointmouse = function  (event ) {
 Plot2D.prototype.plot_data = function () {
 	if (this.m != this.Yapp.length )
 		this.m = this.Yapp.length;
-		
+
    	for(var i=0;i < this.m ;i++) {
 		this.point (this.Xapp[i][0], this.Xapp[i][1], this.Yapp[i] );
 	}
@@ -15489,22 +15489,22 @@ Plot2D.prototype.plot_vector = function(start_x1,start_x2, end_x1,end_x2, vector
 	if(typeof(veccolor) === 'undefined') {
 		veccolor = 0;
 	}
-	
+
 	start_x1 = (start_x1 - this.minX1) * this.scaleX1;
-	end_x1 = (end_x1 - this.minX1) * this.scaleX1;	
+	end_x1 = (end_x1 - this.minX1) * this.scaleX1;
 	start_x2 = (start_x2 - this.minX2) * this.scaleX2;
-	end_x2 = (end_x2 - this.minX2) * this.scaleX2;	
-	
+	end_x2 = (end_x2 - this.minX2) * this.scaleX2;
+
 	var theta1 = Math.atan((end_x2 - start_x2)/(end_x1 - start_x1)); // angle entre vecteur et axe X1
-	var theta2 = Math.atan((end_x1 - start_x1) /(end_x2 - start_x2)); // angle entre vecteur et axe X2	
-	
+	var theta2 = Math.atan((end_x1 - start_x1) /(end_x2 - start_x2)); // angle entre vecteur et axe X2
+
 	var arrowsize = 10;
-	var arrow1_x1 = end_x1 ; 
-	var arrow1_x2 = end_x2 ; 
-	
+	var arrow1_x1 = end_x1 ;
+	var arrow1_x2 = end_x2 ;
+
 	var arrow2_x1 = end_x1 ;
 	var arrow2_x2 = end_x2 ;
-	
+
 	if ( end_x2 >= start_x2) {
 		arrow1_x1 -= arrowsize*Math.sin(theta2 - Math.PI/12);
 		arrow1_x2 -= arrowsize*Math.cos(theta2 - Math.PI/12);
@@ -15512,23 +15512,23 @@ Plot2D.prototype.plot_vector = function(start_x1,start_x2, end_x1,end_x2, vector
 	else {
 		arrow1_x1 += arrowsize*Math.sin(theta2 - Math.PI/12);
 		arrow1_x2 += arrowsize*Math.cos(theta2 - Math.PI/12);
-	}		
+	}
 	if ( end_x1 >= start_x1 ) {
-		arrow2_x1 -= arrowsize*Math.cos(theta1 - Math.PI/12);	
-		arrow2_x2 -= arrowsize*Math.sin(theta1 - Math.PI/12);			
+		arrow2_x1 -= arrowsize*Math.cos(theta1 - Math.PI/12);
+		arrow2_x2 -= arrowsize*Math.sin(theta1 - Math.PI/12);
 	}
 	else {
-		arrow2_x1 += arrowsize*Math.cos(theta1 - Math.PI/12);	
-		arrow2_x2 += arrowsize*Math.sin(theta1 - Math.PI/12);		
+		arrow2_x1 += arrowsize*Math.cos(theta1 - Math.PI/12);
+		arrow2_x2 += arrowsize*Math.sin(theta1 - Math.PI/12);
 	}
-	
+
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
+
 		ctx.lineWidth="1";
 		setcolor(ctx,veccolor);
-		
+
 		ctx.beginPath();
 		ctx.moveTo(start_x1,canvas.height - start_x2);
 		ctx.lineTo(end_x1,canvas.height - end_x2);
@@ -15560,16 +15560,16 @@ Plot2D.prototype.plot_line = function(start_x1,start_x2, end_x1,end_x2, linename
 	if(typeof(linewidth) === 'undefined') {
 		linewidth = 1;
 	}
-	
+
 	start_x1 = (start_x1 - this.minX1) * this.scaleX1;
-	end_x1 = (end_x1 - this.minX1) * this.scaleX1;	
+	end_x1 = (end_x1 - this.minX1) * this.scaleX1;
 	start_x2 = (start_x2 - this.minX2) * this.scaleX2;
-	end_x2 = (end_x2 - this.minX2) * this.scaleX2;	
-	
+	end_x2 = (end_x2 - this.minX2) * this.scaleX2;
+
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
+
 		ctx.lineWidth=""+linewidth;
 		setcolor(ctx,linecolor);
 		if (dashed) {
@@ -15581,7 +15581,7 @@ Plot2D.prototype.plot_line = function(start_x1,start_x2, end_x1,end_x2, linename
 		ctx.lineTo(end_x1,canvas.height - end_x2);
 		ctx.stroke();
 		ctx.setLineDash([1, 0]);
-		
+
 		if(typeof(linename) !== 'undefined') {
 			if ( linename != "" ) {
 				ctx.lineWidth="1";
@@ -15592,15 +15592,15 @@ Plot2D.prototype.plot_line = function(start_x1,start_x2, end_x1,end_x2, linename
 }
 Plot2D.prototype.plot_classifier = function (w, b, coloridx, disappear) {
 	if (typeof(disappear) === 'undefined')
-		var disappear = false; 
+		var disappear = false;
 	if (typeof(coloridx) === 'undefined')
-		var coloridx = 0; 
+		var coloridx = 0;
 
 	var x1 = this.minX1;
 	var x2 = this.maxX1;
 	var y1;
 	var y2;
-	
+
 	if (w[1] != 0) {
 		y1 = (-b - w[0]*x1) / w[1];
 		y2 = (-b - w[0]*x2) / w[1];
@@ -15611,19 +15611,19 @@ Plot2D.prototype.plot_classifier = function (w, b, coloridx, disappear) {
 		y1 = this.minX2;
 		y2 = this.maxX2;
 	}
-	
+
 	var canvas = document.getElementById(plot.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-	
+
 		ctx.lineWidth="3";
-		if ( disappear ) 
+		if ( disappear )
 			ctx.strokeStyle = "grey";
 		else
 			setcolor(ctx, coloridx);
-			
+
 		ctx.setLineDash([1, 0]);
-		ctx.beginPath();		
+		ctx.beginPath();
 		ctx.moveTo(( x1-this.minX1 ) * this.scaleX1 , canvas.height/2 - ( y1 * this.scaleX2 ));
 		ctx.lineTo(( x2-this.minX1 ) * this.scaleX1 , canvas.height/2 - ( y2 * this.scaleX2 ));
 		ctx.stroke();
@@ -15631,39 +15631,39 @@ Plot2D.prototype.plot_classifier = function (w, b, coloridx, disappear) {
 
 	}
 
-	
+
 }
 
 Plot2D.prototype.coord2datavector = function(x1,x2) {
-	var canvas = document.getElementById(this.canvasId); 
+	var canvas = document.getElementById(this.canvasId);
 	var x = [0,0] ;
 	x[0] = ( x1 / this.scaleX1 ) + this.minX1 ;
 	x[1] = (-( x2-canvas.height) / this.scaleX2 ) + this.minX2;
 	return x;
 }
 Plot2D.prototype.plotmathjax = function(stringindex, x, y) {
-			
+
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
 
 		var label = document.getElementById("jaxstring"+stringindex);
 		label.style.top = canvas.height - ( y - this.minX2) * this.scaleX2  + canvas.offsetTop;
-		label.style.left = (x - this.minX1) * this.scaleX1 + canvas.offsetLeft;	
-		label.style.visibility = "visible"; 
+		label.style.left = (x - this.minX1) * this.scaleX1 + canvas.offsetLeft;
+		label.style.visibility = "visible";
 	}
 }
 Plot2D.prototype.clearmathjax = function(stringindex) {
 	var label = document.getElementById("jaxstring"+stringindex);
-	label.style.visibility = "hidden"; 
-	
+	label.style.visibility = "hidden";
+
 }
-	 
+
 Plot2D.prototype.text = function (x1,x2,txt) {
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		ctx.lineWidth="0.5"; 
+		ctx.lineWidth="0.5";
 		ctx.strokeStyle = "black";
 		ctx.strokeText(txt,  ( x1-this.minX1 ) * this.scaleX1 , canvas.height - ( x2 - this.minX2) * this.scaleX2);
 	}
@@ -15673,8 +15673,8 @@ Plot2D.prototype.text = function (x1,x2,txt) {
 /// Plot 3D ///////////////////
 ///////////////////////////////
 function Plot3D(canvasId) {
-	
-	if(typeof(canvasId) === 'undefined' ) 
+
+	if(typeof(canvasId) === 'undefined' )
 		this.canvasId = "plotcanvas3D";
 	else
 		this.canvasId = canvasId;
@@ -15692,7 +15692,7 @@ function Plot3D(canvasId) {
 	this.scaleX3 ;
 	this.NsamplesX1 = 50;
 	this.NsamplesX2 = 50;
-	this.NsamplesX3 = 50;	
+	this.NsamplesX3 = 50;
 
 	this.axisNameX1 = "x1";
 	this.axisNameX2 = "x2";
@@ -15701,12 +15701,12 @@ function Plot3D(canvasId) {
 	// Training set 3D
 	this.X = new Array();
 	this.Y = new Array();
-	
+
 	// other stuff to plot
 	this.lines = new Array();
 	this.planes = new Array();
 	this.spheres = new Array();
-	
+
 	// 2D Graphics
 	this.view2D = new Array();
 	this.viewminX1 = -10;
@@ -15715,7 +15715,7 @@ function Plot3D(canvasId) {
 	this.viewmaxX2 = 10;
 	this.viewscaleX1 = canvas.width / (this.viewmaxX1 - this.viewminX1);
 	this.viewscaleX2 = canvas.width / (this.viewmaxX2 - this.viewminX2);
-	
+
 	this.angleX = 0.0;//- Math.PI/6; // rotations around axis
 	this.angleY = 0.0;
 	this.angleZ = 0.0;// - Math.PI/8;
@@ -15728,19 +15728,19 @@ function Plot3D(canvasId) {
 	this.mouseY = 0;
 
 	// automatic animation
-	this.animation = null; 
-	this.animateAuto = 0; 	// if 0: do not relaunch animation after mouse released 
+	this.animation = null;
+	this.animateAuto = 0; 	// if 0: do not relaunch animation after mouse released
 							// if > 0: samplingrate of animation
-	
+
 	////// Cross browser support ////
 	var ctx = document.getElementById(this.canvasId).getContext("2d");
 	if ( !ctx.setLineDash ) {
 		ctx.setLineDash = function () {};
 	}
-	
+
 	if(window.addEventListener)
         canvas.addEventListener('DOMMouseScroll', this.mousezoom, false);//firefox
- 
+
     //for IE/OPERA etc
     canvas.onmousewheel = this.mousezoom;
 
@@ -15760,14 +15760,14 @@ Plot3D.prototype.test = function() {
 	this.Y.push(1);
 	this.Y.push(2);
 	this.Y.push(3);
-	
+
 	this.X.push([5,5,5]);
 	this.Y.push(3);
-	
-	
+
+
 	this.sphere([5,-5, 1], 50, "", 1) ;
 	this.sphere([-5,5, -3], 30, "", 3) ;
-	
+
 	this.replot();
 	this.animateAuto = 100;
 	this.animate(50);
@@ -15776,72 +15776,72 @@ Plot3D.prototype.computeRanges = function () {
 
 	var i;
 	for (i=0;i<this.Y.length ; i++) {
-		var norm = Math.sqrt( this.X[i][0]*this.X[i][0] + this.X[i][1]*this.X[i][1] + this.X[i][2]*this.X[i][2] ) 
+		var norm = Math.sqrt( this.X[i][0]*this.X[i][0] + this.X[i][1]*this.X[i][1] + this.X[i][2]*this.X[i][2] )
 		if ( norm > this.maxX2 ) {
 			this.maxX2 = norm;
 			this.minX2 = -norm;
 		}
-	}	
-}	
+	}
+}
 
 Plot3D.prototype.replot = function() {
 	// Compute 2D coordinates from 3D ones
-	
-	
+
+
 	var x1;
 	var x2;
 	var distance;
 	var opacity;
 	var radius;
 	var res;
-	
-	var i;	
-	var maxDistance = this.cameraDistance + this.maxX2 - this.minX2; 
+
+	var i;
+	var maxDistance = this.cameraDistance + this.maxX2 - this.minX2;
 
 	this.clear();
-	
+
 	// plotorigin
-	this.point2D(0, 0, 0 , 1.0, 3 ) ; 
-	
+	this.point2D(0, 0, 0 , 1.0, 3 ) ;
+
 	// plot axis
 	this.line([ -1, 0, 0], [10, 0,0] , this.axisNameX1);
 	this.line([ 0, -1, 0], [0, 10 ,0] ,this.axisNameX2);
 	this.line([ 0, 0, -1], [0, 0,10] , this.axisNameX3);
-	
+
 	// plot points
 	for (i=0;i<this.Y.length ; i++) {
-	
+
 		res = this.project(this.X[i] );
 		x1 = res[0];
 		x2 = res[1];
 		distance = res[2];
-	
-		
-		if ( distance < maxDistance ) 
+
+
+		if ( distance < maxDistance )
 			opacity = ( distance / maxDistance ) ;
 		else
 			opacity = 1.0;
-			
+
 		radius = Math.floor(2 + (1 - opacity) * 10);
-				
-		this.point2D(x1, x2, this.Y[i] , opacity, radius ) ; 
+
+		this.point2D(x1, x2, this.Y[i] , opacity, radius ) ;
 	}
-	
+
 	// plot lines
 	for (i=0;i<this.lines.length; i++) {
 		this.line(this.lines[i][0],this.lines[i][1],this.lines[i][2],this.lines[i][3]);
 	}
-	
+
 	// plot planes
 	for (i=0;i<this.planes.length; i++) {
 		this.drawplane(this.planes[i][0],this.planes[i][1],this.planes[i][2],this.planes[i][3]);
 	}
-	
-	// plot spheres 
-	//  plot the most distant ones first !!! 
+
+	// plot spheres
+	//  plot the most distant ones first !!!
 	var distances = new Array();
-	for (i=0;i<this.spheres.length; i++) {	
-		var res = this.project( this.spheres[i][0] ); 
+	for (i=0;i<this.spheres.length; i++) {
+		var res = this.project( this.spheres[i][0] );
 		distances[i] = res[2];
 	}
 	for (var n=0;n<this.spheres.length; n++) {
@@ -15851,7 +15851,7 @@ Plot3D.prototype.replot = function() {
 				idx = i;
 		}
 		this.drawsphere( this.spheres[idx][0], this.spheres[idx][1], this.spheres[idx][2], this.spheres[idx][3] );
-		distances[idx] = -1;			
+		distances[idx] = -1;
 	}
 }
 Plot3D.prototype.clear = function(  ) {
@@ -15874,19 +15874,19 @@ Plot3D.prototype.clear_planes = function(  ) {
 }
 
 Plot3D.prototype.rotateX = function( deltaangle ) {
-	this.angleX += deltaangle; 
+	this.angleX += deltaangle;
 	this.replot();
 }
 
 Plot3D.prototype.rotateY = function( deltaangle ) {
-	this.angleY += deltaangle; 
+	this.angleY += deltaangle;
 	this.replot();
 }
 Plot3D.prototype.rotateZ = function( deltaangle , do_replot) {
 	if ( typeof(do_replot) == "undefined" )
 		var do_replot = true;
-		
-	this.angleZ += deltaangle; 
+
+	this.angleZ += deltaangle;
 	if ( do_replot )
 		this.replot();
 }
@@ -15895,14 +15895,14 @@ Plot3D.prototype.mouserotation = function(e) {
 
 	if ( this.ROTATING ) {
 		e.preventDefault();
-		var dx = e.clientX - this.mouseX;	
-		var dy = e.clientY - this.mouseY;	
+		var dx = e.clientX - this.mouseX;
+		var dy = e.clientY - this.mouseY;
 		this.mouseX = e.clientX;
 		this.mouseY = e.clientY;
-		
-		if ( Math.abs(dx) > 0.2 ) 
+
+		if ( Math.abs(dx) > 0.2 )
 			this.rotateZ(dx / 20, !(Math.abs(dy) > 0.2) );
-		if ( Math.abs(dy) > 0.2 ) 
+		if ( Math.abs(dy) > 0.2 )
 			this.rotateX(dy / 20);
 	}
 }
@@ -15911,7 +15911,7 @@ Plot3D.prototype.mousedown = function(e) {
 	this.ROTATING = true;
 	this.mouseX = e.clientX;
 	this.mouseY = e.clientY;
-	
+
 	this.animateStop();
 }
 
@@ -15924,31 +15924,31 @@ Plot3D.prototype.mouseup = function(e) {
 }
 Plot3D.prototype.mousezoom = function(e) {
 	// !!! use plot3 instead of this due to event handler...
-	
+
 	var delta = 0;
- 
-    if (!e) 
+
+    if (!e)
     	e = window.event;
- 	
+
  	e.preventDefault();
-	
+
     // normalize the delta
     if (e.wheelDelta) {
          // IE and Opera
         delta = e.wheelDelta / 30;
-    } 
-    else if (e.detail) { 
+    }
+    else if (e.detail) {
         delta = -e.detail ;
     }
- 
+
 	plot3.cameraDistance -= delta ;
-	
+
 	if ( plot3.cameraDistance < 5 ) {
 		plot3.cameraDistance = 5;
 	}
-	else if ( plot3.cameraDistance > 100 ) 
+	else if ( plot3.cameraDistance > 100 )
 		plot3.cameraDistance = 100;
-	
+
 	plot3.replot();
 }
 
@@ -15957,42 +15957,42 @@ Plot3D.prototype.project = function ( x3D ) {
 		x3D : points in World coordinate system
 		Camera / view coordinate system initialized like World system
 		Camera is fixed to (0,cameraDistance,0) in camera system
-		
+
 		1. rotate World in camera system
 		2. project camera system to 2D XZ plane since camera on Y-axis
-		3. distance to camera = cameraDistance + Y 
-		
-	
+		3. distance to camera = cameraDistance + Y
+
+
 	*/
-	
+
 	// 1. rotation
-	var tmpX = new Array(3); 
+	var tmpX = new Array(3);
 	// rotation around X-axis:
 	tmpX[0] = x3D[0]; // does not change X-coordinate
 	tmpX[1] = Math.cos(this.angleX) * x3D[1] - Math.sin(this.angleX) * x3D[2];
-	tmpX[2] = Math.sin(this.angleX) * x3D[1] + Math.cos(this.angleX) * x3D[2];	
-	
+	tmpX[2] = Math.sin(this.angleX) * x3D[1] + Math.cos(this.angleX) * x3D[2];
+
 	// rotation around Y-axis:
-	var tmpY = new Array(3); 
+	var tmpY = new Array(3);
 	tmpY[0] = Math.cos(this.angleY) * tmpX[0] - Math.sin(this.angleY) * tmpX[2];
 	tmpY[1] = tmpX[1];
-	tmpY[2] = Math.sin(this.angleY) * tmpX[0] + Math.cos(this.angleY) * tmpX[2];	
+	tmpY[2] = Math.sin(this.angleY) * tmpX[0] + Math.cos(this.angleY) * tmpX[2];
 
 	// rotation around Z-axis:
-	var tmpZ = new Array(3); 
+	var tmpZ = new Array(3);
 	tmpZ[0] = Math.cos(this.angleZ) * tmpY[0] - Math.sin(this.angleZ) * tmpY[1];
-	tmpZ[1] = Math.sin(this.angleZ) * tmpY[0] + Math.cos(this.angleZ) * tmpY[1];	
+	tmpZ[1] = Math.sin(this.angleZ) * tmpY[0] + Math.cos(this.angleZ) * tmpY[1];
 	tmpZ[2] = tmpY[2];
-	
+
 	// Scaling
 	var scale = ( this.cameraDistance/20 ) ;
 	tmpZ[0] /= scale;
 	tmpZ[1] /= scale;
-	tmpZ[2] /= scale;		
-	
-	// Project to 2D plane 	
+	tmpZ[2] /= scale;
+
+	// Project to 2D plane
 	var x1 = tmpZ[0];
-	var x2 = tmpZ[2]; 
+	var x2 = tmpZ[2];
 	var distance = this.cameraDistance + tmpZ[1];
 
 	return [x1,x2, distance];
@@ -16005,29 +16005,29 @@ Plot3D.prototype.line = function( start, end, linename, linecolor, dashed, linew
 	var res = this.project(start);
 	start_x1 = res[0];
 	start_x2 = res[1];
-	
+
 	var end_x1;
 	var end_x2;
 
 	res = this.project(end);
 	end_x1 = res[0];
 	end_x2 = res[1];
-	
+
 	this.line2D(start_x1, start_x2, end_x1, end_x2, linename, linecolor, dashed, linewidth);
 }
 Plot3D.prototype.plot_line = function( start, end, linename, color ) {
 	if (typeof(color) === 'undefined')
-		var color = 0; 
+		var color = 0;
 
 	this.lines.push([start, end, linename, color]);
 	this.line( start, end, linename, color );
 }
 Plot3D.prototype.plane = function( start, end, polyname, color ) {
 	if (typeof(color) === 'undefined')
-		var color = 3; 
+		var color = 3;
 	if (typeof(polyname) === 'undefined')
 		var polyname = "";
-	
+
 	this.planes.push([start, end, polyname, color]);
 	this.drawplane( start, end, polyname, color );
 }
@@ -16041,28 +16041,28 @@ Plot3D.prototype.drawplane = function( start, end, polyname, color ) {
 	corner2[0] = end[0];
 	corner2[1] = start[1];
 	corner2[2] = end[2];
-	
-	res = this.project(start);		
+
+	res = this.project(start);
 	var start_x1 = res[0];
 	var start_x2 = res[1];
-	
-	res = this.project(end);		
+
+	res = this.project(end);
 	var end_x1 = res[0];
 	var end_x2 = res[1];
-	
-	res = this.project(corner1);		
+
+	res = this.project(corner1);
 	var corner1_x1 = res[0];
 	var corner1_x2 = res[1];
- 	res = this.project(corner2);		
+ 	res = this.project(corner2);
 	var corner2_x1 = res[0];
 	var corner2_x2 = res[1];
- 			
+
 	this.polygone2D( [ start_x1, corner1_x1, end_x1, corner2_x1], [ start_x2, corner1_x2, end_x2, corner2_x2], polyname, color);
 }
 
 Plot3D.prototype.sphere = function( center, radius, spherename, color ) {
 	if (typeof(color) === 'undefined')
-		var color = 1; 
+		var color = 1;
 	if (typeof(spherename) === 'undefined')
 		var spherename = "";
 	this.spheres.push([center, radius, spherename, color ]);
@@ -16070,22 +16070,22 @@ Plot3D.prototype.sphere = function( center, radius, spherename, color ) {
 }
 Plot3D.prototype.drawsphere = function( center, radius, spherename, color ) {
 	var res;
-	res = this.project(center);		
+	res = this.project(center);
 	var x1 = res[0];
 	var x2 = res[1];
 	var distance = res[2];
-	
+
 	if ( distance >= 0 ) {
 		var opacity = 1.0;
-		var maxDistance = this.cameraDistance + this.maxX2 - this.minX2; 
-	
-		if ( distance < maxDistance ) 
+		var maxDistance = this.cameraDistance + this.maxX2 - this.minX2;
+
+		if ( distance < maxDistance )
 			opacity = 0.5 * ( distance / maxDistance ) ;
 
 		var radius2D = Math.floor(radius * ( 0 +3* (1 - opacity)*(1 - opacity) ) );
 
 		this.disk2D( x1, x2, radius2D, spherename, color, opacity);
-	
+
 	}
 }
 
@@ -16094,24 +16094,24 @@ Plot3D.prototype.point2D = function (x1, x2, color_idx, opacity,  radius ) {
 	if ( x1 >= this.viewminX1 && x1 <= this.viewmaxX1 && x2 >= this.viewminX2 && x2 <= this.viewmaxX2 ) {
 
 		if (typeof(opacity) === 'undefined')
-			var opacity = 1.1; 
+			var opacity = 1.1;
 		if (typeof(radius) === 'undefined')
-			var radius = 5; 
-	
+			var radius = 5;
+
 
 		var canvas = document.getElementById(this.canvasId);
 		if (canvas.getContext) {
 			var ctx = canvas.getContext("2d");
-		
-			if (opacity < 1.0 ) 
+
+			if (opacity < 1.0 )
 				setcolortransparent(ctx, color_idx, opacity);
 			else
 				setcolor(ctx, color_idx);
-		
+
 			ctx.beginPath();
 			ctx.arc( ( x1-this.viewminX1 ) * this.viewscaleX1 , canvas.height - ( x2 - this.viewminX2) * this.viewscaleX2, radius, 0, 2 * Math.PI , true);
 			// arc( x, y, radius, agnlestart, angleend, sens)
-	
+
 			ctx.closePath();
 			ctx.fill();
 		}
@@ -16127,35 +16127,35 @@ Plot3D.prototype.line2D = function(start_x1,start_x2, end_x1,end_x2, linename, l
 	if(typeof(linewidth) === 'undefined') {
 		linewidth = 1;
 	}
-	
+
 	start_x1 = (start_x1 - this.viewminX1) * this.viewscaleX1;
-	end_x1 = (end_x1 - this.viewminX1) * this.viewscaleX1;	
+	end_x1 = (end_x1 - this.viewminX1) * this.viewscaleX1;
 	start_x2 = (start_x2 - this.viewminX2) * this.viewscaleX2;
-	end_x2 = (end_x2 - this.viewminX2) * this.viewscaleX2;	
-	
-	
+	end_x2 = (end_x2 - this.viewminX2) * this.viewscaleX2;
+
+
 	var canvas = document.getElementById(this.canvasId);
 
-	if ( start_x1 < 0 ) 
+	if ( start_x1 < 0 )
 			start_x1 = 0;
-	if ( start_x1 >= canvas.width ) 
+	if ( start_x1 >= canvas.width )
 			start_x1 = canvas.width-1;
-	if ( start_x2 <= 0 ) 
+	if ( start_x2 <= 0 )
 			start_x2 = 1;
-	if ( start_x2 > canvas.height ) 
+	if ( start_x2 > canvas.height )
 			start_x2 = canvas.height;
-	if ( end_x1 < 0 ) 
+	if ( end_x1 < 0 )
 			end_x1 = 0;
-	if ( end_x1 >= canvas.width ) 
+	if ( end_x1 >= canvas.width )
 			end_x1 = canvas.width-1;
-	if ( end_x2 <= 0 ) 
+	if ( end_x2 <= 0 )
 			end_x2 = 1;
-	if ( end_x2 > canvas.height ) 
+	if ( end_x2 > canvas.height )
 			start_x2 = canvas.height;
 
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
+
 		ctx.lineWidth=""+linewidth;
 		setcolor(ctx,linecolor);
 		if (dashed) {
@@ -16169,19 +16169,19 @@ Plot3D.prototype.line2D = function(start_x1,start_x2, end_x1,end_x2, linename, l
 		if (dashed) {
 			ctx.setLineDash([1, 0]);
 		}
-		
+
 		if(typeof(linename) !== 'undefined') {
 			if (linename != "") {
 				var x = -10 + (end_x1 + start_x1)/2 ;
-				var y = canvas.height + 10 - (end_x2 + start_x2)/2 ; 
-					
+				var y = canvas.height + 10 - (end_x2 + start_x2)/2 ;
+
 				if (linename.indexOf("jaxstring") == 0 ) {
 					// put mathjaxstring as line name
 					var label = document.getElementById(linename);
 					label.style.fontSize = "70%";
 					label.style.top = y + canvas.offsetTop;
-					label.style.left = x + canvas.offsetLeft;	
-					label.style.visibility = "visible"; 
+					label.style.left = x + canvas.offsetLeft;
+					label.style.visibility = "visible";
 				}
 				else {
 					ctx.lineWidth="1";
@@ -16200,41 +16200,41 @@ Plot3D.prototype.polygone2D = function(x1,x2, polyname, color) {
 	if(typeof(color) === 'undefined') {
 		color = 3;
 	}
-	
+
 	var i;
 	// loop over all points:
-	
+
 	for (i=0;i<x1.length;i++) {
-		x1[i] = (x1[i] - this.viewminX1) * this.viewscaleX1;	
+		x1[i] = (x1[i] - this.viewminX1) * this.viewscaleX1;
 		x2[i] = (x2[i] - this.viewminX2) * this.viewscaleX2;
 	}
-	
+
 	var canvas = document.getElementById(this.canvasId);
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
-		
-		
+
+
 		setcolortransparent(ctx,color, 0.5);
-		
+
 		ctx.beginPath();
 		ctx.moveTo(x1[0],canvas.height - x2[0]);
 		for (i=0;i<x1.length;i++) {
 			ctx.lineTo( x1[i],canvas.height - x2[i]);
 		}
 		ctx.fill();
-		
+
 		if(typeof(polyname) !== 'undefined') {
 			if (polyname != "") {
 				var x = -10 + x1[0];
 				var y = canvas.height + 10 - x2[0];
-					
+
 				if (polyname.indexOf("jaxstring") == 0 ) {
 					// put mathjaxstring as line name
 					var label = document.getElementById(polyname);
 					label.style.fontSize = "70%";
 					label.style.top = y + canvas.offsetTop;
-					label.style.left = x + canvas.offsetLeft;	
-					label.style.visibility = "visible"; 
+					label.style.left = x + canvas.offsetLeft;
+					label.style.visibility = "visible";
 				}
 				else {
 					ctx.lineWidth="1";
@@ -16247,40 +16247,40 @@ Plot3D.prototype.polygone2D = function(x1,x2, polyname, color) {
 
 Plot3D.prototype.disk2D = function (x1, x2, radius, spherename, color, opacity ) {
 	if (typeof(opacity) === 'undefined')
-		var opacity = 1.1; 
+		var opacity = 1.1;
 	if (typeof(radius) === 'undefined')
-		var radius = 5; 
-	
+		var radius = 5;
+
 	if ( x1 + radius >= this.viewminX1 && x1 - radius <= this.viewmaxX1 && x2 + radius >= this.viewminX2 && x2 - radius <= this.viewmaxX2 ) {
-		
+
 		var canvas = document.getElementById(this.canvasId);
 		if (canvas.getContext) {
 			var ctx = canvas.getContext("2d");
 			var x1view =  ( x1-this.viewminX1 ) * this.viewscaleX1 ;
 			var x2view =  canvas.height - ( x2 - this.viewminX2) * this.viewscaleX2;
-		
-			if (opacity < 1.0 ) 
+
+			if (opacity < 1.0 )
 				setcolortransparentgradient(ctx, color, opacity, Math.sqrt(x1view*x1view+x2view*x2view) + radius);
 			else
 				setcolorgradient(ctx, color,  Math.sqrt(x1view*x1view+x2view*x2view) + radius);
-		
+
 			ctx.beginPath();
 			ctx.arc( x1view, x2view, radius, 0, 2 * Math.PI , true);
 			ctx.closePath();
 			ctx.fill();
-			
+
 			if(typeof(spherename) !== 'undefined') {
 				if (spherename != "") {
 					var x = -10 + x1view;
 					var y = 10 + x2view;
-					
+
 					if (spherename.indexOf("jaxstring") == 0 ) {
 						// put mathjaxstring as line name
 						var label = document.getElementById(spherename);
 						label.style.fontSize = "70%";
 						label.style.top =  x2view  + canvas.offsetTop;
-						label.style.left = x1view  + canvas.offsetLeft;	
-						label.style.visibility = "visible"; 
+						label.style.left = x1view  + canvas.offsetLeft;
+						label.style.visibility = "visible";
 					}
 					else {
 						var words = spherename.split("*");
@@ -16289,7 +16289,7 @@ Plot3D.prototype.disk2D = function (x1, x2, radius, spherename, color, opacity )
 						var tmpfont = ctx.font;
 						ctx.font = txtsize + "pt sans-serif";
 						ctx.fillStyle = "black";
-		
+
 						if ( words.length == 1 ) {
 							ctx.fillText( spherename, x1view  , x2view  ) ;
 						}
@@ -16306,156 +16306,156 @@ Plot3D.prototype.disk2D = function (x1, x2, radius, spherename, color, opacity )
 	}
 }
 Plot3D.prototype.animate = function(samplingRate) {
-	if ( typeof(samplingRate) === 'undefined' ) 
+	if ( typeof(samplingRate) === 'undefined' )
 		var samplingRate = this.animateAuto ;
-		
-		
+
+
 	this.animateStop(); // make sure a single animation runs
-		
+
 	var p3 = this;
 	this.animation = setInterval( function () {
 			p3.rotateZ(0.01);	// cannot use "this" here => plot3
 		}, samplingRate
 	);
-	
+
 }
 Plot3D.prototype.animateStop = function() {
 	if ( this.animation != null ) {
 		clearInterval( this.animation );
 		this.animation = null;
 	}
-	
+
 }
 Plot3D.prototype.isInSphere = function (x, y, z, sphere) {
 	var dx = (x - sphere[0][0]);
 	var dy = (y - sphere[0][1]);
-	var dz = (z - sphere[0][2]);		
+	var dz = (z - sphere[0][2]);
 	var norm2 = dx*dx+dy*dy+dz*dz;
-	
+
 	if ( norm2 <= sphere[1]*sphere[1] )
 		return true;
-	else 
+	else
 		return false;
 
 }
 
 ////////////////////////////////////////
-// General canvas tools 	 
+// General canvas tools
 function setcolor(ctx, color_idx) {
 	if( color_idx > 10 ) {
 		setcolortransparent(ctx, color_idx - 10, 0.5);
 		return;
 	}
-	
+
 	switch(color_idx) {
-	case -1: 
-		ctx.fillStyle = "white";			
+	case -1:
+		ctx.fillStyle = "white";
 		ctx.strokeStyle = "white";
 		break;
 
-	case 0: 
+	case 0:
 		ctx.fillStyle = "rgb(0,0,0)";
 		ctx.strokeStyle = "rgb(0,0,0)";
 		break;
-	case 1: 
-		ctx.fillStyle = "rgb(0,0,200)";	
-		ctx.strokeStyle = "rgb(0,0,200)";					
+	case 1:
+		ctx.fillStyle = "rgb(0,0,200)";
+		ctx.strokeStyle = "rgb(0,0,200)";
 		break;
-	case 2: 
-		ctx.fillStyle = "rgb(200,0,0)";			
-		ctx.strokeStyle = "rgb(200,0,0)";			
+	case 2:
+		ctx.fillStyle = "rgb(200,0,0)";
+		ctx.strokeStyle = "rgb(200,0,0)";
 		break;
-	case 3: 
+	case 3:
 		ctx.fillStyle = "rgb(0,200,0)";
-		ctx.strokeStyle = "rgb(0,200,0)";						
+		ctx.strokeStyle = "rgb(0,200,0)";
 		break;
-	case 4: 
-		ctx.fillStyle = "rgb(200,0,200)";			
+	case 4:
+		ctx.fillStyle = "rgb(200,0,200)";
 		ctx.strokeStyle = "rgb(200,0,200)";
 		break;
-	case 5: 
-		ctx.fillStyle = "rgb(255,255,0)";			
+	case 5:
+		ctx.fillStyle = "rgb(255,255,0)";
 		ctx.strokeStyle = "rgb(255,255,0)";
 		break;
-	case 6: 
-		ctx.fillStyle = "rgb(0,255,255)";			
+	case 6:
+		ctx.fillStyle = "rgb(0,255,255)";
 		ctx.strokeStyle = "rgb(0,255,255)";
 		break;
-	case 7: 
-		ctx.fillStyle = "rgb(102,51,0)";			
+	case 7:
+		ctx.fillStyle = "rgb(102,51,0)";
 		ctx.strokeStyle = "rgb(102,51,0)";
 		break;
-	case 8: 
-		ctx.fillStyle = "rgb(204,51,0)";			
+	case 8:
+		ctx.fillStyle = "rgb(204,51,0)";
 		ctx.strokeStyle = "rgb(204,51,0)";
 		break;
-	case 9: 
-		ctx.fillStyle = "rgb(255,102,204)";			
+	case 9:
+		ctx.fillStyle = "rgb(255,102,204)";
 		ctx.strokeStyle = "rgb(255,102,204)";
 		break;
-	case 10: 
-		ctx.fillStyle = "rgb(120,120,120)";			
+	case 10:
+		ctx.fillStyle = "rgb(120,120,120)";
 		ctx.strokeStyle = "rgb(120,120,120)";
 		break;
-	
+
 	default:
-		ctx.fillStyle = "rgb(0,0,200)";			
-		ctx.strokeStyle = "rgb(0,0,200)";			
-		break;															
+		ctx.fillStyle = "rgb(0,0,200)";
+		ctx.strokeStyle = "rgb(0,0,200)";
+		break;
 	}
 
 }
-	 
+
 function setcolortransparent(ctx, color_idx, opacity) {
 	switch(color_idx) {
-	case 0: 
+	case 0:
 		ctx.fillStyle = "rgba(0,0,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(0,0,0," + opacity +" )";
 		break;
-	case 1: 
+	case 1:
 		ctx.fillStyle = "rgba(0,0,200," + opacity +" )";
 		ctx.strokeStyle = "rgba(0,0,200," + opacity +" )";
 		break;
-	case 2: 
+	case 2:
 		ctx.fillStyle = "rgba(200,0,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(200,0,0," + opacity +" )";
 		break;
-	case 3: 
+	case 3:
 		ctx.fillStyle = "rgba(0,200,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(0,200,0," + opacity +" )";
 		break;
-	case 4: 
+	case 4:
 		ctx.fillStyle = "rgba(200,0,200," + opacity +" )";
 		ctx.strokeStyle = "rgba(200,0,200," + opacity +" )";
 		break;
-	case 5: 
+	case 5:
 		ctx.fillStyle = "rgba(255,255,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(255,255,0," + opacity +" )";
 		break;
-	case 6: 
-		ctx.fillStyle = "rgba(0,255,255," + opacity +" )";		
+	case 6:
+		ctx.fillStyle = "rgba(0,255,255," + opacity +" )";
 		ctx.strokeStyle = "rgba(0,255,255," + opacity +" )";
 		break;
-	case 7: 
-		ctx.fillStyle = "rgba(102,51,0," + opacity +" )";			
+	case 7:
+		ctx.fillStyle = "rgba(102,51,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(102,51,0," + opacity +" )";
 		break;
-	case 8: 
-		ctx.fillStyle = "rgba(204,51,0," + opacity +" )";			
+	case 8:
+		ctx.fillStyle = "rgba(204,51,0," + opacity +" )";
 		ctx.strokeStyle = "rgba(204,51,0," + opacity +" )";
 		break;
-	case 9: 
-		ctx.fillStyle = "rgab(255,102,204," + opacity +" )";		
+	case 9:
+		ctx.fillStyle = "rgab(255,102,204," + opacity +" )";
 		ctx.strokeStyle = "rgba(255,102,204," + opacity +" )";
 		break;
-	case 10: 
-		ctx.fillStyle = "rgba(120,120,120," + opacity +" )";	
+	case 10:
+		ctx.fillStyle = "rgba(120,120,120," + opacity +" )";
 		ctx.strokeStyle = "rgba(120,120,120," + opacity +" )";
 		break;
 	default:
 		ctx.fillStyle = "rgba(0,0,200," + opacity +" )";
 		ctx.strokeStyle = "rgba(0,0,200," + opacity +" )";
-		break;															
+		break;
 	}
 
 }
@@ -16463,76 +16463,74 @@ function setcolortransparent(ctx, color_idx, opacity) {
 function setcolorgradient(ctx, color_idx,size) {
 	if ( typeof(size) === "undefined")
 		var size = 400 * Math.sqrt(2);
-		
+
 	var gradient = ctx.createRadialGradient(0,0,size, 0 , 2*Math.PI, true);
 	gradient.addColorStop(1,"white");
-	
+
 	switch(color_idx) {
-	case 0: 
+	case 0:
 		gradient.addColorStop(0,"rgb(0,0,0 )");
 		break;
-	case 1: 
+	case 1:
 		gradient.addColorStop(0,"rgb(0,0,200 )");
 		break;
-	case 2: 
+	case 2:
 		gradient.addColorStop(0,"rgb(200,0,0 )");
 		break;
-	case 3: 
+	case 3:
 		gradient.addColorStop(0,"rgb(0,200,0 )");
 		break;
-	case 4: 
+	case 4:
 		gradient.addColorStop(0,"rgb(200,0,200 )");
 		break;
-	case 5: 
-		gradient.addColorStop(0,"rgb(255,255,0 )");		
+	case 5:
+		gradient.addColorStop(0,"rgb(255,255,0 )");
 		break;
 	default:
 		gradient.addColorStop(0,"rgb(0,0,200 )");
 		break;
-													
+
 	}
 	ctx.fillStyle = gradient;
 }
-	 
+
 function setcolortransparentgradient(ctx, color_idx, opacity,size) {
 	if ( typeof(size) === "undefined")
 		var size = 400 * Math.sqrt(2);
-		
+
 	var gradient = ctx.createRadialGradient(0,0,size, 0 , 2*Math.PI, true);
 	gradient.addColorStop(1,"white");
-	
+
 	switch(color_idx) {
-	case 0: 
-		gradient.addColorStop(0.3,"rgba(0,0,0," + opacity +" )");		
+	case 0:
+		gradient.addColorStop(0.3,"rgba(0,0,0," + opacity +" )");
 		gradient.addColorStop(0,"rgb(0,0,0 )");
 		break;
-	case 1: 
+	case 1:
 		gradient.addColorStop(0.3,"rgba(0,0,200," + opacity +" )");
 		gradient.addColorStop(0,"rgb(0,0,200 )");
 		break;
-	case 2: 
+	case 2:
 		gradient.addColorStop(0.3,"rgba(200,0,0," + opacity +" )");
 		gradient.addColorStop(0,"rgb(200,0,0 )");
 		break;
-	case 3: 
+	case 3:
 		gradient.addColorStop(0.3,"rgba(0,200,0," + opacity +" )");
 		gradient.addColorStop(0,"rgb(0,200,0 )");
 		break;
-	case 4: 
+	case 4:
 		gradient.addColorStop(0.3,"rgba(200,0,200," + opacity +" )");
 		gradient.addColorStop(0,"rgb(200,0,200 )");
 		break;
-	case 5: 
+	case 5:
 		gradient.addColorStop(0.3,"rgba(255,255,0," + opacity +" )");
-		gradient.addColorStop(0,"rgb(255,255,0 )");		
+		gradient.addColorStop(0,"rgb(255,255,0 )");
 		break;
 	default:
 		gradient.addColorStop(0.3,"rgba(0,0,200," + opacity +" )");
 		gradient.addColorStop(0,"rgb(0,0,200 )");
 		break;
-													
+
 	}
 	ctx.fillStyle = gradient;
 }
-
-

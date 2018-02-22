@@ -199,27 +199,40 @@ Simulation.prototype.mouseEvents = function() {
 			var data = that.pixels[1].filter( (_,index) => {return index%4==0})
 
 			var x = Array.range(data.min(),data.max(),(data.max()-data.min())/100)
-			var y = x.map( xi => { return Math.exp(-xi*xi/(2*data.var()))/Math.sqrt(2*Math.PI*data.var())})
+			var y = x.map( xi => { return Math.exp(-xi*xi/(2*data.var()))/Math.sqrt(2*that.width*Math.PI)})
+			var z = x.map( xi => { return Math.sign(1-xi*xi)*2*Math.sqrt(Math.abs(1-xi*xi))/(10*Math.PI) })
 			var pdf = {
 				x: x,
 				y: y,
+				name: 'Equilibrium',
+				mode: 'lines',
+			}
+			var wigner = {
+				x: x,
+				y: z,
+				name: 'Wigner Law',
 				mode: 'lines',
 			}
 			var hist = {
 				x: Array.from(data),
+				opacity: 0.6,
+				name: 'State Distribution',
 				type: 'histogram',
 				histnorm: 'probability'
 			}
 			var lambda = {
-				x: that.lambda,
+				x: Array.from(that.lambda),
+				opacity: 0.6,
+				name: 'Interaction Spectrum',
 				type: 'histogram',
 				histnorm: 'probability'
 			}
 			var layout = {
 				yaxis: {range: [0, 0.1]},
-				xaxis: {range: [-1.5, 1.5]}
+				xaxis: {range: [-3, 3]},
+				barmode: 'overlay'
 			}
-			var data = [hist,pdf,lambda];
+			var data = [hist,pdf,lambda,wigner];
 			Plotly.newPlot('graph', data, layout);
 		}
 		if ( event.code == 'Space' ){
@@ -411,26 +424,39 @@ Simulation.prototype.wigner = function() {
 
 		for(var i = 0; i<this.width; i++) {
 			for(var j = 0; j<this.height; j++) {
-				let u = random.integer(-1,1)/(this.width*this.height)
+				let u = random.integer(-1,1)/Math.sqrt(this.width*this.height)
 				pixels.push(u,u,u,u)
 			}
 		}
 		components.push(pixels)
 	}
 
-	// initialise random interaction matrix J[i][j]
-	// let N = this.width*this.height
-	// this.interaction = numeric.identity(N)
+	// initialise symmetric gaussian interaction matrix J[i][j]
+	let thread = new Lalolab('thread',false,'public/js/lalolib')
+	// thread.do('j = randn('+600+','+600+')', () => {
   //
-	// for(var i = 0; i<N; i++)
-	// 	for(var j = 0; j<N; j++)
-	// 		this.interaction[i][j] = random.integer(-1,1)/Math.sqrt(N)
+	// 	thread.do('J = ( j+transpose(j) ) ./ sqrt(8*j.n)', interaction => {
+	// 		this.interaction = interaction; this.lambda = [-10]
   //
-	// // this.lambda = numeric.eig(this.interaction).lambda.x
-	lab.do("X = rand(200,300)")
-	lab.do("svd(X)", function ( result ) {
-		console.log(result)
+	// 		thread.do('eig(J)', lambda => {
+	// 			this.lambda = new Float32Array(lambda)
+  //
+	// 		})
+	// 	})
+	// })
+
+	thread.do('j = reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)-reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)', () => {
+
+		thread.do('J = sign(j+transpose(j)) ./ sqrt(0.2*j.n)', interaction => {
+			this.interaction = interaction; this.lambda = [-10]
+
+			thread.do('eig(J)', lambda => {
+				this.lambda = new Float32Array(lambda)
+
+			})
+		})
 	})
+
 	return components
 }
 
