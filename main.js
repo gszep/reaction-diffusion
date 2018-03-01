@@ -7,7 +7,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $*/
 
 // rendering global
-var renderStep = 20
+var renderStep = 2
 
 // main simulation canvas
 function Simulation(canvas) {
@@ -91,7 +91,7 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 0.00001, min: 0, max:0.0001, step:0.00001,
+		value: 0.00001, min: 0, max:0.1, step:0.00001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
@@ -131,7 +131,7 @@ Simulation.prototype.sliders = function() {
 	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
-		value: that.parameters.timeStep, min: 0.0, max:0.3, step:0.001,
+		value: that.parameters.timeStep, min: 0.0, max:0.5, step:0.001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)
@@ -228,9 +228,16 @@ Simulation.prototype.mouseEvents = function() {
 				histnorm: 'probability'
 			}
 			var layout = {
-				yaxis: {range: [0, 0.1]},
-				xaxis: {range: [-3, 3]},
-				barmode: 'overlay'
+				legend: { x: 0,y: 1 },
+				barmode: 'overlay',
+				yaxis: {
+					showline: true,
+					range: [0, 0.1]
+				},
+				xaxis: {
+					showline: true,
+					range: [-3, 3]
+				}
 			}
 			var data = [hist,pdf,lambda,wigner];
 			Plotly.newPlot('graph', data, layout);
@@ -484,7 +491,7 @@ Simulation.prototype.setSeed = function() {
 Simulation.prototype.applyConstraint = function() {
 	let pixels = this.getPixels(1)
 	var Z = pixels.var(4)
-	pixels = pixels.map( value => { return value/(1+Z) })
+	pixels = pixels.map( value => { return value/Math.sqrt(Z) })
 
 	let components = []; components.length = this.nComponents
 	components[1] = pixels
