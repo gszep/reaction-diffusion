@@ -19,8 +19,11 @@ precision highp int;
   uniform float n;
   uniform float h;
   uniform int bw;
-  uniform float w[5];
+
 void main(void) {
+
+  float T = 5.0*vTC.x;
+  float hh = 1.0*(vTC.y-0.5);
    uint r = texture(samp, vTC).r;
    uint s = texture(samp, vTC).g;
    if ( ((int(n*vTC.x) + int(n*vTC.y)) & 1) == bw){
@@ -29,7 +32,7 @@ void main(void) {
      sum += texture(samp, vec2(vTC.x-h, vTC.y)).g;
      sum += texture(samp, vec2(vTC.x, vTC.y+h)).g;
      sum += texture(samp, vec2(vTC.x, vTC.y-h)).g;
-     s = (float(r) < w[sum]) ? 0u : 1u;
+     s = (float(r) < floor(4294967295.0/(1.0 + exp(2.0*(2.0*float(sum) - 4.0+hh)/T)))) ? 0u : 1u;
    }
    fragColor = uvec2(r, s);
 }
@@ -72,7 +75,7 @@ function getShader ( gl, id ){
 var gl, prog, prog_show, FBO, FBO1, texture, texture1, ctx,
     cTemp, bHot = true, mouseDown = false,
     timer, delay = 0, frames = 0, time, animation, pix,
-    n = 32, sampLoc, wLoc, bwLoc, nLoc, hLoc, T = 1
+    n = 512, sampLoc, wLoc, bwLoc, nLoc, hLoc, T = 1
 function main() {
    var c = document.getElementById("c")
    var err = "Your browser does not support "
