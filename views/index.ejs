@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<% include header %>
+	</head>
+
+	<body>
+		<header><h1>Reaction-Diffusion System</h1></header>
+		<div id="simulation">
+
+			<aside class="panel">
+
+				<section id="instructions">
+					<header><h4>Model</h4></header>
+						Approximate Majority
+						<br></br>
+				</section>
+
+				<section id="controls">
+					<header><h4>Parameters</h4></header>
+
+					Diffusion Ratio:
+					<span class="remark" id="diffusionRatio"></span><br/>
+					<div id="diffusionRatioSlider" class="slider"></div>
+
+					Grid Size:
+					<span class="remark" id="gridSize"></span><br/>
+					<div id="gridSizeSlider" class="slider"></div>
+
+					Time Step:
+					<span class="remark" id="timeStep"></span><br/>
+					<div id="timeStepSlider" class="slider"></div>
+
+					Colors:
+					<div id="gradient"></div>
+				</section>
+
+			</aside>
+
+			<canvas id="simulation-canvas" width="512" height="512" style="width:512px;height:512px;"></canvas>
+			<div id="graph" style="width:512px;height:512px;"></div>
+			<script>
+
+				// initialise color scheme
+				$("#gradient").gradient({values: [[0.0,'#000000'],[0.5,'#0080ff'],[1.0,'#FFFFFF']]})
+
+				// instantiate simulation canvas
+				S = new Simulation('simulation-canvas')
+
+			</script>
+
+		</div>
+
+	</body>
+</html>
