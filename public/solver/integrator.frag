@@ -32,9 +32,9 @@ void main() {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					value[1] = vec4(1.0);
+					value[i] = vec4(1.0);
 				else
-					value[1] = vec4(-1.0);
+					value[i] = vec4(0.0);
 			}
 		}
 	}
@@ -48,29 +48,13 @@ void main() {
 		dt = timeStep;
 	}
 
-	// lowp uint sum = texture(samp, vec2(vTC.x+h, vTC.y)).g;
-	// sum += texture(samp, vec2(vTC.x-h, vTC.y)).g;
-	// sum += texture(samp, vec2(vTC.x, vTC.y+h)).g;
-	// sum += texture(samp, vec2(vTC.x, vTC.y-h)).g;
-
-	// vec4 interactions = vec4(0.0);
-	// for (int i=1; i < 10; i++) {
-	// 	for (int j=1; j < 10; j++) {
-	// 		// // float dx = Uniform(-0.005,0.005);
-	// 		// // float dy = Uniform(-0.005,0.005);
-	// 		// vec2 dr = texture(component[2],fract(location+1.0/vec2(i,j))).xy;
-	// 		interactions +=
-	// 	}
-	// }
-	vec4 interactions = vec4(0.0);
-	float n = 10.;//float(size.x*size.y);
-	for (int i=0; i < int(n); i++) {
-		interactions += Uniform(-1./n,1./n)*texture(component[1], vec2(Uniform(0.,1.),Uniform(0.,1.)));
-	}
+	// random noise
+	vec4 eta = vec4(noise*Uniform(-1.,1.));
 
 	// output components to buffer
-	outputComponent[1] = value[1] + dt*( 0.0*laplacian[1]*diffusion[1] + interactions );
-	outputComponent[2] = value[2];
+	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + eta + value[2]*value[1] - value[1]*value[3] );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - value[2]*value[1] - value[2]*value[3] + 2.0*value[1]*value[3] );
+	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] - eta + value[2]*value[3] - value[1]*value[3] );
 
 	// pass forward random seed
 	outputComponent[0] = state;

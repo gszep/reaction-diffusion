@@ -6,12 +6,11 @@
 void main(void) {
 
 	vec4 displayPixel = vec4(0.0,0.0,0.0,0.0);
-	float s = texture(component[1], location).x;
+	for( int i=0; i < NCOMPONENTS; i++ ) {
 
-	if (s < 0.0)
-		displayPixel = mix( displayPixel, colors[1], -s);
-	if (s > 0.0)
-		displayPixel = mix( displayPixel, colors[2], s);
+		float phi = texture(component[i], location).x;
+		displayPixel = mix( displayPixel, colors[i], phi);
+	};
 
 	outputColor = displayPixel;
 }

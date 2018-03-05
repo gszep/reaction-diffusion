@@ -23,6 +23,10 @@
 					<span class="remark" id="diffusionRatio"></span><br/>
 					<div id="diffusionRatioSlider" class="slider"></div>
 
+					Noise:
+					<span class="remark" id="noise"></span><br/>
+					<div id="noiseSlider" class="slider"></div>
+
 					Grid Size:
 					<span class="remark" id="gridSize"></span><br/>
 					<div id="gridSizeSlider" class="slider"></div>
@@ -42,7 +46,7 @@
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0,'#000000'],[0.5,'#0080ff'],[1.0,'#FFFFFF']]})
+				$("#gradient").gradient({values: [[0.0,'#000000'],[0.33, '#FFD40B'],[0.66,'#FFFFFF'],[1.0,'#1700F1']]})
 
 				// instantiate simulation canvas
 				S = new Simulation('simulation-canvas')

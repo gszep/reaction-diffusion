@@ -7,7 +7,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $*/
 
 // rendering global
-var renderStep = 2
+var renderStep = 20
 
 // main simulation canvas
 function Simulation(canvas) {
@@ -18,8 +18,8 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 32; this.height = 32;
-		this.pixels = this.wigner()
+		this.width = 256; this.height = 256;
+		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
 		// initialise parameters, interactions
@@ -47,7 +47,6 @@ Simulation.prototype.render = function() {
 	// update parameters
 	this.updateParameters()
 	this.setSeed()
-	this.applyConstraint()
 
 	// propagate for a given number of steps
 	this.propagate()
@@ -81,7 +80,7 @@ Simulation.prototype.propagate = function() {
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
 		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
-		'timeStep': 0.0,
+		'timeStep': 0.0, 'noise': 0.0
 	}
 }
 
@@ -91,21 +90,38 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 0.00001, min: 0, max:0.1, step:0.00001,
+		value: 1.0, min: 0, max:2, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[1][0] = ui.value
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[1][0] = ui.value
+			that.parameters.diffusion[3][0] = ui.value * that.parameters.diffusion[1][0]
 
 		}
 	})
-	$('#diffusionRatioSlider').slider('value',0.00001)
+	$('#diffusionRatioSlider').slider('value',1.0)
+
+	$('#noiseSlider').slider({
+		value: 0.0, min: 0.0, max:10.0, step:0.001,
+
+		change: function(event, ui) {
+			$('#noise').html(ui.value)
+			that.parameters.noise = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#noise').html(ui.value)
+			that.parameters.noise = ui.value
+
+		}
+	})
+	$('#noiseSlider').slider('value',0.0)
 
 	$('#gridSizeSlider').slider({
 		value: 256, min:100 , max:512, step:1,
@@ -119,7 +135,7 @@ Simulation.prototype.sliders = function() {
 			if (that.textures)
 				that.pixels = that.getPixels()
 			else
-				that.pixels = that.wigner()
+				that.pixels = that.zeros()
 
 			that.width = ui.value; that.height = ui.value;
 			that.setBuffer(that.pixels)
@@ -409,6 +425,7 @@ Simulation.prototype.bindComponents = function(program,bufferIndex) {
 
 // setting zero initial condition
 Simulation.prototype.zeros = function() {
+	this.lambda = [-10]
 	var components = []
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
@@ -642,7 +659,6 @@ Simulation.prototype.getShader = function(type) {
 			this.nComponents = this.getComponents(declare)
 			gl.shaderSource(shader,declare+derivatives+random+sourceCode)
 			gl.compileShader(shader)
-			console.log(declare+derivatives+random+sourceCode)
 
 			// report any errors
 			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
@@ -679,8 +695,8 @@ Simulation.prototype.getShader = function(type) {
 // compile integrator and painter shaders from glsl code
 Simulation.prototype.compileShaders = function() {
 
-	this.integrator  = gl.createProgram()
-	this.painter  = gl.createProgram()
+	this.integrator = gl.createProgram()
+	this.painter = gl.createProgram()
 
 	return Promise.all([
 
