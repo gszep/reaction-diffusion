@@ -45,7 +45,7 @@
 #  Use '*' to allow any origin to access your server.
 #
 #  Takes precedence over allow_origin_pat.
-c.NotebookApp.allow_origin = '*'
+#c.NotebookApp.allow_origin = ''
 
 ## Use a regular expression for the Access-Control-Allow-Origin header
 #
@@ -240,7 +240,7 @@ c.NotebookApp.open_browser = False
 #c.NotebookApp.port = 8888
 
 ## The number of additional ports to try if the specified port is not available.
-#c.NotebookApp.port_retries = 50
+c.NotebookApp.port_retries = 0
 
 ## DISABLED: use %pylab or %matplotlib in the notebook to enable matplotlib.
 #c.NotebookApp.pylab = 'disabled'
@@ -283,8 +283,7 @@ c.NotebookApp.open_browser = False
 #  uses.
 c.NotebookApp.tornado_settings = {
     'headers': {
-        'Content-Security-Policy': "frame-ancestors http://localhost:8000 'self' ",
-        'X-Frame-Options': 'ALLOW-FROM http://localhost:8000'
+        'Content-Security-Policy': "frame-ancestors http://localhost:8000 'self' "
     }
 }
 

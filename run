@@ -1,3 +1,5 @@
 #!/bin/bash
 source env/bin/activate
-node server.js
+
+# initialise jupyter notebook and webserver
+jupyter notebook -y --notebook-dir=jupyter --port=8888 & node server.js && fg

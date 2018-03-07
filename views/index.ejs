@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<% include header %>
-	</head>
+	<head> <% include header %> </head>
 
 	<body>
-		<header><h1>Reaction-Diffusion System</h1></header>
+		<h1 style="font-family:'Computer Modern Sans'">Reaction-Diffusion Systems</h1>
+		<div style="font-family:'Computer Modern Serif'">
+			<p>Example text</p>
+		</div>
 		<div id="simulation">
 
 			<aside class="panel">
@@ -41,18 +42,20 @@
 
 			</aside>
 
-			<canvas id="simulation-canvas" width="512" height="512" style="width:512px;height:512px;"></canvas>
-			<div id="graph" style="width:512px;height:512px;"></div>
+			<canvas id="simulation-canvas" width="512px" height="512px" style="width:512px;height:512px;border:1px solid black"></canvas>
+
+			<aside class="panel">
+				<iframe id='jupyter-notebook' src="http://localhost:8888/notebooks/whiteboard.ipynb" frameBorder="0" style="width:1024px;height:512px;"></iframe>
+			</aside>
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0,'#000000'],[0.33, '#FFD40B'],[0.66,'#FFFFFF'],[1.0,'#1700F1']]})
+				$("#gradient").gradient({values: [[0.0,'#000000'],[0.9, '#FFD40B'],[0.95,'#FFFFFF'],[1.0,'#1700F1']]})
 
 				// instantiate simulation canvas
 				S = new Simulation('simulation-canvas')
 
 			</script>
 		</div>
-		<iframe id='jupyter-notebook' src="http://localhost:8888" style="width: 90%; height: 300px"></iframe>
 	</body>
 </html>
