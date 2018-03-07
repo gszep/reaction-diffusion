@@ -10,7 +10,7 @@ define(['base/js/namespace'], function(Jupyter){
 	Jupyter._target = '_self'
 })
 
-// allow communication from WebGL app to Jupyter Notebook 
+// allow communication from WebGL app to Jupyter Notebook
 window.addEventListener('message', function(event) {
 	if (~event.origin.indexOf('http://localhost:8000')) {
 

@@ -4,7 +4,8 @@ Author: Gregory Szep, King's College London 2017
 Adapted from code by Pablo Márquez Neila
 */
 
-/* global gl:true $*/
+/* dependencies located in public/js */
+/* global gl:true $ random load jupyter */
 
 // rendering global
 var renderStep = 20
@@ -18,7 +19,7 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 256; this.height = 256;
+		this.width = 256; this.height = 256
 		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
@@ -137,7 +138,7 @@ Simulation.prototype.sliders = function() {
 			else
 				that.pixels = that.zeros()
 
-			that.width = ui.value; that.height = ui.value;
+			that.width = ui.value; that.height = ui.value
 			that.setBuffer(that.pixels)
 
 			that.parameters.timeStep = 0.0
@@ -167,7 +168,7 @@ Simulation.prototype.sliders = function() {
 Simulation.prototype.mouseEvents = function() {
 	var that = this
 
-	// TODO(@gszep) factor brush properties into json/method
+	// TODO(@gszep) factor brush properties into json/method.. mess!!
 	this.brush = { radius: 0.1 }
 
 
@@ -212,51 +213,9 @@ Simulation.prototype.mouseEvents = function() {
 
 		if ( event.code == 'Enter' ) {
 			that.pixels = that.getPixels()
-			var data = that.pixels[1].filter( (_,index) => {return index%4==0})
+			jupyter.execute(that.pixels)
 
-			var x = Array.range(data.min(),data.max(),(data.max()-data.min())/100)
-			var y = x.map( xi => { return Math.exp(-xi*xi/(2*data.var()))/Math.sqrt(2*that.width*Math.PI)})
-			var z = x.map( xi => { return Math.sign(1-xi*xi)*2*Math.sqrt(Math.abs(1-xi*xi))/(10*Math.PI) })
-			var pdf = {
-				x: x,
-				y: y,
-				name: 'Equilibrium',
-				mode: 'lines',
-			}
-			var wigner = {
-				x: x,
-				y: z,
-				name: 'Wigner Law',
-				mode: 'lines',
-			}
-			var hist = {
-				x: Array.from(data),
-				opacity: 0.6,
-				name: 'State Distribution',
-				type: 'histogram',
-				histnorm: 'probability'
-			}
-			var lambda = {
-				x: Array.from(that.lambda),
-				opacity: 0.6,
-				name: 'Interaction Spectrum',
-				type: 'histogram',
-				histnorm: 'probability'
-			}
-			var layout = {
-				legend: { x: 0,y: 1 },
-				barmode: 'overlay',
-				yaxis: {
-					showline: true,
-					range: [0, 0.1]
-				},
-				xaxis: {
-					showline: true,
-					range: [-3, 3]
-				}
-			}
-			var data = [hist,pdf,lambda,wigner];
-			Plotly.newPlot('graph', data, layout);
+
 		}
 		if ( event.code == 'Space' ){
 			that.setBuffer(that.pixels)
@@ -272,7 +231,7 @@ Simulation.prototype.mouseEvents = function() {
 }
 
 
-// pass updated parameter values to shaders
+// TODO calling getUniformLocation on every update is inefficient
 Simulation.prototype.updateParameters = function() {
 
 	// itegrate through shaders
@@ -347,13 +306,13 @@ Simulation.prototype.setBuffer = function(pixels) {
 			for ( let n = 0; n < this.nComponents; n++ ) {
 				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+n,
 					gl.TEXTURE_2D, this.textures[i][n], 0)
-				}
-				this.buffer.push(buffer)
 			}
+			this.buffer.push(buffer)
+		}
 
-			// bind component textures to painter program
-			gl.useProgram(this.painter)
-			this.bindComponents(this.painter,1)
+		// bind component textures to painter program
+		gl.useProgram(this.painter)
+		this.bindComponents(this.painter,1)
 	}
 
 	// check for errors
@@ -425,7 +384,6 @@ Simulation.prototype.bindComponents = function(program,bufferIndex) {
 
 // setting zero initial condition
 Simulation.prototype.zeros = function() {
-	this.lambda = [-10]
 	var components = []
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
@@ -455,19 +413,7 @@ Simulation.prototype.wigner = function() {
 		components.push(pixels)
 	}
 
-	// initialise symmetric gaussian interaction matrix J[i][j]
-	let thread = new Lalolab('thread',false,'js/lalolib')
-	thread.do('j = reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)-reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)', () => {
-
-		thread.do('J = sign(j+transpose(j)) ./ sqrt(0.2*j.n)', interaction => {
-			this.interaction = interaction; this.lambda = [-10]
-
-			thread.do('eig(J)', lambda => {
-				this.lambda = new Float32Array(lambda)
-
-			})
-		})
-	})
+	// TODO initialise symmetric gaussian interaction matrix J[i][j]
 
 	return components
 }
@@ -479,10 +425,10 @@ Simulation.prototype.setSeed = function() {
 
 	for(var i = 0; i<this.width; i++){
 		for(var j = 0; j<this.height; j++) {
-			pixels.push(random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1))
+			pixels.push(random.integer(Math.pow(2,7)+1,Math.pow(2,32)-1),
+				random.integer(Math.pow(2,7)+1,Math.pow(2,32)-1),
+				random.integer(Math.pow(2,7)+1,Math.pow(2,32)-1),
+				random.integer(Math.pow(2,7)+1,Math.pow(2,32)-1))
 		}
 	}
 
@@ -536,13 +482,13 @@ Simulation.prototype.getPixels = function(index) {
 
 // resize pixel array with constant interpolation
 Simulation.prototype.resize = function(pixels) {
-		var components = []
+	var components = []
 
-		for ( let n = 0; n < this.nComponents; n++ ) {
-			let resized = this.rescalePixels(pixels[n],this.width,this.height)
-			components.push(resized.data.map( value => { return value/255 }))
-		}
-		return components
+	for ( let n = 0; n < this.nComponents; n++ ) {
+		let resized = this.rescalePixels(pixels[n],this.width,this.height)
+		components.push(resized.data.map( value => { return value/255 }))
+	}
+	return components
 }
 
 
@@ -554,8 +500,8 @@ Simulation.prototype.rescalePixels = function(pixels, width, height) {
 	canvas.height = parseInt(this.canvas.style.height)
 
 	// original grid size
-	originalWidth = Math.sqrt(pixels.length/4)
-	originalHeight = Math.sqrt(pixels.length/4)
+	var originalWidth = Math.sqrt(pixels.length/4)
+	var originalHeight = Math.sqrt(pixels.length/4)
 
 	// pass pixel data to html canvas
 	var ctx = canvas.getContext('2d')
@@ -568,11 +514,11 @@ Simulation.prototype.rescalePixels = function(pixels, width, height) {
 	target.height = canvas.height
 
 	// rescale pixels on canvas
-	target.getContext("2d").putImageData(imageData,0,0);
-	ctx.scale(width/originalWidth,height/originalHeight);
-	ctx.drawImage(target,0,0);
+	target.getContext('2d').putImageData(imageData,0,0)
+	ctx.scale(width/originalWidth,height/originalHeight)
+	ctx.drawImage(target,0,0)
 
-  return ctx.getImageData(0,0,width,height);
+	return ctx.getImageData(0,0,width,height)
 }
 
 
@@ -648,7 +594,7 @@ Simulation.prototype.getShader = function(type) {
 	if (type=='integrator') {
 		shader = gl.createShader(gl.FRAGMENT_SHADER)
 
-		// compile shader
+		// TODO this is a mess.. fix it!
 		return load([
 			'solver/integrator.frag',
 			'solver/include/integrator/declare.glsl',
@@ -656,17 +602,16 @@ Simulation.prototype.getShader = function(type) {
 			'solver/include/integrator/random.glsl'])
 			.then( ([sourceCode,declare,derivatives,random]) => {
 
-			this.nComponents = this.getComponents(declare)
-			gl.shaderSource(shader,declare+derivatives+random+sourceCode)
-			gl.compileShader(shader)
+				this.nComponents = this.getComponents(declare)
+				gl.shaderSource(shader,declare+derivatives+random+sourceCode)
+				gl.compileShader(shader)
 
-			// report any errors
-			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
-				throw gl.getShaderInfoLog(shader)
-			}
+				// report any errors
+				if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))
+					throw gl.getShaderInfoLog(shader)
 
-			return shader
-		})
+				return shader
+			})
 	}
 
 	if (type=='painter') {
@@ -678,16 +623,15 @@ Simulation.prototype.getShader = function(type) {
 			'solver/include/painter/declare.glsl'])
 			.then( ([sourceCode,declare]) => {
 
-			gl.shaderSource(shader,declare+sourceCode)
-			gl.compileShader(shader)
+				gl.shaderSource(shader,declare+sourceCode)
+				gl.compileShader(shader)
 
-			// report any errors
-			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
-				throw gl.getShaderInfoLog(shader)
-			}
+				// report any errors
+				if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))
+					throw gl.getShaderInfoLog(shader)
 
-			return shader
-		})
+				return shader
+			})
 	}
 }
 

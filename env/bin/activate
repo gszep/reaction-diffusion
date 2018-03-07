@@ -206,7 +206,3 @@ if [ -n "$BASH" -o -n "$ZSH_VERSION" ] ; then
 fi
 
 unset NODE_VIRTUAL_ENV_DISABLE_PROMPT
-
-# redirect jupyter paths
-export JUPYTER_CONFIG_DIR="$VIRTUAL_ENV"
-

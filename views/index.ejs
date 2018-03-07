@@ -46,6 +46,7 @@
 
 			<aside class="panel">
 				<iframe id='jupyter-notebook' src="http://localhost:8888/notebooks/whiteboard.ipynb" frameBorder="0" style="width:1024px;height:512px;"></iframe>
+				<script> jupyter = new Jupyter('jupyter-notebook') </script>
 			</aside>
 			<script>
 
@@ -53,7 +54,7 @@
 				$("#gradient").gradient({values: [[0.0,'#000000'],[0.9, '#FFD40B'],[0.95,'#FFFFFF'],[1.0,'#1700F1']]})
 
 				// instantiate simulation canvas
-				S = new Simulation('simulation-canvas')
+				Solver = new Simulation('simulation-canvas')
 
 			</script>
 		</div>
