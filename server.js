@@ -19,13 +19,14 @@ const server = require('http').Server(app)
 const socket = new WebSocket.Server({ server })
 
 // listen for data input
-socket.on('connection', ws => {
+socket.on('connection', socket => {
 
-	ws.on('message', message => {
-		console.log(CYAN+'[Node]'+RESET+' received: %s', message)
+	socket.on('message', message => {
+		console.log(message)
+		console.log(new Float32Array(message))
 	})
 
-	ws.send('something')
+	socket.send(CYAN+'[Node]'+RESET+' Connection established')
 })
 
 server.listen(8000, () => {

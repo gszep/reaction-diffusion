@@ -4,7 +4,7 @@ to the Jupyter Notebook hosted under given url
 Author: Gregory Szep, King's College London 2018
 */
 var jupyterURL = 'http://35.176.80.10:8888'
-var socket = new WebSocket('ws://35.176.80.10:9999')
+var socket = new WebSocket('ws://35.176.80.10:8000')
 
 // linker object to notebook iframe
 function Jupyter(notebook) {
