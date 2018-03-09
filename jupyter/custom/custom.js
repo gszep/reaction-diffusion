@@ -1,20 +1,22 @@
 /*
-Custom functions and listeners defined within the jupyter notebook
+Attach functions and listeners for messages from the
+main index at the given origin, to the Jupyter Notebook
 2017. G. Szep
 */
-/*eslint no-console: ["error", { allow: ["log"] }] */
+/*eslint no-console: ["error", { allow: ["log","error"] }] */
 /* global define Jupyter */
+var origin = 'http://localhost:8000'
 
 // prevent new tabs from opening from within iframe
 define(['base/js/namespace'], function(Jupyter){
 	Jupyter._target = '_self'
 })
 
-// allow communication from WebGL app to Jupyter Notebook
+// message handlers
 window.addEventListener('message', function(event) {
-	if (~event.origin.indexOf('http://localhost:8000')) {
+	if (~event.origin.indexOf(origin)) {
 
-		// execute code in new cell
+		// Jupyter.prototype.execute
 		if(event.data.execute) {
 			Jupyter.notebook.insert_cell_below()
 
@@ -23,9 +25,12 @@ window.addEventListener('message', function(event) {
 			cell.execute()
 		}
 
-		// print to console
-		if(event.data.log)
-			console.log(event.data.log)
+		// Jupyter.prototype.setData
+		else if( ArrayBuffer.prototype.isPrototypeOf(event.data) )
+			console.log(new Float32Array(event.data))
+
+		else // format not recognised
+			console.error('[jupyter] unrecognised message :'+event.data)
 	}
 	else
 		return
