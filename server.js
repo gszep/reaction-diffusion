@@ -10,19 +10,13 @@ CYAN = '\x1b[36m'
 
 // serve app with views and static files
 console.log(CYAN+'[Node]'+RESET+' Configuring Application')
+const WebSocket = require('ws')
 const App = require('./app'),
 	app = new App()
 
-// setup server
+// setup server with data i/o socket
 const server = require('http').Server(app)
-var port = 8000
-
-server.listen(port)
-console.log(CYAN+'[Node]'+RESET+' Listening on port '+port)
-
-// setup data i/o socket
-const WebSocket = require('ws')
-const socket = new WebSocket.Server({ port: 9999 })
+const socket = new WebSocket.Server({ server })
 
 // listen for data input
 socket.on('connection', ws => {
@@ -34,6 +28,11 @@ socket.on('connection', ws => {
 	ws.send('something')
 })
 
+server.listen(8000, () => {
+	console.log(CYAN+'[Node]'+RESET+' Listening on %d', server.address().port)
+})
+
+// tell us when server shuts down
 process.on('SIGINT', function(){
 	console.log('\n'+CYAN+'[Node]'+RESET+' Shutting down server')
 })
