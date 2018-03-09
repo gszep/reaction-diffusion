@@ -18,5 +18,5 @@ deactivate; source env/bin/activate
 All required modules are then installed using `npm` or `pip`.
 ```bash
 npm install -g express ejs http-server
-pip install jupyter scipy numpy matplotlib
+pip install jupyter scipy numpy matplotlib requests
 ```

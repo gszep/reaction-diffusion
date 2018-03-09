@@ -3,7 +3,7 @@ Jupyter object that sends cross-origin data/commands
 to the Jupyter Notebook hosted under given url
 Author: Gregory Szep, King's College London 2018
 */
-var jupyterURL = 'http://localhost:8888'
+var jupyterURL = 'http://35.176.80.10:8888'
 
 // linker object to notebook iframe
 function Jupyter(notebook) {

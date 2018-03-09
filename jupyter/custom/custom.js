@@ -5,7 +5,7 @@ main index at the given origin, to the Jupyter Notebook
 */
 /*eslint no-console: ["error", { allow: ["log","error"] }] */
 /* global define Jupyter */
-var origin = 'http://localhost:8000'
+var origin = 'http://35.176.80.10:8000'
 
 // prevent new tabs from opening from within iframe
 define(['base/js/namespace'], function(Jupyter){

@@ -281,9 +281,12 @@ c.NotebookApp.port_retries = 0
 
 ## Supply overrides for the tornado.web.Application that the Jupyter notebook
 #  uses.
+from requests import get
+IP = get('https://api.ipify.org').text
+
 c.NotebookApp.tornado_settings = {
     'headers': {
-        'Content-Security-Policy': "frame-ancestors http://*:8000 'self' "
+        'Content-Security-Policy': "frame-ancestors http://"+IP+":8000 'self' "
     }
 }
 
