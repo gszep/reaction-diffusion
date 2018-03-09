@@ -283,7 +283,7 @@ c.NotebookApp.port_retries = 0
 #  uses.
 c.NotebookApp.tornado_settings = {
     'headers': {
-        'Content-Security-Policy': "frame-ancestors http://localhost:8000 'self' "
+        'Content-Security-Policy': "frame-ancestors http://*:8000 'self' "
     }
 }
 
