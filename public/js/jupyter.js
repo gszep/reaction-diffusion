@@ -4,6 +4,7 @@ to the Jupyter Notebook hosted under given url
 Author: Gregory Szep, King's College London 2018
 */
 var jupyterURL = 'http://35.176.80.10:8888'
+var socket = new WebSocket('ws://35.176.80.10:9999')
 
 // linker object to notebook iframe
 function Jupyter(notebook) {
@@ -17,12 +18,12 @@ Jupyter.prototype.execute = function(code) {
 }
 
 
-// send arrays to jupyter
+// send arrays to jupyter via socket
 Jupyter.prototype.setData = function(object) {
 	var that = this
 
 	if( Float32Array.prototype.isPrototypeOf(object) )
-		this.notebook.postMessage(object.buffer,jupyterURL,[object.buffer])
+		socket.emit('data',object.buffer)
 
 	else if ( Array.prototype.isPrototypeOf(object) )
 		object.forEach( element => { that.setData(element) })
