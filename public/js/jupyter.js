@@ -23,7 +23,7 @@ Jupyter.prototype.setData = function(object) {
 	var that = this
 
 	if( Float32Array.prototype.isPrototypeOf(object) )
-		socket.emit('data',object.buffer)
+		socket.send(object)
 
 	else if ( Array.prototype.isPrototypeOf(object) )
 		object.forEach( element => { that.setData(element) })
