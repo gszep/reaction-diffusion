@@ -286,7 +286,7 @@ IP = get('https://api.ipify.org').text
 
 c.NotebookApp.tornado_settings = {
     'headers': {
-        'Content-Security-Policy': "frame-ancestors http://"+IP+":8000 'self' "
+        'Content-Security-Policy': "frame-ancestors http://reaction-diffusion.com 'self' "
     }
 }
 
