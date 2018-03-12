@@ -3,12 +3,13 @@ Data transfer socket
 2018. G. Szep
 */
 /*eslint no-console: ["error", { allow: ["log"] }] */
-/*global RESET:true CYAN:true*/
+/*global __dirname RESET:true CYAN:true*/
 RESET = '\x1b[0m'
 CYAN = '\x1b[36m'
 
 const WebSocket = require('ws')
 const fs = require('fs')
+const path = require('path')
 
 
 module.exports = function(server) {
@@ -21,7 +22,7 @@ module.exports = function(server) {
 		console.log('\n'+CYAN+'[Node]'+RESET+' Client connected',socket._socket.remoteAddress.replace(/^.*:/, ''))
 
 		socket.on('message', buffer => {
-			let fileName = '../jupyter/notebooks/data/'+uuid()
+			let fileName = path.join(__dirname,'..','jupyter/notebooks/data/',uuid())
 
 			fs.open(fileName, 'w', (error,filePointer) => {
 				if (error) console.log(CYAN+'[Node]'+RESET+' error opening file '+fileName)
