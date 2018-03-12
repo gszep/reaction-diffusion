@@ -54,10 +54,10 @@ window.addEventListener('message', function(event) {
 // listen to server responses
 socket.addEventListener('message', event => {
 
-	if (event.data.match('[Node]'))
+	if (event.data.match('\\[Node\\]'))
 		console.log(event.data)
 
-	else if (event.data.match('[Data]')) {
+	else if (event.data.match('\\[Data\\]')) {
 		let code = 'pixels=fromfile('+event.data.replace('[Data] ','')+')\n'
 		code += 'n = int(sqrt(len(pixels))); pixels = pixels.reshape(n,n); imshow(pixels);'
 		execute(code)
