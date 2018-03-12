@@ -21,7 +21,7 @@ const socket = new WebSocket.Server({ server })
 // listen for data input
 socket.on('connection', socket => {
 
-	socket.send('[Node] WebSocket connected')
+	socket.send('[Node] Data transfer socket connected')
 	console.log('\n'+CYAN+'[Node]'+RESET+' Client connected',socket._socket.remoteAddress.replace(/^.*:/, ''))
 
 	socket.on('message', message => {
