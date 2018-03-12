@@ -15,6 +15,16 @@ define(['base/js/namespace'], function(Jupyter){
 })
 
 
+// execute code in jupyter
+function execute(code) {
+	Jupyter.notebook.insert_cell_below()
+
+	let cell = Jupyter.notebook.select_next().get_selected_cell()
+	cell.set_text(code)
+	cell.execute()
+}
+
+
 // message handlers
 window.addEventListener('message', function(event) {
 	if (~event.origin.indexOf(origin)) {
@@ -43,9 +53,13 @@ window.addEventListener('message', function(event) {
 
 // listen to server responses
 socket.addEventListener('message', event => {
-	Jupyter.notebook.insert_cell_below()
 
-	let cell = Jupyter.notebook.select_next().get_selected_cell()
-	cell.set_text(event.data)
-	cell.execute()
+	if (event.data.match('[Node]'))
+		console.log(event.data)
+
+	else if (event.data.match('[Data]')) {
+		let code = 'pixels=fromfile('+event.data.replace('[Data] ','')+')\n'
+		code += 'n = int(sqrt(len(pixels))); pixels = pixels.reshape(n,n); imshow(pixels);'
+		execute(code)
+	}
 })
