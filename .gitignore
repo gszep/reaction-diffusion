@@ -1,4 +1,5 @@
 .*
 !.gitmodules
 !.gitignore
+!jupyter/notebooks/data/.socket.js
 *.pyc
