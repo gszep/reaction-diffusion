@@ -58,7 +58,7 @@ socket.addEventListener('message', event => {
 		console.log(event.data)
 
 	else if (event.data.match('\\[Data\\]')) {
-		let code = 'pixels=fromfile("'+event.data.replace('[Data] ','')+'")\n'
+		let code = 'pixels=fromfile("'+event.data.replace('[Data] ','')+'",dtype=float32)[::4]\n'
 		code += 'n = int(sqrt(len(pixels))); pixels = pixels.reshape(n,n); imshow(pixels);'
 		execute(code)
 	}
