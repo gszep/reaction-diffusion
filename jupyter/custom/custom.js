@@ -28,8 +28,7 @@ window.addEventListener('message', function(event) {
 
 		// Jupyter.prototype.setData
 		else if( ArrayBuffer.prototype.isPrototypeOf(event.data) )
-			console.log(new Float32Array(event.data))
-			// socket.send(object)
+			socket.send(event.data)
 
 		// Jupyter.prototype.postMessage
 		else
