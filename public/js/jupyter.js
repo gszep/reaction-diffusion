@@ -40,9 +40,6 @@ Jupyter.prototype.postMessage = function(message) {
 
 
 // listen to responses
-socket.on('connection', connection => {
-
-	connection.on('message', message => {
-		console.log(message)
-	})
+socket.addEventListener('message', event => {
+	console.log(event.data)
 })
