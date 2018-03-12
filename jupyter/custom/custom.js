@@ -5,13 +5,15 @@ main index at the given origin, to the Jupyter Notebook
 */
 /*eslint no-console: ["error", { allow: ["log","error"] }] */
 /* global define Jupyter */
+
 var origin = 'http://reaction-diffusion.com'
-var socket = new Worker('data/socket.js')
+var socket = new WebSocket('ws://reaction-diffusion.com')
 
 // prevent new tabs from opening from within iframe
 define(['base/js/namespace'], function(Jupyter){
 	Jupyter._target = '_self'
 })
+
 
 // message handlers
 window.addEventListener('message', function(event) {
@@ -28,7 +30,7 @@ window.addEventListener('message', function(event) {
 
 		// Jupyter.prototype.setData
 		else if( ArrayBuffer.prototype.isPrototypeOf(event.data) )
-			socket.postMessage(event.data,[event.data])
+			socket.send(event.data)
 
 		// Jupyter.prototype.postMessage
 		else
@@ -36,4 +38,14 @@ window.addEventListener('message', function(event) {
 	}
 	else
 		return
+})
+
+
+// listen to server responses
+socket.addEventListener('message', event => {
+	Jupyter.notebook.insert_cell_below()
+
+	let cell = Jupyter.notebook.select_next().get_selected_cell()
+	cell.set_text(event.data)
+	cell.execute()
 })
