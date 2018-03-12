@@ -3,6 +3,7 @@ Jupyter object that sends cross-origin data/commands
 to the Jupyter Notebook hosted under given url
 Author: Gregory Szep, King's College London 2018
 */
+/*eslint no-console: ["error", { allow: ["log"] }] */
 var jupyterURL = 'http://reaction-diffusion.com:8888'
 var socket = new WebSocket('ws://reaction-diffusion.com')
 
@@ -20,13 +21,12 @@ Jupyter.prototype.execute = function(code) {
 
 // send arrays to jupyter via socket
 Jupyter.prototype.setData = function(object) {
-	var that = this
 
 	if( Float32Array.prototype.isPrototypeOf(object) )
 		socket.send(object)
 
 	else if ( Array.prototype.isPrototypeOf(object) )
-		object.forEach( element => { that.setData(element) })
+		object.forEach( element => { socket.send(element) })
 
 	else // format not recognised
 		this.postMessage(object)
