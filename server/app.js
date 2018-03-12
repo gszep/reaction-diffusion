@@ -19,7 +19,8 @@ var App = module.exports = function() {
 // serve static files and use templating system
 App.prototype.initialise = function() {
 
-	this.app.use(express.static(__dirname + '/public'))
+	this.app.use(express.static(__dirname + '/../public'))
+	this.app.set('views', __dirname + '/../views')
 	this.app.set('view engine', 'ejs')
 }
 

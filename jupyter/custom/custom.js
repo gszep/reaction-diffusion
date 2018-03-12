@@ -6,7 +6,7 @@ main index at the given origin, to the Jupyter Notebook
 /*eslint no-console: ["error", { allow: ["log","error"] }] */
 /* global define Jupyter */
 var origin = 'http://reaction-diffusion.com'
-var socket = new Worker('data/socket.js')
+var socket = new Worker('../socket.js')
 
 // prevent new tabs from opening from within iframe
 define(['base/js/namespace'], function(Jupyter){

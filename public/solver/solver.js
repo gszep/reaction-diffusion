@@ -213,9 +213,7 @@ Simulation.prototype.mouseEvents = function() {
 
 		if ( event.code == 'Enter' ) {
 			that.pixels = that.getPixels()
-			jupyter.execute(that.pixels)
-
-
+			jupyter.setData(that.pixels)
 		}
 		if ( event.code == 'Space' ){
 			that.setBuffer(that.pixels)
