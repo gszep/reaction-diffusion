@@ -5,7 +5,6 @@ Author: Gregory Szep, King's College London 2018
 */
 /*eslint no-console: ["error", { allow: ["log"] }] */
 var jupyterURL = 'http://reaction-diffusion.com:8888'
-var socket = new WebSocket('ws://reaction-diffusion.com')
 
 // linker object to notebook iframe
 function Jupyter(notebook) {
@@ -24,7 +23,7 @@ Jupyter.prototype.setData = function(object) {
 	var that = this
 
 	if( Float32Array.prototype.isPrototypeOf(object) )
-		socket.send(object)
+		this.notebook.postMessage(object.buffer,jupyterURL,[object.buffer])
 
 	else if ( Array.prototype.isPrototypeOf(object) )
 		object.forEach( element => { that.setData(element) })
@@ -38,9 +37,3 @@ Jupyter.prototype.setData = function(object) {
 Jupyter.prototype.postMessage = function(message) {
 	this.notebook.postMessage(message,jupyterURL)
 }
-
-
-// listen to responses
-socket.addEventListener('message', event => {
-	console.log(event.data)
-})

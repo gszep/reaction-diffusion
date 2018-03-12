@@ -6,6 +6,7 @@ main index at the given origin, to the Jupyter Notebook
 /*eslint no-console: ["error", { allow: ["log","error"] }] */
 /* global define Jupyter */
 var origin = 'http://reaction-diffusion.com'
+var socket = new WebSocket('ws://reaction-diffusion.com')
 
 // prevent new tabs from opening from within iframe
 define(['base/js/namespace'], function(Jupyter){
@@ -28,10 +29,18 @@ window.addEventListener('message', function(event) {
 		// Jupyter.prototype.setData
 		else if( ArrayBuffer.prototype.isPrototypeOf(event.data) )
 			console.log(new Float32Array(event.data))
+			// socket.send(object)
 
-		else // format not recognised
+		// Jupyter.prototype.postMessage
+		else
 			console.error('[jupyter] unrecognised message :'+event.data)
 	}
 	else
 		return
+})
+
+
+// listen to responses
+socket.addEventListener('message', event => {
+	console.log(event.data)
 })
