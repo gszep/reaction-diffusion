@@ -21,12 +21,13 @@ Jupyter.prototype.execute = function(code) {
 
 // send arrays to jupyter via socket
 Jupyter.prototype.setData = function(object) {
+	var that = this
 
 	if( Float32Array.prototype.isPrototypeOf(object) )
 		socket.send(object)
 
 	else if ( Array.prototype.isPrototypeOf(object) )
-		object.forEach( element => { socket.send(element) })
+		object.forEach( element => { that.setData(element) })
 
 	else // format not recognised
 		this.postMessage(object)
