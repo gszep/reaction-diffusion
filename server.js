@@ -19,6 +19,7 @@ const server = require('http').Server(app)
 const socket = new WebSocket.Server({ server })
 
 // listen for data input
+const fs = require('fs')
 socket.on('connection', socket => {
 
 	socket.send('[Node] Data transfer socket connected')
@@ -26,6 +27,7 @@ socket.on('connection', socket => {
 
 	socket.on('message', message => {
 		console.log(CYAN+'[Node]'+RESET,message)
+		fs.appendFileSync('array.txt', message)
 	})
 })
 
