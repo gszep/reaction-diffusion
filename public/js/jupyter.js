@@ -37,3 +37,12 @@ Jupyter.prototype.setData = function(object) {
 Jupyter.prototype.postMessage = function(message) {
 	this.notebook.postMessage(message,jupyterURL)
 }
+
+
+// listen to responses
+socket.on('connection', connection => {
+
+	connection.on('message', message => {
+		console.log(message)
+	})
+})
