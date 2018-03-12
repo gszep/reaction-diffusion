@@ -33,7 +33,7 @@ socket.on('connection', socket => {
 	console.log('\n'+CYAN+'[Node]'+RESET+' Client connected',socket._socket.remoteAddress.replace(/^.*:/, ''))
 
 	socket.on('message', buffer => {
-		let fileName = 'jupyter/notebooks/data/'+uuid()
+		let fileName = 'jupyter/notebooks/data/example'
 
 		fs.open(fileName, 'w', (error,filePointer) => {
 			if (error) console.log(CYAN+'[Node]'+RESET+' error opening file '+fileName)
