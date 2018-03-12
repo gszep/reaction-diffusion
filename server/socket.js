@@ -29,7 +29,7 @@ module.exports = function(server) {
 
 				fs.write(filePointer,buffer,error => {
 					if (error) console.log(CYAN+'[Node]'+RESET+' error writing data '+fileName)
-					else socket.send({setData: fileName})
+					else socket.send(fileName)
 				})
 			})
 		})
