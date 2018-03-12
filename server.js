@@ -20,7 +20,9 @@ const socket = new WebSocket.Server({ server })
 
 // listen for data input
 socket.on('connection', connection => {
-	connection.send(CYAN+'[Node]'+RESET+' Connection established')
+
+	connection.send('[Node] Connection established')
+	console.log('\n'+CYAN+'[Node]'+RESET+' Client connected',connection)
 
 	connection.on('message', message => {
 		console.log(message)
