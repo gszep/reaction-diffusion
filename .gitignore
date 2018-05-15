@@ -4,4 +4,4 @@
 jupyter/notebooks/data/*
 !.keep
 *.pyc
-*.ipynb
+jupyter/notebooks/*.ipynb
