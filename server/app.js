@@ -31,6 +31,10 @@ App.prototype.getViews = function() {
 		res.render('index')
 	})
 
+	this.app.get('/lorenz', function(req, res) {
+		res.render('lorenz')
+	})
+
 	this.app.get('/gradientui', function(req, res) {
 		res.render('gradientui/index')
 	})

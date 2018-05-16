@@ -233,7 +233,7 @@ Simulation.prototype.mouseEvents = function() {
 Simulation.prototype.updateParameters = function() {
 
 	// itegrate through shaders
-	['this.integrator','this.painter'].forEach( program => {
+	['this.integrator','this.painter','this.phase'].forEach( program => {
 		gl.useProgram(eval(program))
 
 		// iterate through parameter list
@@ -311,6 +311,9 @@ Simulation.prototype.setBuffer = function(pixels) {
 		// bind component textures to painter program
 		gl.useProgram(this.painter)
 		this.bindComponents(this.painter,1)
+
+		gl.useProgram(this.phase)
+		this.bindComponents(this.phase,1)
 	}
 
 	// check for errors
@@ -522,17 +525,44 @@ Simulation.prototype.rescalePixels = function(pixels, width, height) {
 
 // initialise mesh geomerty to render onto
 Simulation.prototype.setGeometry = function() {
+	this.setSpace()
+	this.setPhase()
+}
+
+
+// setup real space
+Simulation.prototype.setSpace = function() {
 	let vertexIndex = gl.getAttribLocation(this.integrator, 'vertexCoordinate')
 
-	// populate coordinate buffer with four vertexes
+	// populate realspace coordinate buffer with four vertexes
 	gl.enableVertexAttribArray(vertexIndex)
-	var xy = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
-	gl.bufferData(gl.ARRAY_BUFFER,xy,gl.STATIC_DRAW)
+	var vertices = new Float32Array([-1,-1, 1,-1, -1,1, 1,1])
 
 	// attach coordinate buffer to shaders
+	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
+	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW)
 	gl.vertexAttribPointer(vertexIndex,2,gl.FLOAT,gl.FALSE,0,0)
+}
+
+
+// setup phase space
+Simulation.prototype.setPhase = function() {
+	gl.bindAttribLocation(this.phase, 2, "location")
+	gl.linkProgram(this.phase); gl.useProgram(this.phase)
+
+	// populate phasespace coordinate buffer with vertexes
+	gl.enableVertexAttribArray(2)
+	var vertices = new Float32Array(2*this.width*this.height)
+	for ( var y=0, i=0; y<1; y+=2/this.height ) {
+		for ( var x=0; x<1; x+=2/this.width ) {
+			vertices[i++] = x;  vertices[i++] = y;
+		}
+	}
+
+	// attach coordinate buffer to shaders
+	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
+	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW)
+	gl.vertexAttribPointer(2,2,gl.FLOAT,gl.FALSE,0,0)
 }
 
 
@@ -542,10 +572,28 @@ Simulation.prototype.display = function() {
 		parseInt(this.canvas.style.width),
 		parseInt(this.canvas.style.height))
 
+	// plot in real space
 	gl.useProgram(this.painter)
-
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
+
+	// plot in phase space
+	gl.useProgram(this.phase)
+
+  // rotMat.rotate(xRot/3, 1,0,0);  rotMat.rotate(yRot/3, 0,1,0);
+  // yRot = 0;  xRot = 0;
+
+  //gl.clear(gl.COLOR_BUFFER_BIT)
+  // gl.uniform3f( xLoc, rotMat.m11, rotMat.m21, rotMat.m31 );
+  // gl.uniform3f( yLoc, rotMat.m12, rotMat.m22, rotMat.m32 );
+
+  // if(setScale){
+  //   gl.uniform2f( pLoc, scale, alpha );
+  //   setScale = false;}
+
+  gl.enable(gl.BLEND)
+  gl.drawArrays(gl.POINTS, 0, this.width*this.height)
+  gl.disable(gl.BLEND)
 }
 
 
@@ -577,6 +625,27 @@ Simulation.prototype.getShader = function(type) {
 		return load(['solver/coordinate.vert']).then( ([sourceCode]) => {
 
 			gl.shaderSource(shader,sourceCode)
+			gl.compileShader(shader)
+
+			// report any errors
+			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
+				throw gl.getShaderInfoLog(shader)
+			}
+
+			return shader
+		})
+
+	}
+
+	if (type=='phasecoordinate') {
+		shader = gl.createShader(gl.VERTEX_SHADER)
+
+		return load([
+			'solver/phasecoordinate.vert',
+			'solver/include/phase/declare.glsl'])
+			.then( ([sourceCode,declare]) => {
+
+			gl.shaderSource(shader,declare+sourceCode)
 			gl.compileShader(shader)
 
 			// report any errors
@@ -631,6 +700,26 @@ Simulation.prototype.getShader = function(type) {
 				return shader
 			})
 	}
+
+	if (type=='phasepainter') {
+		shader = gl.createShader(gl.FRAGMENT_SHADER)
+
+		// compile shader
+		return load([
+			'solver/phasepainter.frag',
+			'solver/include/painter/declare.glsl'])
+			.then( ([sourceCode,declare]) => {
+
+				gl.shaderSource(shader,declare+sourceCode)
+				gl.compileShader(shader)
+
+				// report any errors
+				if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))
+					throw gl.getShaderInfoLog(shader)
+
+				return shader
+			})
+	}
 }
 
 
@@ -639,6 +728,7 @@ Simulation.prototype.compileShaders = function() {
 
 	this.integrator = gl.createProgram()
 	this.painter = gl.createProgram()
+	this.phase  = gl.createProgram()
 
 	return Promise.all([
 
@@ -655,6 +745,15 @@ Simulation.prototype.compileShaders = function() {
 		this.getShader('painter').then( shader => {
 			gl.attachShader(this.painter, shader)
 			gl.linkProgram(this.painter)
+		}),
+
+		this.getShader('phasecoordinate').then( shader => {
+			gl.attachShader(this.phase, shader)
+		}),
+
+		this.getShader('phasepainter').then( shader => {
+			gl.attachShader(this.phase, shader)
+			gl.linkProgram(this.phase)
 		})
 	])
 }

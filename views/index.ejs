@@ -42,12 +42,9 @@
 
 			</aside>
 
-			<canvas id="simulation-canvas" width="512px" height="512px" style="width:512px;height:512px;border:1px solid black"></canvas>
+			<canvas id="simulation-canvas" width="512px" height="512px"
+				style="width:512px;height:512px;border:1px solid black"></canvas>
 
-			<aside class="panel">
-				<iframe id='jupyter-notebook' src="http://reaction-diffusion.com:8888/notebooks/whiteboard.ipynb" frameBorder="0" style="width:1024px;height:512px;"></iframe>
-				<script> jupyter = new Jupyter('jupyter-notebook') </script>
-			</aside>
 			<script>
 
 				// initialise color scheme
@@ -58,5 +55,9 @@
 
 			</script>
 		</div>
+		<br><br>
+		<iframe id='jupyter-notebook' src="http://reaction-diffusion.com:8888/notebooks/whiteboard.ipynb"
+		frameBorder="0" style="width:100%;height:950px;"></iframe>
+		<script> jupyter = new Jupyter('jupyter-notebook') </script>
 	</body>
 </html>
