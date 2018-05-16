@@ -180,7 +180,7 @@ Simulation.prototype.mouseEvents = function() {
 		that.isMouseDown = true
 
 		that.parameters.brush = [
-			this.mouseX/parseInt(that.canvas.style.width),
+			2*this.mouseX/parseInt(that.canvas.style.width),
 			1-this.mouseY/parseInt(that.canvas.style.height),
 			that.brush.radius,event.which]
 	}
@@ -193,7 +193,7 @@ Simulation.prototype.mouseEvents = function() {
 
 		if(that.isMouseDown){
 			that.parameters.brush = [
-				this.mouseX/parseInt(that.canvas.style.width),
+				2*this.mouseX/parseInt(that.canvas.style.width),
 				1-this.mouseY/parseInt(that.canvas.style.height),
 				that.brush.radius,event.which]
 		}
@@ -568,8 +568,12 @@ Simulation.prototype.setPhase = function() {
 
 // show with component to color map
 Simulation.prototype.display = function() {
+
+	gl.scissor(0,0,
+		parseInt(this.canvas.style.width)/2,
+		parseInt(this.canvas.style.height))
 	gl.viewport(0,0,
-		parseInt(this.canvas.style.width),
+		parseInt(this.canvas.style.width)/2,
 		parseInt(this.canvas.style.height))
 
 	// plot in real space
@@ -577,8 +581,17 @@ Simulation.prototype.display = function() {
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 
+	gl.scissor(parseInt(this.canvas.style.width)/2,0,
+		parseInt(this.canvas.style.width)/2,
+		parseInt(this.canvas.style.height))
+	gl.viewport(parseInt(this.canvas.style.width)/2,0,
+		parseInt(this.canvas.style.width)/2,
+		parseInt(this.canvas.style.height))
+
 	// plot in phase space
 	gl.useProgram(this.phase)
+	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
+	gl.drawArrays(gl.POINTS, 0, this.width*this.height)
 
   // rotMat.rotate(xRot/3, 1,0,0);  rotMat.rotate(yRot/3, 0,1,0);
   // yRot = 0;  xRot = 0;
@@ -590,10 +603,6 @@ Simulation.prototype.display = function() {
   // if(setScale){
   //   gl.uniform2f( pLoc, scale, alpha );
   //   setScale = false;}
-
-  gl.enable(gl.BLEND)
-  gl.drawArrays(gl.POINTS, 0, this.width*this.height)
-  gl.disable(gl.BLEND)
 }
 
 

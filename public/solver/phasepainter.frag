@@ -3,14 +3,13 @@
 // --- fragment shader ---
 // components to colorspace
 
+in float value[NCOMPONENTS];
 void main(void) {
 
-	// vec4 displayPixel = vec4(0.0,0.0,0.0,0.0);
-	// for( int i=0; i < NCOMPONENTS; i++ ) {
-  //
-	// 	float phi = texture(component[i], location).x;
-	// 	displayPixel = mix( displayPixel, colors[i], phi);
-	// };
+	vec4 displayPixel = vec4(0.0,0.0,0.0,0.0);
+	for( int i=0; i < NCOMPONENTS; i++ ) {
+		displayPixel = mix( displayPixel, colors[i], value[i]);
+	};
 
-	outputColor = vec4(1.0,0.0,0.0,1.0);
+	outputColor = displayPixel;
 }

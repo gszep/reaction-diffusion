@@ -5,16 +5,17 @@
 // three dimensional phase space rather
 // than real space
 
+out float value[NCOMPONENTS];
 void main(void) {
 
 	// get phasespace coordinates
-	vec4 value[NCOMPONENTS];
+	// float value[NCOMPONENTS];
 	for( int i=0; i < NCOMPONENTS; i++ ) {
-		value[i] = texture(component[i],location);
+		value[i] = texture(component[i],location).x ;
 	}
 
 	// transform
-	vec3 coordinate = vec3(value[1].x,value[2].x,value[3].x);
+	vec3 coordinate = vec3(value[1],value[2],value[3]);
 	coordinate -= 0.5;
 	coordinate *= 0.8;
 
