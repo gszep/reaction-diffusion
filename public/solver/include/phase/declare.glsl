@@ -8,9 +8,10 @@ precision highp int;
 
 // component coordinates
 uniform highp sampler2D component[NCOMPONENTS];
-in vec2 location;
 
 // view matrix
-// uniform vec3 RotX;
-// uniform vec3 RotY;
-// uniform vec2 param;
+uniform vec3 RotX;
+uniform vec3 RotY;
+
+in vec2 location;
+out float value[NCOMPONENTS];

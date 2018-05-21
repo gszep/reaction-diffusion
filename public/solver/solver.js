@@ -9,6 +9,8 @@ Adapted from code by Pablo Márquez Neila
 
 // rendering global
 var renderStep = 20
+xRot = 0; yRot = 0
+xOffs = 0; yOffs = 0
 
 // main simulation canvas
 function Simulation(canvas) {
@@ -172,12 +174,14 @@ Simulation.prototype.mouseEvents = function() {
 	this.brush = { radius: 0.1 }
 
 
-	this.canvas.onmouseup = function() {
+	this.canvas.onmouseup = function(event) {
 		that.isMouseDown = false
+		xOffs = event.clientX;  yOffs = event.clientY
 	}
 
 	this.canvas.onmousedown = function(event) {
 		that.isMouseDown = true
+		xOffs = event.clientX; yOffs = event.clientY
 
 		that.parameters.brush = [
 			2*this.mouseX/parseInt(that.canvas.style.width),
@@ -197,6 +201,18 @@ Simulation.prototype.mouseEvents = function() {
 				1-this.mouseY/parseInt(that.canvas.style.height),
 				that.brush.radius,event.which]
 		}
+
+		if (!that.isMouseDown) return;
+		if (event.shiftKey) {
+			transl *= 1 + (event.clientY-yOffs)/300
+			yRot = - xOffs + event.clientX
+		}
+		else {
+			 yRot = - xOffs + event.clientX
+			 xRot = - yOffs + event.clientY
+		}
+		xOffs = event.clientX
+		yOffs = event.clientY
 	}
 
 	// use mousewheel to change brush radius
@@ -553,8 +569,8 @@ Simulation.prototype.setPhase = function() {
 	// populate phasespace coordinate buffer with vertexes
 	gl.enableVertexAttribArray(2)
 	var vertices = new Float32Array(2*this.width*this.height)
-	for ( var y=0, i=0; y<1; y+=2/this.height ) {
-		for ( var x=0; x<1; x+=2/this.width ) {
+	for ( var y=0, i=0; y<1; y+=4/this.height ) {
+		for ( var x=0; x<1; x+=4/this.width ) {
 			vertices[i++] = x;  vertices[i++] = y;
 		}
 	}
@@ -563,6 +579,10 @@ Simulation.prototype.setPhase = function() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
 	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW)
 	gl.vertexAttribPointer(2,2,gl.FLOAT,gl.FALSE,0,0)
+
+	// view rotation matrix
+	rotMat = new CanvasMatrix4()
+	rotMat.makeIdentity()
 }
 
 
@@ -590,6 +610,15 @@ Simulation.prototype.display = function() {
 
 	// plot in phase space
 	gl.useProgram(this.phase)
+
+	rotMat.rotate(xRot/3, 1,0,0);  rotMat.rotate(yRot/3, 0,1,0);
+  yRot = 0;  xRot = 0;
+
+	gl.uniform3f(gl.getUniformLocation(this.phase,"RotX"),
+		rotMat.m11, rotMat.m21, rotMat.m31 )
+	gl.uniform3f(gl.getUniformLocation(this.phase,"RotY"),
+		rotMat.m12, rotMat.m22, rotMat.m32 )
+
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.POINTS, 0, this.width*this.height)
 
@@ -783,4 +812,91 @@ Simulation.prototype.getComponents = function(integrator) {
 	else {
 		throw 'no "#define NCOMPONENTS" declaration found in solver code'
 	}
+}
+
+
+CanvasMatrix4=function(m) {
+  this.makeIdentity()
+}
+
+CanvasMatrix4.prototype.makeIdentity=function(){
+  this.m11=1;this.m12=0;this.m13=0;this.m14=0;
+  this.m21=0;this.m22=1;this.m23=0;this.m24=0;
+  this.m31=0;this.m32=0;this.m33=1;this.m34=0;
+  this.m41=0;this.m42=0;this.m43=0;this.m44=1
+}
+
+CanvasMatrix4.prototype.rotate=function(angle,x,y,z){
+  angle=angle/180*Math.PI;angle/=2;
+  var sinA=Math.sin(angle);
+  var cosA=Math.cos(angle);
+  var sinA2=sinA*sinA;
+  var length=Math.sqrt(x*x+y*y+z*z);
+  if(length==0){x=0;y=0;z=1}
+  else if(length!=1){x/=length;y/=length;z/=length}
+  var mat=new CanvasMatrix4();
+  if(x==1&&y==0&&z==0){
+    mat.m11=1;mat.m12=0;mat.m13=0;
+    mat.m21=0;mat.m22=1-2*sinA2;mat.m23=2*sinA*cosA;
+    mat.m31=0;mat.m32=-2*sinA*cosA;mat.m33=1-2*sinA2;
+    mat.m14=mat.m24=mat.m34=0;
+    mat.m41=mat.m42=mat.m43=0;
+    mat.m44=1
+  }
+  else if(x==0&&y==1&&z==0){
+    mat.m11=1-2*sinA2;mat.m12=0;mat.m13=-2*sinA*cosA;
+    mat.m21=0;mat.m22=1;mat.m23=0;mat.m31=2*sinA*cosA;
+    mat.m32=0;mat.m33=1-2*sinA2;
+    mat.m14=mat.m24=mat.m34=0;
+    mat.m41=mat.m42=mat.m43=0;
+    mat.m44=1
+  }
+  else if(x==0&&y==0&&z==1){
+    mat.m11=1-2*sinA2;mat.m12=2*sinA*cosA;mat.m13=0;
+    mat.m21=-2*sinA*cosA;mat.m22=1-2*sinA2;mat.m23=0;
+    mat.m31=0;mat.m32=0;mat.m33=1;
+    mat.m14=mat.m24=mat.m34=0;
+    mat.m41=mat.m42=mat.m43=0;
+    mat.m44=1
+  }
+  else{
+    var x2=x*x;var y2=y*y;var z2=z*z;
+    mat.m11=1-2*(y2+z2)*sinA2;
+    mat.m12=2*(x*y*sinA2+z*sinA*cosA);
+    mat.m13=2*(x*z*sinA2-y*sinA*cosA);
+    mat.m21=2*(y*x*sinA2-z*sinA*cosA);
+    mat.m22=1-2*(z2+x2)*sinA2;
+    mat.m23=2*(y*z*sinA2+x*sinA*cosA);
+    mat.m31=2*(z*x*sinA2+y*sinA*cosA);
+    mat.m32=2*(z*y*sinA2-x*sinA*cosA);
+    mat.m33=1-2*(x2+y2)*sinA2;
+    mat.m14=mat.m24=mat.m34=0;
+    mat.m41=mat.m42=mat.m43=0;
+    mat.m44=1
+  }
+  this.multRight(mat)
+}
+
+CanvasMatrix4.prototype.multRight=function(mat){
+  var m11=(this.m11*mat.m11+this.m12*mat.m21+this.m13*mat.m31+this.m14*mat.m41);
+  var m12=(this.m11*mat.m12+this.m12*mat.m22+this.m13*mat.m32+this.m14*mat.m42);
+  var m13=(this.m11*mat.m13+this.m12*mat.m23+this.m13*mat.m33+this.m14*mat.m43);
+  var m14=(this.m11*mat.m14+this.m12*mat.m24+this.m13*mat.m34+this.m14*mat.m44);
+  var m21=(this.m21*mat.m11+this.m22*mat.m21+this.m23*mat.m31+this.m24*mat.m41);
+  var m22=(this.m21*mat.m12+this.m22*mat.m22+this.m23*mat.m32+this.m24*mat.m42);
+  var m23=(this.m21*mat.m13+this.m22*mat.m23+this.m23*mat.m33+this.m24*mat.m43);
+  var m24=(this.m21*mat.m14+this.m22*mat.m24+this.m23*mat.m34+this.m24*mat.m44);
+  var m31=(this.m31*mat.m11+this.m32*mat.m21+this.m33*mat.m31+this.m34*mat.m41);
+  var m32=(this.m31*mat.m12+this.m32*mat.m22+this.m33*mat.m32+this.m34*mat.m42);
+  var m33=(this.m31*mat.m13+this.m32*mat.m23+this.m33*mat.m33+this.m34*mat.m43);
+  var m34=(this.m31*mat.m14+this.m32*mat.m24+this.m33*mat.m34+this.m34*mat.m44);
+  var m41=(this.m41*mat.m11+this.m42*mat.m21+this.m43*mat.m31+this.m44*mat.m41);
+  var m42=(this.m41*mat.m12+this.m42*mat.m22+this.m43*mat.m32+this.m44*mat.m42);
+  var m43=(this.m41*mat.m13+this.m42*mat.m23+this.m43*mat.m33+this.m44*mat.m43);
+  var m44=(this.m41*mat.m14+this.m42*mat.m24+this.m43*mat.m34+this.m44*mat.m44);
+
+  this.m11=m11;this.m12=m12;this.m13=m13;this.m14=m14;
+  this.m21=m21;this.m22=m22;this.m23=m23;this.m24=m24;
+  this.m31=m31;this.m32=m32;this.m33=m33;this.m34=m34;
+  this.m41=m41;this.m42=m42;this.m43=m43;this.m44=m44
 }
