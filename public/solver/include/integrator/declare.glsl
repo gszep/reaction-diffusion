@@ -14,7 +14,9 @@ in vec2 location;
 // parameters
 uniform vec4 brush;
 uniform float diffusion[NCOMPONENTS];
+
 uniform float noise;
 uniform float timeStep;
-uniform float feed;
-uniform float kill;
+
+uniform float rate[4];
+uniform float diss[3];
