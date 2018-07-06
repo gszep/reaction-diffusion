@@ -9,7 +9,7 @@ Adapted from code by Pablo Márquez Neila
 
 // rendering global
 var renderStep = 20
-xRot = 0; yRot = 0
+xRot = 90; yRot = 0
 xOffs = 0; yOffs = 0
 
 // main simulation canvas
@@ -81,11 +81,11 @@ Simulation.prototype.propagate = function() {
 
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
-	this.parameters = { 'brush': [-1,-1,0,0], 'colors': [],
-		'diffusion': [[0.0],[0.00001*0.2097],[0.00001],[0.00001*0.105]],
-		'rate': [[1.0],[0.75],[1.0],[0.078]],
+	this.parameters = { 'brush': [0.5,0.5,0.01,1], 'colors': [],
+		'diffusion': [[0.0],[0.00001],[0.00001],[0.25*0.00001]],
+		'rate': [[1.0],[0.75],[1.0],[0.078],[0.1]],
 		'diss': [[1.0],[1.0],[1.0]],
-		'timeStep': 0.0, 'noise': 0.0, 'feed': 0.037
+		'timeStep': 0.0, 'noise': 0.0
 	}
 }
 
@@ -95,21 +95,21 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 1.0, min: 0, max:2, step:0.001,
+		value: 0.25, min: 0, max:2, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = 0.00001*0.105*ui.value
+			that.parameters.diffusion[3][0] = 0.00001*ui.value
 
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = 0.00001*0.105*ui.value
+			that.parameters.diffusion[3][0] = 0.00001*ui.value
 
 		}
 	})
-	$('#diffusionRatioSlider').slider('value',1.0)
+	$('#diffusionRatioSlider').slider('value',0.25)
 
 	$('#noiseSlider').slider({
 		value: 0.0, min: 0.0, max:0.1, step:0.001,
@@ -128,22 +128,22 @@ Simulation.prototype.sliders = function() {
 	})
 	$('#noiseSlider').slider('value', that.parameters.noise)
 
-	$('#killSlider').slider({
+	$('#degradationSlider').slider({
 		value: that.parameters.rate[3][0], min: 0.0, max:1.0, step:0.001,
 
 		change: function(event, ui) {
-			$('#kill').html(ui.value)
+			$('#degradation').html(ui.value)
 			that.parameters.rate[3][0] = ui.value
 
 		},
 
 		slide: function(event, ui) {
-			$('#kill').html(ui.value)
+			$('#degradation').html(ui.value)
 			that.parameters.rate[3][0] = ui.value
 
 		}
 	})
-	$('#killSlider').slider('value', that.parameters.rate[3][0])
+	$('#degradationSlider').slider('value', that.parameters.rate[3][0])
 
 	$('#alphaSlider').slider({
 		value: that.parameters.rate[0][0], min: 0.0, max:1.0, step:0.001,

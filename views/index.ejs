@@ -3,9 +3,24 @@
 	<head> <% include header %> </head>
 
 	<body>
-		<h1 style="font-family:'Computer Modern Sans'">Reaction-Diffusion Systems</h1>
+		<h1 style="font-family:'Computer Modern Sans'">Pattern formation in growing bacetrial colonies</h1>
 		<div style="font-family:'Computer Modern Serif'">
-			<p>Example text</p>
+			<p>We would like to understand the behaviour of the lactone system [1] in the
+				presence of a growing bacterial coloney [2]. The system can be reduced to the
+				following coupled partial differential equations
+				$$
+					\left(\,\partial_t-D \partial_x^2\,\right) \color{gold}{L}= \frac{\alpha\color{gold}{L}^2}{\color{gold}{L}^2+\Delta\alpha} - \frac{J\color{gold}{L}\color{blue}{H}}{\color{blue}{H}+\Delta J}
+					\qquad
+					\left(\,\partial_t-D\,' \partial_x^2\,\right)\color{blue}{H}= \frac{\beta\color{gold}{L}^2}{\color{gold}{L}^2+\Delta\beta} - \mu\color{blue}{H}
+				$$
+				The plan is to couple the above equation to Fisher's equation
+				$$
+				\left(\,\partial_t-G \partial_x^2\,\right) \color{green}{B}= r  \color{green}{B} (1- \color{green}{B})
+				$$
+				In the simulation below we have not yet coupled the equations together,
+				but the system still exhibits wave-like patterns.
+				<br><br>
+			</p>
 		</div>
 		<div id="simulation">
 
@@ -13,36 +28,36 @@
 
 				<section id="instructions">
 					<header><h4>Model</h4></header>
-						Approximate Majority
+						Reduced Lactone System
 						<br></br>
 				</section>
 
 				<section id="controls">
 					<header><h4>Parameters</h4></header>
 
-					Diffusion Ratio:
+					Diffusion Ratio $D\,'/D$:
 					<span class="remark" id="diffusionRatio"></span><br/>
 					<div id="diffusionRatioSlider" class="slider"></div>
 
-					Alpha:
-					<span class="remark" id="feed"></span><br/>
+					Autocatalysis $\alpha$:
+					<span class="remark" id="alpha"></span><br/>
 					<div id="alphaSlider" class="slider"></div>
 
-					Interaction:
-					<span class="remark" id="feed"></span><br/>
+					Interaction $J$:
+					<span class="remark" id="interaction"></span><br/>
 					<div id="interactionSlider" class="slider"></div>
 
-					Beta:
-					<span class="remark" id="feed"></span><br/>
+					Catalysis $\beta$:
+					<span class="remark" id="beta"></span><br/>
 					<div id="betaSlider" class="slider"></div>
 
-					Kill:
-					<span class="remark" id="kill"></span><br/>
-					<div id="killSlider" class="slider"></div>
+					Degradation $\mu$:
+					<span class="remark" id="degradation"></span><br/>
+					<div id="degradationSlider" class="slider"></div>
 
-					Noise:
+					<!-- Noise:
 					<span class="remark" id="noise"></span><br/>
-					<div id="noiseSlider" class="slider"></div>
+					<div id="noiseSlider" class="slider"></div> -->
 
 					Grid Size:
 					<span class="remark" id="gridSize"></span><br/>
@@ -64,7 +79,7 @@
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0,'#000000'],[0.9, '#FFD40B'],[0.95,'#FFFFFF'],[1.0,'#1700F1']]})
+				$("#gradient").gradient({values: [[0.0,'#000000'],[0.9, '#FFD40B'],[0.95,'#BBFFBB'],[1.0,'#1700F1']]})
 
 				// instantiate simulation canvas
 				Solver = new Simulation('simulation-canvas')
@@ -72,6 +87,11 @@
 			</script>
 		</div>
 		<br><br>
+		<p>
+			[1] Grant, P. et al. 2016. Orthogonal intercellular signaling for programmed spatial behavior <br>
+			[2] Smith-Roberge, J. et al. 2018. Pattern formation in bacterial colonies with density-dependent diffusion
+		</p>
+
 		<iframe id='jupyter-notebook' src="http://reaction-diffusion.com:8888/notebooks/whiteboard.ipynb"
 		frameBorder="0" style="width:100%;height:950px;"></iframe>
 		<script> jupyter = new Jupyter('jupyter-notebook') </script>

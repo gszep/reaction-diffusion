@@ -18,5 +18,5 @@ uniform float diffusion[NCOMPONENTS];
 uniform float noise;
 uniform float timeStep;
 
-uniform float rate[4];
+uniform float rate[5];
 uniform float diss[3];

@@ -54,7 +54,7 @@ void main() {
 
 	// output components to buffer
 	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + rate[0]*value[1]*value[1] / (diss[0]+value[1]*value[1]) - rate[1]*value[1]*value[3] / (diss[1]+value[3]) );
-	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] + rate[4]*value[2]*(1.0-value[2]) );
 	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] + rate[2]*value[1]*value[1] / (diss[2]+value[1]*value[1]) - rate[3]*value[3] );
 
 	// pass forward random seed
