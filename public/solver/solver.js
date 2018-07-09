@@ -82,9 +82,9 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [0.5,0.5,0.01,1], 'colors': [],
-		'diffusion': [[0.0],[0.00001],[0.00001],[0.25*0.00001]],
-		'rate': [[1.0],[0.75],[1.0],[0.078],[0.1]],
-		'diss': [[1.0],[1.0],[1.0]],
+		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
+		'rate': [[7.5402],[6.698],[27.1],[2.0],[0.1]],
+		'diss': [[0.5394],[0.32],[2.8051]],
 		'timeStep': 0.0, 'noise': 0.0
 	}
 }
@@ -95,7 +95,7 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 0.25, min: 0, max:2, step:0.001,
+		value: 4.763, min: 0, max:10, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
@@ -109,7 +109,7 @@ Simulation.prototype.sliders = function() {
 
 		}
 	})
-	$('#diffusionRatioSlider').slider('value',0.25)
+	$('#diffusionRatioSlider').slider('value',4.763)
 
 	$('#noiseSlider').slider({
 		value: 0.0, min: 0.0, max:0.1, step:0.001,
@@ -129,7 +129,7 @@ Simulation.prototype.sliders = function() {
 	$('#noiseSlider').slider('value', that.parameters.noise)
 
 	$('#degradationSlider').slider({
-		value: that.parameters.rate[3][0], min: 0.0, max:1.0, step:0.001,
+		value: that.parameters.rate[3][0], min: 0.0, max:3.0, step:0.001,
 
 		change: function(event, ui) {
 			$('#degradation').html(ui.value)
@@ -146,7 +146,7 @@ Simulation.prototype.sliders = function() {
 	$('#degradationSlider').slider('value', that.parameters.rate[3][0])
 
 	$('#alphaSlider').slider({
-		value: that.parameters.rate[0][0], min: 0.0, max:1.0, step:0.001,
+		value: that.parameters.rate[0][0], min: 0.0, max:15.0, step:0.0001,
 
 		change: function(event, ui) {
 			$('#alpha').html(ui.value)
@@ -163,7 +163,7 @@ Simulation.prototype.sliders = function() {
 	$('#alphaSlider').slider('value', that.parameters.rate[0][0])
 
 	$('#interactionSlider').slider({
-		value: that.parameters.rate[1][0], min: 0.0, max:1.0, step:0.001,
+		value: that.parameters.rate[1][0], min: 0.0, max:30.0, step:0.001,
 
 		change: function(event, ui) {
 			$('#interaction').html(ui.value)
@@ -180,7 +180,7 @@ Simulation.prototype.sliders = function() {
 	$('#interactionSlider').slider('value', that.parameters.rate[1][0])
 
 	$('#betaSlider').slider({
-		value: that.parameters.rate[2][0], min: 0.0, max:1.0, step:0.001,
+		value: that.parameters.rate[2][0], min: 0.0, max:500.0, step:0.0001,
 
 		change: function(event, ui) {
 			$('#beta').html(ui.value)
@@ -220,7 +220,7 @@ Simulation.prototype.sliders = function() {
 	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
-		value: that.parameters.timeStep, min: 0.0, max:2.0, step:0.001,
+		value: that.parameters.timeStep, min: 0.0, max:0.01, step:0.000001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)

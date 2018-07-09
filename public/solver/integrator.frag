@@ -42,7 +42,7 @@ void main() {
 	// choose stable timeStep as default
 	float dt;
 	if (timeStep==0.0) {
-		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[1] + 0.018 ));
+		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[3] + 0.018 ));
 	}
 	else {
 		dt = timeStep;
