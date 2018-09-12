@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 4
+#define NCOMPONENTS 5
 // phase vertex declarations
 
 // use 16-bit preicision

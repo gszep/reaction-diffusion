@@ -48,14 +48,11 @@ void main() {
 		dt = timeStep;
 	}
 
-	// random noise
-	vec4 eta = vec4(noise*Uniform(0.,1.));
-	vec4 eps = vec4(noise*Uniform(0.,1.));
-
 	// output components to buffer
-	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + rate[0]*value[1]*value[1] / (diss[0]+value[1]*value[1]) - rate[1]*value[1]*value[3] / (diss[1]+value[3]) );
-	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] + rate[4]*value[2]*(1.0-value[2]) );
-	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] + rate[2]*value[1]*value[1] / (diss[2]+value[1]*value[1]) - rate[3]*value[3] );
+	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] - deg[0]*value[1] + rate[0]*(value[4]*value[4]+rate[4])/(value[4]*value[4]+rate[5]) );
+	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - deg[1]*value[2] + rate[1]*(rate[6]+value[1]*value[1]*value[1]*value[1])/(1.0+value[1]*value[1]*value[1]*value[1]) );
+	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] - deg[2]*value[3] + rate[2]*(value[2]*value[2]+rate[7])/(value[2]*value[2]+rate[8]) );
+	outputComponent[4] = value[4] + dt*( laplacian[4]*diffusion[4] - deg[3]*value[4] + rate[3]*(rate[9]+value[3])/(1.0+value[3]) );
 
 	// pass forward random seed
 	outputComponent[0] = state;

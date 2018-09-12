@@ -5,13 +5,57 @@
 	<body>
 		<h1 style="font-family:'Computer Modern Sans'">Pattern formation in growing bacetrial colonies</h1>
 		<div style="font-family:'Computer Modern Serif'">
-			<p>We would like to understand the behaviour of the lactone system [1] in the
-				presence of a growing bacterial coloney [2]. The system can be reduced to the
-				following coupled partial differential equations
+			<p>We would like to understand the behaviour of the lactone system [1] adapted
+				to exhibit bistable behaviour. The system can be reduced to
+				coupled differential equations governing the concentrations of
+				repressors $\color{gray}{T}$,$\color{gray}{L}$ and activators
+				$\color{DarkCyan}{R}$ and $\color{gold}{S}$. The activators are imaged
+				via a downstream chemical cascade that lead to cyan and yellow flourescent
+				proteins.
+			</p>
+			<p>
+			Activation and inhibition strengths are given by $J,J'$ and $H,H'$
+			respectively. The baseline production of inhibitors is given by
+			primed and unprimed $\omega,\Omega$. The degredation rates of all
+			components are given by primed and unprimed $\mu,\nu$.
 				$$
-					\left(\,\partial_t-D \partial_x^2\,\right) \color{gold}{L}= \frac{\alpha\color{gold}{L}^2}{\color{gold}{L}^2+\Delta\alpha} - \frac{J\color{gold}{L}\color{blue}{H}}{\color{blue}{H}+\Delta J}
-					\qquad
-					\left(\,\partial_t-D\,' \partial_x^2\,\right)\color{blue}{H}= \frac{\beta\color{gold}{L}^2}{\color{gold}{L}^2+\Delta\beta} - \mu\color{blue}{H}
+				\begin{align}
+				        \frac{d\color{gray}{L}}{dt} =
+				        J\frac{
+				        \color{DarkCyan}{R}^2
+				        \left(
+				        \frac{\color{DarkBlue}{C_6}}{p+\color{DarkBlue}{C_6}}
+				        \right)^n
+				        +\omega}
+				        {\color{DarkCyan}{R}^2
+				        \left(
+				        \frac{\color{DarkBlue}{\color{DarkBlue}{C_6}}}{p+\color{DarkBlue}{\color{DarkBlue}{C_6}}}
+				        \right)^n
+				        +\Omega }-\mu\color{gray}{L}
+				        \quad\qquad
+				        \frac{d\color{DarkCyan}{R}}{dt} =
+				        H\frac{1}{1+\color{gray}{T}^4}-\nu\color{DarkCyan}{R}
+				        \\
+				        \frac{d\color{gray}{T}}{dt} =
+				        J^\prime\frac{\color{gold}{S}^{2}
+				        \left(
+				        \frac{\color{DarkBlue}{C_{12}}}{q+\color{DarkBlue}{C_{12}}}
+				        \right)^m
+				        +\omega^\prime }
+				        {\color{gold}{S}^{2}
+				        \left(
+				        \frac{\color{DarkBlue}{C_{12}}}{q+\color{DarkBlue}{C_{12}}}
+				        \right)^m
+				        +\Omega^\prime }-\mu^\prime\color{gray}{T}
+				        \quad\quad
+				        \frac{d\color{gold}{S}}{dt} =
+				        H^\prime\frac{1}{1+\color{gray}{L}}-\nu^\prime \color{gold}{S}
+				        \\
+				        \frac{d\color{DarkBlue}{C_{6}}}{dt} = D_{6}\frac{d^2\color{DarkBlue}{C_{6}}}{dx^2}
+				        \qquad\qquad\quad\quad\quad\quad\quad\quad
+				        \frac{d\color{DarkBlue}{C_{12}}}{dt} = D_{12}\frac{d^2\color{DarkBlue}{C_{12}}}{dx^2}
+				        \quad\quad
+				\end{align}
 				$$
 				The plan is to couple the above equation to Fisher's equation
 				$$
@@ -79,7 +123,9 @@
 			<script>
 
 				// initialise color scheme
-				$("#gradient").gradient({values: [[0.0,'#000000'],[0.9, '#FFD40B'],[0.95,'#BBFFBB'],[1.0,'#1700F1']]})
+				$("#gradient").gradient({values: [[0.0,'#000000'],
+				[0.6,'#808080'],[0.7,'#008b8b'],
+				[0.8,'#808080'],[0.9,'#FFDF00']]})
 
 				// instantiate simulation canvas
 				Solver = new Simulation('simulation-canvas')

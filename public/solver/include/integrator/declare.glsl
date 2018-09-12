@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 4
+#define NCOMPONENTS 5
 // shared fragment declarations
 
 // use 16-bit preicision
@@ -18,5 +18,5 @@ uniform float diffusion[NCOMPONENTS];
 uniform float noise;
 uniform float timeStep;
 
-uniform float rate[5];
-uniform float diss[3];
+uniform float rate[10];
+uniform float deg[4];

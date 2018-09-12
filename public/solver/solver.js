@@ -81,10 +81,13 @@ Simulation.prototype.propagate = function() {
 
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
-	this.parameters = { 'brush': [0.5,0.5,0.01,1], 'colors': [],
-		'diffusion': [[0.0],[0.00001],[0.00001],[0.00001]],
-		'rate': [[7.5402],[6.698],[27.1],[2.0],[0.1]],
-		'diss': [[0.5394],[0.32],[2.8051]],
+	this.parameters = { 'brush': [-1,-1,0.01,1], 'colors': [],
+		'diffusion': [[0.0],[0.00001],[0.0001],[0.00001],[0.0001]],
+		'rate': [
+			[0.1],[1.5],[0.1],[1.5],
+			[1],[0.1],[0.1],
+			[0.001],[10.5],[0.1]],
+		'deg': [[0.75],[1.0],[0.75],[1.0]],
 		'timeStep': 0.0, 'noise': 0.0
 	}
 }
