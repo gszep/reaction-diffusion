@@ -3,66 +3,92 @@
 	<head> <% include header %> </head>
 
 	<body>
-		<h1 style="font-family:'Computer Modern Sans'">Pattern formation in growing bacetrial colonies</h1>
+		<h1 style="font-family:'Computer Modern Sans'">
+			Pattern formation in growing bacetrial colonies</h1>
 		<div style="font-family:'Computer Modern Serif'">
-			<p>We would like to understand the behaviour of the lactone system [1] adapted
-				to exhibit bistable behaviour. The system can be reduced to
-				coupled differential equations governing the concentrations of
-				repressors $\color{gray}{T}$,$\color{gray}{L}$ and activators
-				$\color{DarkCyan}{R}$ and $\color{gold}{S}$. The activators are imaged
-				via a downstream chemical cascade that lead to cyan and yellow flourescent
-				proteins.
-			</p>
-			<p>
-			Activation and inhibition strengths are given by $J,J'$ and $H,H'$
-			respectively. The baseline production of inhibitors is given by
-			primed and unprimed $\omega,\Omega$. The degredation rates of all
-			components are given by primed and unprimed $\mu,\nu$.
-				$$
-				\begin{align}
-				        \frac{d\color{gray}{L}}{dt} =
-				        J\frac{
-				        \color{DarkCyan}{R}^2
-				        \left(
-				        \frac{\color{DarkBlue}{C_6}}{p+\color{DarkBlue}{C_6}}
-				        \right)^n
-				        +\omega}
-				        {\color{DarkCyan}{R}^2
-				        \left(
-				        \frac{\color{DarkBlue}{\color{DarkBlue}{C_6}}}{p+\color{DarkBlue}{\color{DarkBlue}{C_6}}}
-				        \right)^n
-				        +\Omega }-\mu\color{gray}{L}
-				        \quad\qquad
-				        \frac{d\color{DarkCyan}{R}}{dt} =
-				        H\frac{1}{1+\color{gray}{T}^4}-\nu\color{DarkCyan}{R}
-				        \\
-				        \frac{d\color{gray}{T}}{dt} =
-				        J^\prime\frac{\color{gold}{S}^{2}
-				        \left(
-				        \frac{\color{DarkBlue}{C_{12}}}{q+\color{DarkBlue}{C_{12}}}
-				        \right)^m
-				        +\omega^\prime }
-				        {\color{gold}{S}^{2}
-				        \left(
-				        \frac{\color{DarkBlue}{C_{12}}}{q+\color{DarkBlue}{C_{12}}}
-				        \right)^m
-				        +\Omega^\prime }-\mu^\prime\color{gray}{T}
-				        \quad\quad
-				        \frac{d\color{gold}{S}}{dt} =
-				        H^\prime\frac{1}{1+\color{gray}{L}}-\nu^\prime \color{gold}{S}
-				        \\
-				        \frac{d\color{DarkBlue}{C_{6}}}{dt} = D_{6}\frac{d^2\color{DarkBlue}{C_{6}}}{dx^2}
-				        \qquad\qquad\quad\quad\quad\quad\quad\quad
-				        \frac{d\color{DarkBlue}{C_{12}}}{dt} = D_{12}\frac{d^2\color{DarkBlue}{C_{12}}}{dx^2}
-				        \quad\quad
-				\end{align}
-				$$
-				The plan is to couple the above equation to Fisher's equation
-				$$
-				\left(\,\partial_t-G \partial_x^2\,\right) \color{green}{B}= r  \color{green}{B} (1- \color{green}{B})
-				$$
-				In the simulation below we have not yet coupled the equations together,
-				but the system still exhibits wave-like patterns.
+<p>
+	We would like to understand the behaviour of the lactone system [1] adapted to
+	exhibit bistable behaviour. The system can be reduced to coupled partial
+	differential equations governing the concentrations of inhibitors
+	$\color{gray}{T}$,$\color{gray}{L}$, activators
+	$\color{DarkCyan}{R}$,$\color{gold}{S}$ and diffusables
+	$\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$. The activators are
+	imaged via a downstream chemical cascade that lead to cyan and yellow
+	flourescent proteins.
+</p>
+<p>
+	Activation and inhibition strengths are given by $J,J'$ and $H,H'$
+	respectively. The baseline production of inhibitors is given by primed and
+	unprimed $\omega,\Omega$. The degredation rates of all components are given by
+	primed and unprimed $\mu,\nu$. The activators
+	$\color{DarkCyan}{R}$,$\color{gold}{S}$ must be bound to
+	$\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$ in order to induce the
+	production of inhibitors $\color{gray}{L}$,$\color{gray}{T}$ respectively. The
+	amount of $\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$ needed to reach
+	inhibitor prouction at full capacity is given by unprimed and primed $n,p$
+	respectively.
+	$$
+	\begin{align}
+		\frac{d\color{gray}{L}}{dt} =
+		J\frac{
+		\color{DarkCyan}{R}^2
+		\left(
+		\frac{\color{DarkBlue}{C_6}}{p+\color{DarkBlue}{C_6}}
+		\right)^n
+		+\omega}
+		{\color{DarkCyan}{R}^2
+		\left(
+		\frac{\color{DarkBlue}{\color{DarkBlue}{C_6}}}{p+\color{DarkBlue}{\color{DarkBlue}{C_6}}}
+		\right)^n
+		+\Omega }-\mu\color{gray}{L}
+		\quad\qquad
+		\frac{d\color{DarkCyan}{R}}{dt} =
+		H\frac{1}{1+\color{gray}{T}^4}-\nu\color{DarkCyan}{R}
+		\\
+		\frac{d\color{gray}{T}}{dt} =
+		J^\prime\frac{\color{gold}{S}^{2}
+		\left(
+		\frac{\color{DarkBlue}{C_{12}}}{p^\prime+\color{DarkBlue}{C_{12}}}
+		\right)^{n\prime}
+		+\omega^\prime }
+		{\color{gold}{S}^{2}
+		\left(
+		\frac{\color{DarkBlue}{C_{12}}}{p^\prime+\color{DarkBlue}{C_{12}}}
+		\right)^{n\prime}
+		+\Omega^\prime }-\mu^\prime\color{gray}{T}
+		\quad\quad
+		\frac{d\color{gold}{S}}{dt} =
+		H^\prime\frac{1}{1+\color{gray}{L}}-\nu^\prime \color{gold}{S}
+		\\
+		\frac{d\color{DarkBlue}{C_{6}}}{dt} = D_{6}\frac{d^2\color{DarkBlue}{C_{6}}}{dx^2}
+		\qquad\qquad\quad\quad\quad\quad\quad\quad
+		\frac{d\color{DarkBlue}{C_{12}}}{dt} = D_{12}\frac{d^2\color{DarkBlue}{C_{12}}}{dx^2}
+		\quad\quad
+	\end{align}
+	$$
+	There exists only one stable fixed point in this system. Setting all
+	the right-hand-sides of the equations to zero, it becomes possible to
+	invert expressions for $L(R,C_6)$, $T(S,C_{12})$ and $S(L)$
+	then substituting these into equation for $\frac{dR}{dt}$ to obatin a
+	closed equation $f(R,C_6,C_{12})$ containing all parameters.
+	$$
+		f(R,C_6,C_{12}) =
+		\frac{H}{1+T(S(L(R,C_6)),C_{12})^4}-\nu R
+	$$
+	We are interested in the number of times this expression crosses zero.
+	Since the denominator in the fraction is always positive, we can
+	scale the expression and focus on
+	$$
+	f(R,C_6,C_{12}) =
+	H-\nu R-R T(S(L(R,C_6)),C_{12})^4
+	$$
+	We have a positive intecept at $H$ and a leading negative linear term that
+	will bring the function to cross zero. Since $T(S(L(R,C_6)),C_{12})^4$ is
+	always positive the slope of the function will always be negative.
+	Once the function crosses zero it will never return, leaving the system with
+	only one stable fixed point, making it impossible to exhibit bistability.
+	This suggests that $C_6$ and $C_{12}$ only serve to shift the location of
+	the single stable fixed point.
 				<br><br>
 			</p>
 		</div>
@@ -83,21 +109,26 @@
 					<span class="remark" id="diffusionRatio"></span><br/>
 					<div id="diffusionRatioSlider" class="slider"></div>
 
-					Short-range autocatalysis $\alpha$:
-					<span class="remark" id="alpha"></span><br/>
-					<div id="alphaSlider" class="slider"></div>
-
-					Long-range inhibition $J$:
-					<span class="remark" id="interaction"></span><br/>
-					<div id="interactionSlider" class="slider"></div>
-
-					Inhibitor catalysis $\beta$:
+					L Activation $\beta$:
 					<span class="remark" id="beta"></span><br/>
 					<div id="betaSlider" class="slider"></div>
+					T Activation $\beta'$:
+					<span class="remark" id="betadash"></span><br/>
+					<div id="betadashSlider" class="slider"></div>
 
-					Degradation $\mu$:
-					<span class="remark" id="degradation"></span><br/>
-					<div id="degradationSlider" class="slider"></div>
+					Baseline Inhibition $\omega$:
+					<span class="remark" id="omega"></span><br/>
+					<div id="omegaSlider" class="slider"></div>
+					Baseline Inhibition $\omega'$:
+					<span class="remark" id="omegadash"></span><br/>
+					<div id="omegadashSlider" class="slider"></div>
+
+					Inhibitor Saturation $\Omega$:
+					<span class="remark" id="Omega"></span><br/>
+					<div id="OmegaSlider" class="slider"></div>
+					Inhibitor Saturation $\Omega'$:
+					<span class="remark" id="Omegadash"></span><br/>
+					<div id="OmegadashSlider" class="slider"></div>
 
 					<!-- Noise:
 					<span class="remark" id="noise"></span><br/>
@@ -124,8 +155,10 @@
 
 				// initialise color scheme
 				$("#gradient").gradient({values: [[0.0,'#000000'],
-				[0.6,'#808080'],[0.7,'#008b8b'],
-				[0.8,'#808080'],[0.9,'#FFDF00']]})
+				[0.31,'#000080'],[0.32,'#808080'],
+				[0.33,'#000080'],[0.34,'#808080'],
+				[0.7,'#008b8b'],[0.8,'#FFDF00']
+			]})
 
 				// instantiate simulation canvas
 				Solver = new Simulation('simulation-canvas')

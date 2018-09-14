@@ -8,7 +8,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $ random load jupyter */
 
 // rendering global
-var renderStep = 20
+var renderStep = 1
 xRot = 90; yRot = 0
 xOffs = 0; yOffs = 0
 
@@ -21,7 +21,7 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 256; this.height = 256
+		this.width = 100; this.height = 100
 		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
@@ -82,12 +82,12 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0.01,1], 'colors': [],
-		'diffusion': [[0.0],[0.00001],[0.0001],[0.00001],[0.0001]],
+		'diffusion': [[0.0],[0.00001],[0.0],[0.00001],[0.0],[0.0],[0.0]],
 		'rate': [
-			[0.1],[1.5],[0.1],[1.5],
-			[1],[0.1],[0.1],
-			[0.001],[10.5],[0.1]],
-		'deg': [[0.75],[1.0],[0.75],[1.0]],
+			[3.0],[3.0], // betas
+			[0.01],[0.01], // omegas
+			[0.001],[0.001], // Omegas
+		],
 		'timeStep': 0.0, 'noise': 0.0
 	}
 }
@@ -98,109 +98,126 @@ Simulation.prototype.sliders = function() {
 	var that = this
 
 	$('#diffusionRatioSlider').slider({
-		value: 4.763, min: 0, max:10, step:0.001,
+		value: 1.0, min: 0, max:2, step:0.001,
 
 		change: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = 0.00001*ui.value
+			that.parameters.diffusion[3][0] = that.parameters.diffusion[1][0]*ui.value
 
 		},
 
 		slide: function(event, ui) {
 			$('#diffusionRatio').html(ui.value)
-			that.parameters.diffusion[3][0] = 0.00001*ui.value
+			that.parameters.diffusion[3][0] =  that.parameters.diffusion[1][0]*ui.value
 
 		}
 	})
-	$('#diffusionRatioSlider').slider('value',4.763)
-
-	$('#noiseSlider').slider({
-		value: 0.0, min: 0.0, max:0.1, step:0.001,
-
-		change: function(event, ui) {
-			$('#noise').html(ui.value)
-			that.parameters.noise = ui.value
-
-		},
-
-		slide: function(event, ui) {
-			$('#noise').html(ui.value)
-			that.parameters.noise = ui.value
-
-		}
-	})
-	$('#noiseSlider').slider('value', that.parameters.noise)
-
-	$('#degradationSlider').slider({
-		value: that.parameters.rate[3][0], min: 0.0, max:3.0, step:0.001,
-
-		change: function(event, ui) {
-			$('#degradation').html(ui.value)
-			that.parameters.rate[3][0] = ui.value
-
-		},
-
-		slide: function(event, ui) {
-			$('#degradation').html(ui.value)
-			that.parameters.rate[3][0] = ui.value
-
-		}
-	})
-	$('#degradationSlider').slider('value', that.parameters.rate[3][0])
-
-	$('#alphaSlider').slider({
-		value: that.parameters.rate[0][0], min: 0.0, max:15.0, step:0.0001,
-
-		change: function(event, ui) {
-			$('#alpha').html(ui.value)
-			that.parameters.rate[0][0] = ui.value
-
-		},
-
-		slide: function(event, ui) {
-			$('#alpha').html(ui.value)
-			that.parameters.rate[0][0] = ui.value
-
-		}
-	})
-	$('#alphaSlider').slider('value', that.parameters.rate[0][0])
-
-	$('#interactionSlider').slider({
-		value: that.parameters.rate[1][0], min: 0.0, max:30.0, step:0.001,
-
-		change: function(event, ui) {
-			$('#interaction').html(ui.value)
-			that.parameters.rate[1][0] = ui.value
-
-		},
-
-		slide: function(event, ui) {
-			$('#interaction').html(ui.value)
-			that.parameters.rate[1][0] = ui.value
-
-		}
-	})
-	$('#interactionSlider').slider('value', that.parameters.rate[1][0])
+	$('#diffusionRatioSlider').slider('value',1.0)
 
 	$('#betaSlider').slider({
-		value: that.parameters.rate[2][0], min: 0.0, max:500.0, step:0.0001,
+		value: that.parameters.rate[0][0], min: 0.0, max:3.0, step:0.0001,
 
 		change: function(event, ui) {
 			$('#beta').html(ui.value)
-			that.parameters.rate[2][0] = ui.value
+			that.parameters.rate[0][0] = ui.value
 
 		},
 
 		slide: function(event, ui) {
 			$('#beta').html(ui.value)
+			that.parameters.rate[0][0] = ui.value
+
+		}
+	})
+	$('#betaSlider').slider('value', that.parameters.rate[0][0])
+
+	$('#betadashSlider').slider({
+		value: that.parameters.rate[1][0], min: 0.0, max:3.0, step:0.0001,
+
+		change: function(event, ui) {
+			$('#betadash').html(ui.value)
+			that.parameters.rate[1][0] = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#betadash').html(ui.value)
+			that.parameters.rate[1][0] = ui.value
+
+		}
+	})
+	$('#betadashSlider').slider('value', that.parameters.rate[1][0])
+
+	$('#omegaSlider').slider({
+		value: that.parameters.rate[2][0], min: 0.0, max:2.0, step:0.001,
+
+		change: function(event, ui) {
+			$('#omega').html(ui.value)
+			that.parameters.rate[2][0] = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#omega').html(ui.value)
 			that.parameters.rate[2][0] = ui.value
 
 		}
 	})
-	$('#betaSlider').slider('value', that.parameters.rate[2][0])
+	$('#omegaSlider').slider('value', that.parameters.rate[2][0])
+
+	$('#omegadashSlider').slider({
+		value: that.parameters.rate[3][0], min: 0.0, max:2.0, step:0.001,
+
+		change: function(event, ui) {
+			$('#omegadash').html(ui.value)
+			that.parameters.rate[3][0] = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#omegadash').html(ui.value)
+			that.parameters.rate[3][0] = ui.value
+
+		}
+	})
+	$('#omegadashSlider').slider('value', that.parameters.rate[3][0])
+
+	$('#OmegaSlider').slider({
+		value: that.parameters.rate[4][0], min: 0.0, max:2.0, step:0.001,
+
+		change: function(event, ui) {
+			$('#Omega').html(ui.value)
+			that.parameters.rate[4][0] = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#Omega').html(ui.value)
+			that.parameters.rate[4][0] = ui.value
+
+		}
+	})
+	$('#OmegaSlider').slider('value', that.parameters.rate[4][0])
+
+	$('#OmegadashSlider').slider({
+		value: that.parameters.rate[5][0], min: 0.0, max:2.0, step:0.001,
+
+		change: function(event, ui) {
+			$('#Omegadash').html(ui.value)
+			that.parameters.rate[5][0] = ui.value
+
+		},
+
+		slide: function(event, ui) {
+			$('#Omegadash').html(ui.value)
+			that.parameters.rate[5][0] = ui.value
+
+		}
+	})
+	$('#OmegadashSlider').slider('value', that.parameters.rate[5][0])
 
 	$('#gridSizeSlider').slider({
-		value: 256, min:100 , max:512, step:1,
+		value: 100, min:100 , max:512, step:1,
 		change: function(event, ui) {
 			$('#gridSize').html(ui.value)
 		},
@@ -223,7 +240,7 @@ Simulation.prototype.sliders = function() {
 	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
-		value: that.parameters.timeStep, min: 0.0, max:0.01, step:0.000001,
+		value: that.parameters.timeStep, min: 0.0, max:1.0, step:0.000001,
 
 		change: function(event, ui) {
 			$('#timeStep').html(ui.value)
@@ -446,6 +463,9 @@ Simulation.prototype.setTextures = function(pixels) {
 					gl.RGBA, gl.FLOAT, new Float32Array(pixels[n]))
 
 				// texture properties
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
@@ -479,8 +499,18 @@ Simulation.prototype.zeros = function() {
 		let pixels = []
 
 		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++)
-				pixels.push(0,0,0,0)
+			for(var j = 0; j<this.height; j++){
+
+				if (i<10 && n == 1 && j >= 10) {
+					pixels.push(4,4,4,4)
+				}
+				else if (j<10 && n == 3 && i>=10) {
+					pixels.push(4,4,4,4)
+				}
+				else
+					pixels.push(0,0,0,0)
+			}
+
 
 		components.push(pixels)
 	}
