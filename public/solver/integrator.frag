@@ -32,7 +32,9 @@ void main() {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					value[i] = vec4(2.0);
+					value[i] = vec4(1.0);
+				else
+					value[i] = vec4(0.0);
 			}
 		}
 	}
@@ -48,19 +50,19 @@ void main() {
 
 	// human readable values
 	vec4 C6 = value[1];
-	vec4 L = value[2];
+	vec4 R = value[2];
 	vec4 C12 = value[3];
-	vec4 T = value[4];
-	vec4 R = value[5];
-	vec4 S = value[6];
+	vec4 S = value[4];
+	vec4 L = value[5];
+	vec4 T = value[6];
 
 	// output components to buffer
 	outputComponent[1] = C6 + dt*( laplacian[1]*diffusion[1] ); // C6
-	outputComponent[2] = L +  dt*( rate[0]*(R*R*C6+rate[2])/(rate[4]*R*R*C6+1.0) - L ); // L
+	outputComponent[2] = R +  dt*( 1.0/(1.0+T*T*T*T) - R ); // R
 	outputComponent[3] = C12+ dt*( laplacian[3]*diffusion[3] ); // C12
-	outputComponent[4] = T +  dt*( rate[1]*(S*S*C12+rate[3])/(rate[5]*S*S*C12+1.0) - T ); // T
-	outputComponent[5] = R +  dt*( 1.0/(1.0+T*T*T*T) - R ); // R
-	outputComponent[6] = S +  dt*( 1.0/(1.0+L) - S ); // S
+	outputComponent[4] = S +  dt*( 1.0/(1.0+L) - S ); // S
+	outputComponent[5] = L +  dt*( rate[0]*(R*R*C6+rate[2])/(rate[4]*R*R*C6+1.0) - L ); // L
+	outputComponent[6] = T +  dt*( rate[1]*(S*S*C12+rate[3])/(rate[5]*S*S*C12+1.0) - T ); // T
 
 	// pass forward random seed
 	outputComponent[0] = state;

@@ -21,7 +21,7 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 100; this.height = 100
+		this.width = 256; this.height = 256
 		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
@@ -82,7 +82,7 @@ Simulation.prototype.propagate = function() {
 // initialise parameters from specifications
 Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0.01,1], 'colors': [],
-		'diffusion': [[0.0],[0.00001],[0.0],[0.00001],[0.0],[0.0],[0.0]],
+		'diffusion': [[0.0],[0.0001],[0.0],[0.0001],[0.0],[0.0],[0.0]],
 		'rate': [
 			[3.0],[3.0], // betas
 			[0.01],[0.01], // omegas
@@ -217,7 +217,7 @@ Simulation.prototype.sliders = function() {
 	$('#OmegadashSlider').slider('value', that.parameters.rate[5][0])
 
 	$('#gridSizeSlider').slider({
-		value: 100, min:100 , max:512, step:1,
+		value: 256, min:10 , max:512, step:1,
 		change: function(event, ui) {
 			$('#gridSize').html(ui.value)
 		},
@@ -501,11 +501,11 @@ Simulation.prototype.zeros = function() {
 		for(var i = 0; i<this.width; i++)
 			for(var j = 0; j<this.height; j++){
 
-				if (i<10 && n == 1 && j >= 10) {
-					pixels.push(4,4,4,4)
+				if (j<10 && n == 1) {
+					pixels.push(1,1,1,1)
 				}
-				else if (j<10 && n == 3 && i>=10) {
-					pixels.push(4,4,4,4)
+				else if (j>256-10 && n == 3) {
+					pixels.push(1 ,1,1,1)
 				}
 				else
 					pixels.push(0,0,0,0)

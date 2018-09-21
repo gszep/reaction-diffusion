@@ -14,7 +14,7 @@ void main(void) {
 	}
 
 	// transform
-	vec3 coordinate = vec3(value[1],value[2],value[3]);
+	vec3 coordinate = 0.5*vec3(value[5],value[6],value[1]-value[3]);
 	coordinate -= 0.5;
 
 	gl_Position = vec4(dot(coordinate,RotX),dot(coordinate,RotY),0.0,1.0);

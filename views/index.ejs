@@ -10,55 +10,54 @@
 	We would like to understand the behaviour of the lactone system [1] adapted to
 	exhibit bistable behaviour. The system can be reduced to coupled partial
 	differential equations governing the concentrations of inhibitors
-	$\color{gray}{T}$,$\color{gray}{L}$, activators
-	$\color{DarkCyan}{R}$,$\color{gold}{S}$ and diffusables
-	$\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$. The activators are
+	$\color{DarkCyan}{L}$,$\color{gold}{T}$, activators
+	$\color{gray}{R}$,$\color{gray}{S}$ and diffusables
+	$\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$. The inhibitors are
 	imaged via a downstream chemical cascade that lead to cyan and yellow
 	flourescent proteins.
 </p>
 <p>
 	Activation and inhibition strengths are given by $J,J'$ and $H,H'$
-	respectively. The baseline production of inhibitors is given by primed and
-	unprimed $\omega,\Omega$. The degredation rates of all components are given by
-	primed and unprimed $\mu,\nu$. The activators
-	$\color{DarkCyan}{R}$,$\color{gold}{S}$ must be bound to
+	respectively. The baseline production level of inhibitors is given by primed and
+	unprimed $\omega$ and the saturation level by $\Omega$. The degradation rates
+	of all components are given by primed and unprimed $\mu,\nu$. The activators $\color{gray}{R}$,$\color{gray}{S}$ must be bound to
 	$\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$ in order to induce the
-	production of inhibitors $\color{gray}{L}$,$\color{gray}{T}$ respectively. The
+	production of inhibitors $\color{DarkCyan}{L}$,$\color{gold}{T}$ respectively. The
 	amount of $\color{DarkBlue}{C_{6}}$,$\color{DarkBlue}{C_{12}}$ needed to reach
-	inhibitor prouction at full capacity is given by unprimed and primed $n,p$
-	respectively.
+	inhibitor production at full capacity is given by Hill coefficients $n,n'$ and
+	disacocciation constants $k,k'$.
 	$$
 	\begin{align}
-		\frac{d\color{gray}{L}}{dt} =
+		\frac{d\color{DarkCyan}{L}}{dt} =
 		J\frac{
-		\color{DarkCyan}{R}^2
+		\color{gray}{R}^2
 		\left(
 		\frac{\color{DarkBlue}{C_6}}{p+\color{DarkBlue}{C_6}}
 		\right)^n
 		+\omega}
-		{\color{DarkCyan}{R}^2
+		{\color{gray}{R}^2
 		\left(
 		\frac{\color{DarkBlue}{\color{DarkBlue}{C_6}}}{p+\color{DarkBlue}{\color{DarkBlue}{C_6}}}
 		\right)^n
-		+\Omega }-\mu\color{gray}{L}
+		+\Omega }-\mu\color{DarkCyan}{L}
 		\quad\qquad
-		\frac{d\color{DarkCyan}{R}}{dt} =
-		H\frac{1}{1+\color{gray}{T}^4}-\nu\color{DarkCyan}{R}
+		\frac{d\color{gray}{R}}{dt} =
+		H\frac{1}{1+\color{gold}{T}^4}-\nu\color{gray}{R}
 		\\
-		\frac{d\color{gray}{T}}{dt} =
-		J^\prime\frac{\color{gold}{S}^{2}
+		\frac{d\color{gold}{T}}{dt} =
+		J^\prime\frac{\color{gray}{S}^{2}
 		\left(
 		\frac{\color{DarkBlue}{C_{12}}}{p^\prime+\color{DarkBlue}{C_{12}}}
 		\right)^{n\prime}
 		+\omega^\prime }
-		{\color{gold}{S}^{2}
+		{\color{gray}{S}^{2}
 		\left(
 		\frac{\color{DarkBlue}{C_{12}}}{p^\prime+\color{DarkBlue}{C_{12}}}
 		\right)^{n\prime}
-		+\Omega^\prime }-\mu^\prime\color{gray}{T}
+		+\Omega^\prime }-\mu^\prime\color{gold}{T}
 		\quad\quad
-		\frac{d\color{gold}{S}}{dt} =
-		H^\prime\frac{1}{1+\color{gray}{L}}-\nu^\prime \color{gold}{S}
+		\frac{d\color{gray}{S}}{dt} =
+		H^\prime\frac{1}{1+\color{DarkCyan}{L}}-\nu^\prime \color{gray}{S}
 		\\
 		\frac{d\color{DarkBlue}{C_{6}}}{dt} = D_{6}\frac{d^2\color{DarkBlue}{C_{6}}}{dx^2}
 		\qquad\qquad\quad\quad\quad\quad\quad\quad
