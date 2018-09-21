@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 4
+#define NCOMPONENTS 7
 // painter fragment declarations
 
 // use 16-bit preicision

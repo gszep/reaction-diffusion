@@ -2,8 +2,21 @@
 <link rel="icon" type="image/png" href="img/favicon.png"/>
 <meta charset="UTF-8">
 
-<!-- standard libraries -->
+<!-- computer modern fonts -->
+<link rel="stylesheet" href="fonts/bright/cmun-bright.css"></link>
+<link rel="stylesheet" href="fonts/concrete/cmun-concrete.css"></link>
+<link rel="stylesheet" href="fonts/sans/cmun-sans.css"></link>
+<link rel="stylesheet" href="fonts/serif/cmun-serif.css"></link>
+<link rel="stylesheet" href="fonts/typewriter/cmun-typewriter.css"></link>
+
+<!-- layout style -->
 <link rel="stylesheet" type="text/css" href="css/style.css"/>
+
+<!-- mathematics -->
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]} }) </script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+
+<!-- loading and querying -->
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/load.js"></script>
 
@@ -16,16 +29,13 @@
 <script type="text/javascript" src="js/colorPicker.js"></script>
 <script type="text/javascript" src="js/gradientui.js"></script>
 
-<!-- main libraries -->
-<script type="text/javascript" src="main.js"></script>
+<!-- gpu solver -->
+<script type="text/javascript" src="solver/solver.js"></script>
 
-<!-- math and linear algebra -->
-<script src="js/lalolib/lalolib.js"></script>
+<!-- jupyter notebook access -->
+<script src="js/jupyter.js"></script>
 <script src="js/math.js"></script>
 
-<!-- plotting -->
-<script src="js/plotly.min.js"></script>
-
-<!-- accurate psuedorandom numbers-->
+<!-- accurate psuedo-random number generator -->
 <script src="js/random.min.js"></script>
 <script>random = new Random()</script>

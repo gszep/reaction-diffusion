@@ -1,3 +1,4 @@
 #!/bin/bash
 source env/bin/activate
-node server.js
+trap "kill %1" SIGINT
+node server/server.js &  yes | ./jupyter/run

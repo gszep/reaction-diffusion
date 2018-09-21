@@ -18,17 +18,17 @@ vec4 getLaplacian(sampler2D sampler, ivec2 size) {
 	vec2 topright = location+vec2(dx,dy);
 
 	return (
-		4.0*texture(sampler,fract(left))/(dx*dx)+
-		4.0*texture(sampler,fract(right))/(dx*dx)+
+		4.0*texture(sampler,(left))/(dx*dx)+
+		4.0*texture(sampler,(right))/(dx*dx)+
 
-		4.0*texture(sampler,fract(bottom))/(dy*dy)+
-		4.0*texture(sampler,fract(top))/(dy*dy)+
+		4.0*texture(sampler,(bottom))/(dy*dy)+
+		4.0*texture(sampler,(top))/(dy*dy)+
 
-		1.0*texture(sampler,fract(topleft))/(dx*dy)+
-		1.0*texture(sampler,fract(topright))/(dx*dy)+
+		1.0*texture(sampler,(topleft))/(dx*dy)+
+		1.0*texture(sampler,(topright))/(dx*dy)+
 
-		1.0*texture(sampler,fract(bottomleft))/(dx*dy)+
-		1.0*texture(sampler,fract(bottomright))/(dx*dy)-
+		1.0*texture(sampler,(bottomleft))/(dx*dy)+
+		1.0*texture(sampler,(bottomright))/(dx*dy)-
 
 		20.0*texture(sampler,location)/(dx*dy)
 	) / 6.0;

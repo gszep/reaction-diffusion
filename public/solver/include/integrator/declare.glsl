@@ -1,5 +1,5 @@
 #version 300 es
-#define NCOMPONENTS 4
+#define NCOMPONENTS 7
 // shared fragment declarations
 
 // use 16-bit preicision
@@ -14,5 +14,8 @@ in vec2 location;
 // parameters
 uniform vec4 brush;
 uniform float diffusion[NCOMPONENTS];
+
 uniform float noise;
 uniform float timeStep;
+
+uniform float rate[6];

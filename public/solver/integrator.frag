@@ -42,19 +42,27 @@ void main() {
 	// choose stable timeStep as default
 	float dt;
 	if (timeStep==0.0) {
-		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[1] + 0.018 ));
+		dt = 1.0 / ( float(size.x)*( 8.0*float(size.y)*diffusion[3] + 0.018 ));
 	}
 	else {
 		dt = timeStep;
 	}
 
-	// random noise
-	vec4 eta = vec4(noise*Uniform(-1.,1.));
+	// human readable values
+	vec4 C6 = value[1];
+	vec4 R = value[2];
+	vec4 C12 = value[3];
+	vec4 S = value[4];
+	vec4 L = value[5];
+	vec4 T = value[6];
 
 	// output components to buffer
-	outputComponent[1] = value[1] + dt*( laplacian[1]*diffusion[1] + eta + value[2]*value[1] - value[1]*value[3] );
-	outputComponent[2] = value[2] + dt*( laplacian[2]*diffusion[2] - value[2]*value[1] - value[2]*value[3] + 2.0*value[1]*value[3] );
-	outputComponent[3] = value[3] + dt*( laplacian[3]*diffusion[3] - eta + value[2]*value[3] - value[1]*value[3] );
+	outputComponent[1] = C6 + dt*( laplacian[1]*diffusion[1] ); // C6
+	outputComponent[2] = R +  dt*( 1.0/(1.0+T*T*T*T) - R ); // R
+	outputComponent[3] = C12+ dt*( laplacian[3]*diffusion[3] ); // C12
+	outputComponent[4] = S +  dt*( 1.0/(1.0+L) - S ); // S
+	outputComponent[5] = L +  dt*( rate[0]*(R*R*C6+rate[2])/(rate[4]*R*R*C6+1.0) - L ); // L
+	outputComponent[6] = T +  dt*( rate[1]*(S*S*C12+rate[3])/(rate[5]*S*S*C12+1.0) - T ); // T
 
 	// pass forward random seed
 	outputComponent[0] = state;

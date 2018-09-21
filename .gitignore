@@ -1,4 +1,7 @@
 .*
 !.gitmodules
 !.gitignore
+jupyter/notebooks/data/*
+!.keep
 *.pyc
+jupyter/notebooks/*.ipynb
