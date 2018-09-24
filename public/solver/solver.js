@@ -21,7 +21,7 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 256; this.height = 256
+		this.width = 256; this.height = 1
 		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
@@ -84,9 +84,9 @@ Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0.01,1], 'colors': [],
 		'diffusion': [[0.0],[0.0001],[0.0],[0.0001],[0.0],[0.0],[0.0]],
 		'rate': [
-			[3.0],[3.0], // betas
-			[0.01],[0.01], // omegas
-			[0.001],[0.001], // Omegas
+			[1.0],[1.0], // betas
+			[0.0],[0.0], // omegas
+			[0.1],[0.1], // Omegas
 		],
 		'timeStep': 0.0, 'noise': 0.0
 	}
@@ -215,29 +215,6 @@ Simulation.prototype.sliders = function() {
 		}
 	})
 	$('#OmegadashSlider').slider('value', that.parameters.rate[5][0])
-
-	$('#gridSizeSlider').slider({
-		value: 256, min:10 , max:512, step:1,
-		change: function(event, ui) {
-			$('#gridSize').html(ui.value)
-		},
-
-		slide: function(event, ui) {
-			$('#gridSize').html(ui.value)
-
-			if (that.textures)
-				that.pixels = that.getPixels()
-			else
-				that.pixels = that.zeros()
-
-			that.width = ui.value; that.height = ui.value
-			that.setBuffer(that.pixels)
-
-			that.parameters.timeStep = 0.0
-			$('#timeStepSlider').slider('value', that.parameters.timeStep)
-		}
-	})
-	$('#gridSizeSlider').slider('value', that.height)
 
 	$('#timeStepSlider').slider({
 		value: that.parameters.timeStep, min: 0.0, max:1.0, step:0.000001,
@@ -391,8 +368,8 @@ Simulation.prototype.resetBrush = function() {
 Simulation.prototype.setBuffer = function(pixels) {
 	this.pause = true
 
-	if (pixels[0].length/4 != this.width*this.height)
-		pixels = this.resize(pixels)
+	// if (pixels[0].length/4 != this.width*this.height)
+	// 	pixels = this.resize(pixels)
 
 	// create two texture targets per component
 	this.setTextures(pixels)
@@ -498,14 +475,14 @@ Simulation.prototype.zeros = function() {
 	for ( let n = 0; n < this.nComponents; n++ ) {
 		let pixels = []
 
-		for(var i = 0; i<this.width; i++)
-			for(var j = 0; j<this.height; j++){
+		for(var i = 0; i<this.height; i++)
+			for(var j = 0; j<this.width; j++){
 
 				if (j<10 && n == 1) {
 					pixels.push(1,1,1,1)
 				}
 				else if (j>256-10 && n == 3) {
-					pixels.push(1 ,1,1,1)
+					pixels.push(1,1,1,1)
 				}
 				else
 					pixels.push(0,0,0,0)
