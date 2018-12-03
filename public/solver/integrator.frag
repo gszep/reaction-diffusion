@@ -32,9 +32,7 @@ void main() {
 			for (int i=0; i<NCOMPONENTS; i++) {
 
 				if (i == componentIndex)
-					value[i] = vec4(1.0);
-				else
-					value[i] = vec4(0.0);
+					value[i] += vec4(1.0);
 			}
 		}
 	}

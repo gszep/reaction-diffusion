@@ -84,9 +84,9 @@ Simulation.prototype.setParameters = function() {
 	this.parameters = { 'brush': [-1,-1,0.01,1], 'colors': [],
 		'diffusion': [[0.0],[0.0001],[0.0],[0.0001],[0.0],[0.0],[0.0]],
 		'rate': [
-			[3.0],[3.0], // betas
-			[0.01],[0.01], // omegas
-			[0.001],[0.001], // Omegas
+			[1.0],[1.0], // betas
+			[0.0],[0.0], // omegas
+			[0.1],[0.1], // Omegas
 		],
 		'timeStep': 0.0, 'noise': 0.0
 	}
