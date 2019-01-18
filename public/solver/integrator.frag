@@ -62,14 +62,14 @@ void main() {
 	// 		interactions +=
 	// 	}
 	// }
-	vec4 interactions = vec4(0.0);
-	float n = 10.;//float(size.x*size.y);
-	for (int i=0; i < int(n); i++) {
-		interactions += Uniform(-1./n,1./n)*texture(component[1], vec2(Uniform(0.,1.),Uniform(0.,1.)));
-	}
+	// vec4 interactions = vec4(0.0);
+	// float n = 10.;//float(size.x*size.y);
+	// for (int i=0; i < int(n); i++) {
+	// 	interactions += Uniform(-1./n,1./n)*texture(component[1], vec2(Uniform(0.,1.),Uniform(0.,1.)));
+	// }
 
 	// output components to buffer
-	outputComponent[1] = value[1] + dt*( 0.0*laplacian[1]*diffusion[1] + interactions );
+	outputComponent[1] = value[1] + vec4(Uniform(-1.,1.),0,0,0);
 	outputComponent[2] = value[2];
 
 	// pass forward random seed

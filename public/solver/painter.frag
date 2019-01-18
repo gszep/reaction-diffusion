@@ -9,7 +9,7 @@ void main(void) {
 	float s = texture(component[1], location).x;
 
 	if (s < 0.0)
-		displayPixel = mix( displayPixel, colors[1], -s);
+		displayPixel = mix( displayPixel, colors[0], -s);
 	if (s > 0.0)
 		displayPixel = mix( displayPixel, colors[2], s);
 

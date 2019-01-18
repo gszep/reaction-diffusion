@@ -7,7 +7,7 @@ Adapted from code by Pablo Márquez Neila
 /* global gl:true $*/
 
 // rendering global
-var renderStep = 2
+var renderStep = 20
 
 // main simulation canvas
 function Simulation(canvas) {
@@ -18,8 +18,8 @@ function Simulation(canvas) {
 		this.setGeometry()
 
 		// zero initial condition
-		this.width = 32; this.height = 32;
-		this.pixels = this.wigner()
+		this.width = 256; this.height = 256;
+		this.pixels = this.zeros()
 		this.setBuffer(this.pixels)
 
 		// initialise parameters, interactions
@@ -28,6 +28,7 @@ function Simulation(canvas) {
 		this.mouseEvents()
 
 		// begin simulation
+		this.setSeed()
 		this.pause = false
 		this.renderLoop()
 	})
@@ -46,8 +47,7 @@ Simulation.prototype.render = function() {
 
 	// update parameters
 	this.updateParameters()
-	this.setSeed()
-	this.applyConstraint()
+	// this.setSeed()
 
 	// propagate for a given number of steps
 	this.propagate()
@@ -207,23 +207,10 @@ Simulation.prototype.mouseEvents = function() {
 				name: 'Equilibrium',
 				mode: 'lines',
 			}
-			var wigner = {
-				x: x,
-				y: z,
-				name: 'Wigner Law',
-				mode: 'lines',
-			}
 			var hist = {
 				x: Array.from(data),
 				opacity: 0.6,
 				name: 'State Distribution',
-				type: 'histogram',
-				histnorm: 'probability'
-			}
-			var lambda = {
-				x: Array.from(that.lambda),
-				opacity: 0.6,
-				name: 'Interaction Spectrum',
 				type: 'histogram',
 				histnorm: 'probability'
 			}
@@ -234,12 +221,12 @@ Simulation.prototype.mouseEvents = function() {
 					showline: true,
 					range: [0, 0.1]
 				},
-				xaxis: {
-					showline: true,
-					range: [-3, 3]
-				}
+				// xaxis: {
+				// 	showline: true,
+				// 	range: [-5, 5]
+				// }
 			}
-			var data = [hist,pdf,lambda,wigner];
+			var data = [hist,pdf];
 			Plotly.newPlot('graph', data, layout);
 		}
 		if ( event.code == 'Space' ){
@@ -311,9 +298,6 @@ Simulation.prototype.resetBrush = function() {
 // initialise frame buffers with given component pixels[n]
 Simulation.prototype.setBuffer = function(pixels) {
 	this.pause = true
-
-	if (pixels[0].length/4 != this.width*this.height)
-		pixels = this.resize(pixels)
 
 	// create two texture targets per component
 	this.setTextures(pixels)
@@ -423,70 +407,6 @@ Simulation.prototype.zeros = function() {
 }
 
 
-// setting wigner initial condition
-Simulation.prototype.wigner = function() {
-	var components = []
-	for ( let n = 0; n < this.nComponents; n++ ) {
-		let pixels = []
-
-		for(var i = 0; i<this.width; i++) {
-			for(var j = 0; j<this.height; j++) {
-				let u = random.integer(-1,1)/Math.sqrt(this.width*this.height)
-				pixels.push(u,u,u,u)
-			}
-		}
-		components.push(pixels)
-	}
-
-	// initialise symmetric gaussian interaction matrix J[i][j]
-	let thread = new Lalolab('thread',false,'js/lalolib')
-	thread.do('j = reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)-reshape((new Distribution (Bernoulli, 0.01)).sample(600*600),600,600)', () => {
-
-		thread.do('J = sign(j+transpose(j)) ./ sqrt(0.2*j.n)', interaction => {
-			this.interaction = interaction; this.lambda = [-10]
-
-			thread.do('eig(J)', lambda => {
-				this.lambda = new Float32Array(lambda)
-
-			})
-		})
-	})
-
-	return components
-}
-
-
-// setting seed for random numbers on gpu
-Simulation.prototype.setSeed = function() {
-	let pixels = []
-
-	for(var i = 0; i<this.width; i++){
-		for(var j = 0; j<this.height; j++) {
-			pixels.push(random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1),
-									random.integer(2**7+1,2**32-1))
-		}
-	}
-
-	let components = []; components.length = this.nComponents
-	components[0] = pixels
-	this.setTextures(components)
-}
-
-
-// apply global constraint
-Simulation.prototype.applyConstraint = function() {
-	let pixels = this.getPixels(1)
-	var Z = pixels.var(4)
-	pixels = pixels.map( value => { return value/Math.sqrt(Z) })
-
-	let components = []; components.length = this.nComponents
-	components[1] = pixels
-	this.setTextures(components)
-}
-
-
 // get pixel data from components
 Simulation.prototype.getPixels = function(index) {
 	let data = []
@@ -517,48 +437,6 @@ Simulation.prototype.getPixels = function(index) {
 }
 
 
-// resize pixel array with constant interpolation
-Simulation.prototype.resize = function(pixels) {
-		var components = []
-
-		for ( let n = 0; n < this.nComponents; n++ ) {
-			let resized = this.rescalePixels(pixels[n],this.width,this.height)
-			components.push(resized.data.map( value => { return value/255 }))
-		}
-		return components
-}
-
-
-Simulation.prototype.rescalePixels = function(pixels, width, height) {
-	let canvas = document.createElement('canvas')
-
-	// view window dimensions
-	canvas.width = parseInt(this.canvas.style.width)
-	canvas.height = parseInt(this.canvas.style.height)
-
-	// original grid size
-	originalWidth = Math.sqrt(pixels.length/4)
-	originalHeight = Math.sqrt(pixels.length/4)
-
-	// pass pixel data to html canvas
-	var ctx = canvas.getContext('2d')
-	var imageData = ctx.createImageData(originalWidth, originalHeight)
-	imageData.data.set(pixels.map( value => { return value*255 }))
-
-	// create target canvas
-	var target = document.createElement('canvas')
-	target.width = canvas.width
-	target.height = canvas.height
-
-	// rescale pixels on canvas
-	target.getContext("2d").putImageData(imageData,0,0);
-	ctx.scale(width/originalWidth,height/originalHeight);
-	ctx.drawImage(target,0,0);
-
-  return ctx.getImageData(0,0,width,height);
-}
-
-
 // initialise mesh geomerty to render onto
 Simulation.prototype.setGeometry = function() {
 	let vertexIndex = gl.getAttribLocation(this.integrator, 'vertexCoordinate')
@@ -582,7 +460,6 @@ Simulation.prototype.display = function() {
 		parseInt(this.canvas.style.height))
 
 	gl.useProgram(this.painter)
-
 	gl.bindFramebuffer(gl.FRAMEBUFFER,null)
 	gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 }
@@ -642,7 +519,6 @@ Simulation.prototype.getShader = function(type) {
 			this.nComponents = this.getComponents(declare)
 			gl.shaderSource(shader,declare+derivatives+random+sourceCode)
 			gl.compileShader(shader)
-			console.log(declare+derivatives+random+sourceCode)
 
 			// report any errors
 			if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) {
