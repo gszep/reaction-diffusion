@@ -5,3 +5,4 @@ jupyter/notebooks/data/*
 !.keep
 *.pyc
 jupyter/notebooks/*.ipynb
+node_modules
