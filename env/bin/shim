@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-export NODE_PATH=/home/gszep/projects/reaction-diffusion/env/lib/node_modules
-export NPM_CONFIG_PREFIX=/home/gszep/projects/reaction-diffusion/env
-export npm_config_prefix=/home/gszep/projects/reaction-diffusion/env
-exec /home/gszep/projects/reaction-diffusion/env/bin/node "$@"
