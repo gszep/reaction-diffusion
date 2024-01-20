@@ -22,8 +22,3 @@ const Socket = require('./socket'),
 server.listen(8000, () => {
 	console.log(CYAN+'[Node]'+RESET+' Listening on %d', server.address().port); socket
 })
-
-// tell us when server shuts down
-process.on('SIGINT', function(){
-	console.log('\n'+CYAN+'[Node]'+RESET+' Shutting down server')
-})
