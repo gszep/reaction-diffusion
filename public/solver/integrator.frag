@@ -14,11 +14,28 @@ void main() {
 
 	// calculate laplacians
 	ivec2 size = textureSize(component[0],0);
-	for( int i=0; i < NCOMPONENTS; i++ ) {
 
-		value[i] = texture(component[i],location);
-		laplacian[i] = getLaplacian(component[i],size);
-	}
+	// update components
+	value[0] = texture(component[0],location);
+	laplacian[0] = getLaplacian(component[0],size);
+
+	value[1] = texture(component[1],location);
+	laplacian[1] = getLaplacian(component[1],size);
+
+	value[2] = texture(component[2],location);
+	laplacian[2] = getLaplacian(component[2],size);
+
+	value[3] = texture(component[3],location);
+	laplacian[3] = getLaplacian(component[3],size);
+
+	value[4] = texture(component[4],location);
+	laplacian[4] = getLaplacian(component[4],size);
+
+	value[5] = texture(component[5],location);
+	laplacian[5] = getLaplacian(component[5],size);
+
+	value[6] = texture(component[6],location);
+	laplacian[6] = getLaplacian(component[6],size);
 
 	// user perturbations
 	if(brush.x > 0.0) {
